@@ -1,21 +1,28 @@
 package zedzee.github.io.chips.mixin;
 
-import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.state.StateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.util.ShapeHelpers;
 
-@Mixin(AbstractBlock.class)
+@Mixin(Block.class)
 public class BlockMixin {
-    @Inject(method = "getOutlineShape", at = @At("HEAD"), cancellable = true)
-    private void makeSmaller(BlockState state, BlockView world, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> cir) {
-        cir.setReturnValue(VoxelShapes.cuboid(0.5, 0.5, 0.5, 1.0, 1.0, 1.0));
+    @Inject(method = "appendProperties", at = @At("HEAD"))
+    public void addChips(StateManager.Builder<Block, BlockState> builder, CallbackInfo ci) {
+        builder.add(ShapeHelpers.CHIPS_PROPERTY);
+    }
+
+    @Inject(method = "getDefaultState", at = @At("TAIL"), cancellable = true)
+    public void setMaxChips(CallbackInfoReturnable<BlockState> cir) {
+        BlockState ret = cir.getReturnValue();
+        if (ret.contains(ShapeHelpers.CHIPS_PROPERTY)) {
+            cir.setReturnValue(ret.with(ShapeHelpers.CHIPS_PROPERTY, 255));
+        }
     }
 }
