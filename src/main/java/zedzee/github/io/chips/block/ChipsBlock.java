@@ -47,6 +47,53 @@ public class ChipsBlock extends Block {
         this.setDefaultState(this.getDefaultState().with(CHIPS_PROPERTY, 255));
     }
 
+    private static int getBottomLayer(int n) {
+        return (n & 0x0F);
+    }
+
+    private static int getTopLayer(int n) {
+        return (n & 0xF0) >> 4;
+    }
+
+    private static int rotate4Left(int n) {
+        return (
+                ((n & 1) << 2) |
+                ((n & 0b10) >> 1) |
+                ((n & 0b100) << 1) |
+                ((n & 0b1000) >> 2)
+        );
+    }
+
+    private static int rotate4Right(int n) {
+        return (
+                ((n & 1) << 1) |
+                ((n & 0b10) << 2) |
+                ((n & 0b100) >> 2) |
+                ((n & 0b1000) >> 1)
+        );
+    }
+
+    private static int rotate8Left(int n) {
+        return rotate4Left(getBottomLayer(n)) | (rotate4Left(getTopLayer(n) >> 4));
+    }
+
+    private static int rotate8Right(int n) {
+        return rotate4Right(getBottomLayer(n)) | (rotate4Right(getTopLayer(n) >> 4));
+    }
+
+    private static int simplifyModel(int n) {
+        int leadingZeros = Integer.numberOfLeadingZeros(n);
+        if (leadingZeros == 4 || leadingZeros == 0) {
+            return n;
+        }
+
+        for (int i = 0; i < leadingZeros; i++) {
+            n = rotate8Left(n);
+        }
+
+        return n;
+    }
+
     private static boolean hasCorner(int flags, int corner) {
         return (flags & createFlag(corner)) != 0;
     }
