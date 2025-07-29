@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zedzee.github.io.chips.block.ChipsBlocks;
 
 public class Chips implements ModInitializer {
     public static final String MOD_ID = "chips";
@@ -12,6 +13,7 @@ public class Chips implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ChipsBlocks.init();
     }
 
     public static Identifier identifier(String path) {

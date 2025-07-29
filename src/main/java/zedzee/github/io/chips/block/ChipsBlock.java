@@ -1,7 +1,9 @@
-package zedzee.github.io.chips.util;
+package zedzee.github.io.chips.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +14,7 @@ import net.minecraft.world.BlockView;
 
 import java.util.Optional;
 
-public class ShapeHelpers {
+public class ChipsBlock extends Block {
     public static final IntProperty CHIPS_PROPERTY = IntProperty.of("chips", 0, 255);
 
     public static final VoxelShape[] CORNER_SHAPES = Util.make(new VoxelShape[8], cornerShapes -> {
@@ -40,6 +42,11 @@ public class ShapeHelpers {
         }
     });
 
+    public ChipsBlock(Settings settings) {
+        super(settings);
+        this.setDefaultState(this.getDefaultState().with(CHIPS_PROPERTY, 255));
+    }
+
     private static boolean hasCorner(int flags, int corner) {
         return (flags & createFlag(corner)) != 0;
     }
@@ -48,7 +55,11 @@ public class ShapeHelpers {
         return 1 << corner;
     }
 
-    public static int getClosestSlice(BlockState state, Vec3d pos) {
+    private static boolean isFull(BlockState state) {
+        return state.get(CHIPS_PROPERTY) == 255;
+    }
+
+    public int getClosestSlice(BlockState state, Vec3d pos) {
         int i = state.get(CHIPS_PROPERTY);
         double d = Double.MAX_VALUE;
         int j = -1;
@@ -70,7 +81,24 @@ public class ShapeHelpers {
         return j;
     }
 
-    public static VoxelShape getOutlineShape(BlockState state) {
+    @Override
+    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPES[state.get(CHIPS_PROPERTY)];
+    }
+
+    @Override
+    public boolean hasSidedTransparency(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
+        return isFull(state) ? 0.2F : 1.0F;
+    }
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
+        builder.add(CHIPS_PROPERTY);
     }
 }
