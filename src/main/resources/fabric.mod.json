@@ -14,8 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "client": ["zedzee.github.io.chips.client.ChipsClient"],
-    "main": ["zedzee.github.io.chips.Chips"],
-    "fabric-datagen": ["zedzee.github.io.chips.client.datagen.ChipsDataGen"]
+    "main": ["zedzee.github.io.chips.Chips"]
   },
 
   "mixins": [
