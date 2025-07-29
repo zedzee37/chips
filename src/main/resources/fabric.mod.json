@@ -10,11 +10,12 @@
 
   "license": "GPL-3.0",
   "icon": "assets/chips/icon.png",
-
+  "accessWidener": "chips.accesswidener",
   "environment": "*",
   "entrypoints": {
     "client": ["zedzee.github.io.chips.client.ChipsClient"],
-    "main": ["zedzee.github.io.chips.Chips"]
+    "main": ["zedzee.github.io.chips.Chips"],
+    "fabric-datagen": ["zedzee.github.io.chips.client.datagen.ChipsDataGen"]
   },
 
   "mixins": [

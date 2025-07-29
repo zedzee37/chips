@@ -19,8 +19,15 @@ loom {
             sourceSet sourceSets.client
         }
     }
+
+    accessWidenerPath = file("src/main/resources/chips.accesswidener")
 }
 
+fabricApi {
+    configureDataGeneration() {
+        client = true
+    }
+}
 
 repositories {
     // Add repositories to retrieve artifacts from in here.
