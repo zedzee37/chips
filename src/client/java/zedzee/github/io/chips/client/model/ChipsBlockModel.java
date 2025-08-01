@@ -39,10 +39,10 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
         emitter.square(Direction.DOWN, fromX, fromZ, toX, toZ, fromY);
         emit(emitter);
 
-        emitter.square(Direction.UP, fromX, fromZ, toX, toZ, toY);
+        emitter.square(Direction.UP, fromX, fromZ + 0.5f, toX, toZ + 0.5f, toY);
         emit(emitter);
 
-        emitter.square(Direction.NORTH, fromX, fromY, toX, toY, fromZ);
+        emitter.square(Direction.NORTH, fromX + 0.5f, fromY, toX + 0.5f, toY, fromZ);
         emit(emitter);
 
         emitter.square(Direction.SOUTH, fromX, fromY, toX, toY, toZ);
@@ -51,7 +51,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
         emitter.square(Direction.WEST, fromZ, fromY, toZ, toY, fromX);
         emit(emitter);
 
-        emitter.square(Direction.EAST, fromZ, fromY, toZ, toY, toX);
+        emitter.square(Direction.EAST, fromZ + 0.5f, fromY, toZ + 0.5f, toY, toX);
         emit(emitter);
     }
 
