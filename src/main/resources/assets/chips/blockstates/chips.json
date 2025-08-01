@@ -1,5 +1,5 @@
 {
   "variants": {
-    "": { "model":  "chips:block/chips" }
+    "": { "model": "minecraft:block/grass_block" }
   }
 }
