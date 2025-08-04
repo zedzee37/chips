@@ -106,8 +106,11 @@ public class ChipsBlock extends Block {
         return state.get(CHIPS_PROPERTY) == 255;
     }
 
-    public int getClosestSlice(BlockState state, Vec3d pos) {
-        int i = state.get(CHIPS_PROPERTY);
+    public static int getClosestSlice(BlockState state, Vec3d pos) {
+        int i = 255;
+        if (state.contains(CHIPS_PROPERTY)) {
+            i = state.get(CHIPS_PROPERTY);
+        }
         double d = Double.MAX_VALUE;
         int j = -1;
 

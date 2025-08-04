@@ -39,19 +39,19 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
         emitter.square(Direction.DOWN, fromX, fromZ, toX, toZ, fromY);
         emit(emitter);
 
-        emitter.square(Direction.UP, fromX, fromZ + 0.5f, toX, toZ + 0.5f, toY);
+        emitter.square(Direction.UP, fromX, fromZ, toX, toZ, toY);
         emit(emitter);
 
-        emitter.square(Direction.NORTH, fromX + 0.5f, fromY, toX + 0.5f, toY, fromZ);
+        emitter.square(Direction.NORTH, fromX, fromY, toX, toY, toZ);
         emit(emitter);
 
         emitter.square(Direction.SOUTH, fromX, fromY, toX, toY, toZ);
         emit(emitter);
 
-        emitter.square(Direction.WEST, fromZ, fromY, toZ, toY, fromX);
+        emitter.square(Direction.EAST, fromZ, fromY, toZ, toY, toX);
         emit(emitter);
 
-        emitter.square(Direction.EAST, fromZ + 0.5f, fromY, toZ + 0.5f, toY, toX);
+        emitter.square(Direction.WEST, fromZ, fromY, toZ, toY, fromX);
         emit(emitter);
     }
 
@@ -67,9 +67,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     }
 
     @Override
-    public void addParts(Random random, List<BlockModelPart> parts) {
-
-    }
+    public void addParts(Random random, List<BlockModelPart> parts) {}
 
     @Override
     public Sprite particleSprite() {

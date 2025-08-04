@@ -8,11 +8,10 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.util.ModRegistry;
 
 import java.util.function.Function;
 
-public class ChipsBlocks extends ModRegistry {
+public class ChipsBlocks {
     public static final Block CHIPS_BLOCK = register("chips", ChipsBlock::new, Block.Settings.create());
 
     private static Block register(String path, Function<AbstractBlock.Settings, Block> factory, AbstractBlock.Settings settings) {
