@@ -36,22 +36,63 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     }
 
     private void addQuads(QuadEmitter emitter, float fromX, float fromY, float fromZ, float toX, float toY, float toZ) {
-        emitter.square(Direction.DOWN, fromX, fromZ, toX, toZ, fromY);
-        emit(emitter);
+        for (Direction direction : Direction.values()) {
+            emitQuad(emitter, direction, fromX, fromY, fromZ, toX, toY, toZ);
+        }
+    }
 
-        emitter.square(Direction.UP, fromX, fromZ, toX, toZ, toY);
-        emit(emitter);
+    // not using square because it emits with an offset
+    private void emitQuad(
+            QuadEmitter emitter,
+            Direction direction,
+            float fromX,
+            float fromY,
+            float fromZ,
+            float toX,
+            float toY,
+            float toZ
+    ) {
+        emitter.nominalFace(direction);
 
-        emitter.square(Direction.NORTH, fromX, fromY, toX, toY, toZ);
-        emit(emitter);
+        switch (direction) {
+            case UP:
+                emitter.pos(3, fromX, toY, fromZ);
+                emitter.pos(2, toX, toY, fromZ);
+                emitter.pos(1, toX, toY, toZ);
+                emitter.pos(0, fromX, toY, toZ);
+                break;
+            case DOWN:
+                emitter.pos(0, fromX, fromY, fromZ);
+                emitter.pos(1, toX, fromY, fromZ);
+                emitter.pos(2, toX, fromY, toZ);
+                emitter.pos(3, fromX, fromY, toZ);
+                break;
+            case NORTH:
+                emitter.pos(0, fromX, fromY, toZ);
+                emitter.pos(1, toX, fromY, toZ);
+                emitter.pos(2, toX, toY, toZ);
+                emitter.pos(3, fromX, toY, toZ);
+                break;
+            case SOUTH:
+                emitter.pos(3, fromX, fromY, fromZ);
+                emitter.pos(2, toX, fromY, fromZ);
+                emitter.pos(1, toX, toY, fromZ);
+                emitter.pos(0, fromX, toY, fromZ);
+                break;
+            case EAST:
+                emitter.pos(3, toX, fromY, toZ);
+                emitter.pos(2, toX, toY, toZ);
+                emitter.pos(1, toX, toY, fromZ);
+                emitter.pos(0, toX, fromY, fromZ);
+                break;
+            case WEST:
+                emitter.pos(0, fromX, fromY, toZ);
+                emitter.pos(1, fromX, toY, toZ);
+                emitter.pos(2, fromX, toY, fromZ);
+                emitter.pos(3, fromX, fromY, fromZ);
+                break;
+        }
 
-        emitter.square(Direction.SOUTH, fromX, fromY, toX, toY, toZ);
-        emit(emitter);
-
-        emitter.square(Direction.EAST, fromZ, fromY, toZ, toY, toX);
-        emit(emitter);
-
-        emitter.square(Direction.WEST, fromZ, fromY, toZ, toY, fromX);
         emit(emitter);
     }
 
