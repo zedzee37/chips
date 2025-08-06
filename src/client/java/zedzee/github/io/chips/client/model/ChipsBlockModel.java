@@ -14,22 +14,23 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.ChipsBlockHelpers;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 public class ChipsBlockModel implements BlockStateModel, BlockStateModel.UnbakedGrouped {
+    private static final Identifier TEMP_BLOCK_TEXTURE = Identifier.ofVanilla("block/spruce_planks");
     private Sprite sprite;
 
     @Override
     public void emitQuads(QuadEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Random random, Predicate<@Nullable Direction> cullTest) {
-        if (!state.contains(ChipsBlock.CHIPS_PROPERTY)) {
+        if (!state.contains(ChipsBlockHelpers.CHIPS)) {
             return;
         }
 
-        int shapeIdx = state.get(ChipsBlock.CHIPS_PROPERTY);
-        VoxelShape shape = ChipsBlock.SHAPES[shapeIdx];
+        int shapeIdx = state.get(ChipsBlockHelpers.CHIPS);
+        VoxelShape shape = ChipsBlockHelpers.SHAPES[shapeIdx];
         shape.forEachBox((fromX, fromY, fromZ, toX, toY, toZ) -> {
             addQuads(emitter, (float) fromX, (float) fromY, (float) fromZ, (float) toX, (float) toY, (float) toZ);
         });
@@ -68,16 +69,16 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
                 emitter.pos(3, fromX, fromY, toZ);
                 break;
             case NORTH:
-                emitter.pos(0, fromX, fromY, toZ);
-                emitter.pos(1, toX, fromY, toZ);
-                emitter.pos(2, toX, toY, toZ);
-                emitter.pos(3, fromX, toY, toZ);
-                break;
-            case SOUTH:
                 emitter.pos(3, fromX, fromY, fromZ);
                 emitter.pos(2, toX, fromY, fromZ);
                 emitter.pos(1, toX, toY, fromZ);
                 emitter.pos(0, fromX, toY, fromZ);
+                break;
+            case SOUTH:
+                emitter.pos(0, fromX, fromY, toZ);
+                emitter.pos(1, toX, fromY, toZ);
+                emitter.pos(2, toX, toY, toZ);
+                emitter.pos(3, fromX, toY, toZ);
                 break;
             case EAST:
                 emitter.pos(3, toX, fromY, toZ);
@@ -104,7 +105,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
     @Override
     public void resolve(Resolver resolver) {
-        resolver.markDependency(Identifier.ofVanilla("block/diamond_block"));
+        resolver.markDependency(TEMP_BLOCK_TEXTURE);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     public BlockStateModel bake(BlockState state, Baker baker) {
         ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
 
-        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, Identifier.ofVanilla("block/diamond_block"));
+        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, TEMP_BLOCK_TEXTURE);
         this.sprite = spriteGetter.get(spriteIdentifier, () -> "");
 
         return this;

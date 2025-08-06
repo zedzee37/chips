@@ -15,7 +15,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.ChipsBlockHelpers;
 import zedzee.github.io.chips.block.ChipsBlocks;
 
 public class ChiselItem extends Item {
@@ -63,10 +65,10 @@ public class ChiselItem extends Item {
 
         // adjust the pos to local coords
         Vec3d adjustedPos = blockHitResult.getPos().subtract(pos.getX(), pos.getY(), pos.getZ());
-        if (state.contains(ChipsBlock.CHIPS_PROPERTY)) {
-            corner = ChipsBlock.getClosestSlice(state, adjustedPos);
+        if (state.contains(ChipsBlockHelpers.CHIPS)) {
+            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
         } else if (state.getOutlineShape(world, blockHitResult.getBlockPos()) == VoxelShapes.fullCube()) {
-            corner = ChipsBlock.getClosestSlice(state, adjustedPos);
+            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
         } else {
             user.stopUsingItem();
         }
@@ -79,11 +81,13 @@ public class ChiselItem extends Item {
 
         corner = 1 << corner;
 
-        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState().with(ChipsBlock.CHIPS_PROPERTY, (255 & ~(corner))));
-        } else {
-            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState().with(ChipsBlock.CHIPS_PROPERTY, (state.get(ChipsBlock.CHIPS_PROPERTY) & ~(corner))));
-        }
+//        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+//            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState().with(ChipsBlock.CHIPS, (255 & ~(corner))));
+//        } else {
+//            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState().with(ChipsBlock.CHIPS, (state.get(ChipsBlock.CHIPS) & ~(corner))));
+//        }
+
+        world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, state.get(ChipsBlockHelpers.CHIPS) & ~(corner)));
 
         stack.damage(1, player);
         user.stopUsingItem();;

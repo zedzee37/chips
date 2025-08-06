@@ -12,7 +12,11 @@ import zedzee.github.io.chips.Chips;
 import java.util.function.Function;
 
 public class ChipsBlocks {
-    public static final Block CHIPS_BLOCK = register("chips", ChipsBlock::new, Block.Settings.create());
+//    public static final Block CHIPS_BLOCK = register(
+//            "chips",
+//            ChipsBlock::new,
+//            Block.Settings.create().nonOpaque()
+//    );
 
     private static Block register(String path, Function<AbstractBlock.Settings, Block> factory, AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);

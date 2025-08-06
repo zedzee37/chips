@@ -1,21 +1,15 @@
 package zedzee.github.io.chips.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
 
 import java.util.Optional;
 
-@Deprecated
-public class ChipsBlock extends Block {
+public class ChipsBlockHelpers {
     public static final IntProperty CHIPS = IntProperty.of("chips", 0, 255);
 
     public static final VoxelShape[] CORNER_SHAPES = Util.make(new VoxelShape[8], cornerShapes -> {
@@ -43,11 +37,6 @@ public class ChipsBlock extends Block {
         }
     });
 
-    public ChipsBlock(Settings settings) {
-        super(settings);
-        this.setDefaultState(this.getDefaultState().with(CHIPS, 1));
-    }
-
     private static int getBottomLayer(int n) {
         return (n & 0x0F);
     }
@@ -59,18 +48,18 @@ public class ChipsBlock extends Block {
     private static int rotate4Left(int n) {
         return (
                 ((n & 1) << 2) |
-                ((n & 0b10) >> 1) |
-                ((n & 0b100) << 1) |
-                ((n & 0b1000) >> 2)
+                        ((n & 0b10) >> 1) |
+                        ((n & 0b100) << 1) |
+                        ((n & 0b1000) >> 2)
         );
     }
 
     private static int rotate4Right(int n) {
         return (
                 ((n & 1) << 1) |
-                ((n & 0b10) << 2) |
-                ((n & 0b100) >> 2) |
-                ((n & 0b1000) >> 1)
+                        ((n & 0b10) << 2) |
+                        ((n & 0b100) >> 2) |
+                        ((n & 0b1000) >> 1)
         );
     }
 
@@ -82,7 +71,7 @@ public class ChipsBlock extends Block {
         return rotate4Right(getBottomLayer(n)) | (rotate4Right(getTopLayer(n) >> 4));
     }
 
-    private static int simplifyModel(int n) {
+    public static int simplifyModel(int n) {
         int leadingZeros = Integer.numberOfLeadingZeros(n);
         if (leadingZeros == 4 || leadingZeros == 0) {
             return n;
@@ -95,7 +84,7 @@ public class ChipsBlock extends Block {
         return n;
     }
 
-    private static boolean hasCorner(int flags, int corner) {
+    public static boolean hasCorner(int flags, int corner) {
         return (flags & createFlag(corner)) != 0;
     }
 
@@ -103,7 +92,7 @@ public class ChipsBlock extends Block {
         return 1 << corner;
     }
 
-    private static boolean isFull(BlockState state) {
+    public static boolean isFull(BlockState state) {
         return state.get(CHIPS) == 255;
     }
 
@@ -132,24 +121,7 @@ public class ChipsBlock extends Block {
         return j;
     }
 
-    @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public static VoxelShape getOutlineShape(BlockState state) {
         return SHAPES[state.get(CHIPS)];
-    }
-
-    @Override
-    public boolean hasSidedTransparency(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
-        return isFull(state) ? 0.2F : 1.0F;
-    }
-
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
-        builder.add(CHIPS);
     }
 }
