@@ -12,15 +12,15 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
     @Override
     public void initialize(Context context) {
         context.modifyBlockModelOnLoad().register((original, ctx) ->
-                !ctx.state().contains(ChipsBlockHelpers.CHIPS)
+                !shouldRenderChipsModel(ctx.state())
                 ? original
                 : new ChipsBlockModel()
                 );
     }
 
     private boolean shouldRenderChipsModel(BlockState state) {
-//        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255;
-// for testing purposes
         return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255;
+// for testing purposes
+//        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255;
     }
 }

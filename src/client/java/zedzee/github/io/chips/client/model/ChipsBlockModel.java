@@ -2,11 +2,14 @@ package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.*;
+import net.minecraft.client.render.model.json.ModelVariant;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -14,6 +17,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlockHelpers;
 
 import java.util.List;
@@ -105,7 +109,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
     @Override
     public void resolve(Resolver resolver) {
-        resolver.markDependency(TEMP_BLOCK_TEXTURE);
+//        resolver.markDependency(TEMP_BLOCK_TEXTURE);
     }
 
     @Override
@@ -118,10 +122,17 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
     @Override
     public BlockStateModel bake(BlockState state, Baker baker) {
-        ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
+//        ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
 
-        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, TEMP_BLOCK_TEXTURE);
-        this.sprite = spriteGetter.get(spriteIdentifier, () -> "");
+        Block block = state.getBlock();
+        Identifier identifier = Registries.BLOCK.getId(block);
+        identifier = Identifier.ofVanilla("block/" + identifier.getPath());
+
+        BakedSimpleModel model = baker.getModel(identifier);
+        sprite = model.getParticleTexture(model.getTextures(), baker);
+
+//        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, identifier);
+//        this.sprite = spriteGetter.get(spriteIdentifier, () -> "");
 
         return this;
     }
