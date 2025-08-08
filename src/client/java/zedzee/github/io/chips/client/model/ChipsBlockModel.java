@@ -4,11 +4,9 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.*;
-import net.minecraft.client.render.model.json.ModelVariant;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -17,18 +15,26 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlockHelpers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ChipsBlockModel implements BlockStateModel, BlockStateModel.UnbakedGrouped {
     private static final Identifier TEMP_BLOCK_TEXTURE = Identifier.ofVanilla("block/spruce_planks");
-    private Sprite sprite;
+    private Supplier<BakedSimpleModel> modelSupplier;
+    private final Map<Direction, Sprite> spriteMap = new HashMap<>();
+    private Sprite particleSprite;
 
     @Override
     public void emitQuads(QuadEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Random random, Predicate<@Nullable Direction> cullTest) {
+        if (particleSprite == null) {
+            modelSupplier.get();
+        }
+
         if (!state.contains(ChipsBlockHelpers.CHIPS)) {
             return;
         }
@@ -98,18 +104,22 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
                 break;
         }
 
-        emit(emitter);
+        emit(emitter, direction);
     }
 
-    private void emit(QuadEmitter emitter) {
-        emitter.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
+    private void emit(QuadEmitter emitter, Direction direction) {
+        if (spriteMap.containsKey(direction)) {
+            emitter.spriteBake(spriteMap.get(direction), MutableQuadView.BAKE_LOCK_UV);
+        } else {
+            emitter.spriteBake(particleSprite, MutableQuadView.BAKE_LOCK_UV);
+        }
+
         emitter.color(-1, -1, -1, -1);
         emitter.emit();
     }
 
     @Override
     public void resolve(Resolver resolver) {
-//        resolver.markDependency(TEMP_BLOCK_TEXTURE);
     }
 
     @Override
@@ -117,21 +127,27 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
     @Override
     public Sprite particleSprite() {
-        return sprite;
+        if (particleSprite == null) {
+            modelSupplier.get();
+        }
+        return particleSprite;
     }
 
     @Override
     public BlockStateModel bake(BlockState state, Baker baker) {
 //        ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
+//
+        modelSupplier = () -> {
+            Block block = state.getBlock();
+            Identifier identifier = Registries.BLOCK.getId(block);
+            identifier = Identifier.of(identifier.getNamespace(), "block/" + identifier.getPath());
 
-        Block block = state.getBlock();
-        Identifier identifier = Registries.BLOCK.getId(block);
-        identifier = Identifier.ofVanilla("block/" + identifier.getPath());
+            BakedSimpleModel model = baker.getModel(identifier);
+            particleSprite = model.getParticleTexture(model.getTextures(), baker);
+            return model;
+        };
 
-        BakedSimpleModel model = baker.getModel(identifier);
-        sprite = model.getParticleTexture(model.getTextures(), baker);
-
-//        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, identifier);
+//        final SpriteIdentifier spriteIdentifier = new SpriteIdentifier(S.BLOCK_ATLAS_TEXTURE, identifier);
 //        this.sprite = spriteGetter.get(spriteIdentifier, () -> "");
 
         return this;
