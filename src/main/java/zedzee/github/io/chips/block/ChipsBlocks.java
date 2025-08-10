@@ -18,6 +18,12 @@ public class ChipsBlocks {
 //            Block.Settings.create().nonOpaque()
 //    );
 
+    public static final Block CHISELING_STATION = register(
+            "chiseling_station",
+            ChiselingStation::new,
+            Block.Settings.create()
+    );
+
     private static Block register(String path, Function<AbstractBlock.Settings, Block> factory, AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);

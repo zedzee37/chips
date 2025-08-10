@@ -4,6 +4,3 @@ accessible method net/minecraft/block/Block setDefaultState (Lnet/minecraft/bloc
 accessible method net/minecraft/block/AbstractBlock getOutlineShape (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;
 
 accessible class net/minecraft/client/render/model/ModelTextures$SpriteEntry
-
-accessible field net/minecraft/state/State propertyMap Lit/unimi/dsi/fastutil/objects/Reference2ObjectArrayMap;
-accessible field net/minecraft/state/State codec Lcom/mojang/serialization/MapCodec;
