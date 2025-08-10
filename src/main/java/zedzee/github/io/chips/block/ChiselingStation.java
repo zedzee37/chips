@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.screen.ChiselingStationScreenHandler;
 
 public class ChiselingStation extends Block {
+    public static final Text TITLE = Text.translatable("container.chiseling");
+
     public ChiselingStation(Settings settings) {
         super(settings);
     }
@@ -29,6 +31,9 @@ public class ChiselingStation extends Block {
 
     @Override
     protected @Nullable NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
-        return new SimpleNamedScreenHandlerFactory((syncId, inventory, player) -> new ChiselingStationScreenHandler(syncId), Text.literal("gug"));
+        return new SimpleNamedScreenHandlerFactory(
+                (syncId, inventory, player) ->
+                        new ChiselingStationScreenHandler(syncId, player.getInventory()), TITLE
+        );
     }
 }
