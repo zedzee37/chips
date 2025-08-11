@@ -20,7 +20,5 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
 
     private boolean shouldRenderChipsModel(BlockState state) {
         return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255;
-// for testing purposes
-//        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255;
     }
 }
