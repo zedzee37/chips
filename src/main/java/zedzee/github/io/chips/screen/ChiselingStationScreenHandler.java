@@ -5,21 +5,18 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlockHelpers;
 import zedzee.github.io.chips.item.ChipsItems;
-import zedzee.github.io.chips.item.ChipsPattern;
-import zedzee.github.io.chips.item.ChiselItem;
 
 public class ChiselingStationScreenHandler extends ScreenHandler implements ScreenHandlerListener {
     public static final ScreenHandlerType<ChiselingStationScreenHandler> CHISELING_STATION = register(
@@ -40,8 +37,15 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
     private final ChipsBlockSlot blockSlot;
     private final ResultSlot resultSlot;
 
+    private final ScreenHandlerContext context;
+
     public ChiselingStationScreenHandler(int syncId, PlayerInventory playerInventory) {
+        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+    }
+
+    public ChiselingStationScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(CHISELING_STATION, syncId);
+        this.context = context;
         this.playerInventory = playerInventory;
         this.craftingInventory = new SimpleInventory(3);
         this.patternSlot = new PatternSlot(craftingInventory, PATTERN_SLOT_IDX, 0, 0);
@@ -61,10 +65,32 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {
         Slot slot2 = this.slots.get(slot);
+        ItemStack itemStack = ItemStack.EMPTY;
 
-        Chips.LOGGER.info(slot2.inventory.getStack(slot).getName().toString());
+        if (slot2.hasStack()) {
+            ItemStack itemStack2 = slot2.getStack();
+            itemStack = itemStack2.copy();
 
-        return ItemStack.EMPTY;
+            // 3 slots for our inventory
+            if (slot < 3) {
+                // 39 slots because 36 slots + 3
+                if (!insertItem(itemStack2, 3, 39, true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!insertItem(itemStack2, 0, 3, false)){
+                return ItemStack.EMPTY;
+            }
+
+            slot2.onTakeItem(player, itemStack2);
+        }
+
+        return itemStack;
+    }
+
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+        this.context.run((world, pos) -> this.dropInventory(player, this.craftingInventory));
     }
 
     @Override
