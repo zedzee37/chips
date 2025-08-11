@@ -4,6 +4,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
@@ -19,6 +20,7 @@ public class ChipsItems {
             "chisel",
             (settings) -> new ChiselItem(settings, DEFAULT_USE_TIME),
             new Item.Settings()
+                    .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
                     .maxDamage(100)
                     .maxCount(1)
     );
@@ -26,6 +28,7 @@ public class ChipsItems {
             "creative_chisel",
             (settings) -> new ChiselItem(settings, 1),
             new Item.Settings()
+                    .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
                     .maxCount(1)
     );
 
