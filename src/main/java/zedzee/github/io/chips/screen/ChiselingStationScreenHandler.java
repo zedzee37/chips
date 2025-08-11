@@ -1,24 +1,27 @@
 package zedzee.github.io.chips.screen;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.item.ChipsItems;
+import zedzee.github.io.chips.item.ChipsPattern;
+import zedzee.github.io.chips.item.ChiselItem;
 
-public class ChiselingStationScreenHandler extends ScreenHandler {
+public class ChiselingStationScreenHandler extends ScreenHandler implements ScreenHandlerListener {
     public static final ScreenHandlerType<ChiselingStationScreenHandler> CHISELING_STATION = register(
             "chiseling_station", ChiselingStationScreenHandler::new
     );
@@ -27,18 +30,25 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
         return Registry.register(Registries.SCREEN_HANDLER, id, new ScreenHandlerType<>(factory, FeatureFlags.VANILLA_FEATURES));
     }
 
+    private final PlayerInventory playerInventory;
     private final Inventory craftingInventory;
+
+    private static final int PATTERN_SLOT_IDX = 0;
+    private static final int BLOCK_SLOT_IDX = 1;
+
     private final PatternSlot patternSlot;
     private final ChipsBlockSlot blockSlot;
     private final ResultSlot resultSlot;
 
     public ChiselingStationScreenHandler(int syncId, PlayerInventory playerInventory) {
         super(CHISELING_STATION, syncId);
+        this.playerInventory = playerInventory;
         this.craftingInventory = new SimpleInventory(3);
-        this.patternSlot = new PatternSlot(craftingInventory, 0, 0, 0);
-        this.blockSlot = new ChipsBlockSlot(craftingInventory, 1, 20,0);
+        this.patternSlot = new PatternSlot(craftingInventory, PATTERN_SLOT_IDX, 0, 0);
+        this.blockSlot = new ChipsBlockSlot(craftingInventory, BLOCK_SLOT_IDX, 20,0);
         this.resultSlot = new ResultSlot(craftingInventory, 2, 40, 0);
         this.addSlots(playerInventory);
+        this.addListener(this);
     }
 
     private void addSlots(PlayerInventory playerInventory) {
@@ -51,6 +61,7 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {
         Slot slot2 = this.slots.get(slot);
+
         Chips.LOGGER.info(slot2.inventory.getStack(slot).getName().toString());
 
         return ItemStack.EMPTY;
@@ -59,6 +70,52 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
     @Override
     public boolean canUse(PlayerEntity player) {
         return true;
+    }
+
+    private void updateResult() {
+        if (this.resultSlot.hasStack()) {
+            return;
+        }
+
+        if (this.patternSlot.getStack().isOf(Items.PAPER) && this.blockSlot.hasStack()) {
+            convertToPattern();
+            return;
+        }
+
+        if (this.patternSlot.getStack().isOf(ChipsItems.CHIPS_PATTERN_ITEM) && this.blockSlot.hasStack()) {
+            chiselItems();
+        }
+    }
+
+    private void convertToPattern() {
+        if (!this.patternSlot.getStack().isOf(Items.PAPER) ||
+                !ChipsBlockHelpers.stackHasChips(this.blockSlot.getStack())) {
+            return;
+        }
+
+        int chips = ChipsBlockHelpers.getChipsFromStack(this.blockSlot.getStack());
+        this.resultSlot.setStack(ChipsBlockHelpers.getStackWithChips(ChipsItems.CHIPS_PATTERN_ITEM.getDefaultStack(), chips));
+    }
+
+    public void chiselItems() {
+        if (!this.patternSlot.getStack().isOf(ChipsItems.CHIPS_PATTERN_ITEM) || !this.blockSlot.hasStack()) {
+            return;
+        }
+
+        ItemStack pattern = this.patternSlot.getStack();
+        int chips = ChipsBlockHelpers.getChipsFromStack(pattern);
+
+        this.resultSlot.setStack(ChipsBlockHelpers.getStackWithChips(this.blockSlot.getStack(), chips));
+    }
+
+    @Override
+    public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
+        updateResult();
+    }
+
+    @Override
+    public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+
     }
 
     static class ResultSlot extends Slot {
@@ -70,6 +127,17 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
         public boolean canInsert(ItemStack stack) {
             return false;
         }
+
+        @Override
+        public void onTakeItem(PlayerEntity player, ItemStack stack) {
+            ItemStack patternStack = this.inventory.getStack(PATTERN_SLOT_IDX);
+            if (patternStack.isOf(Items.PAPER)) {
+                this.inventory.getStack(PATTERN_SLOT_IDX).decrement(1);
+            } else if (patternStack.isOf(ChipsItems.CHIPS_PATTERN_ITEM)) {
+                this.inventory.removeStack(BLOCK_SLOT_IDX);
+            }
+            super.onTakeItem(player, stack);
+        }
     }
 
     static class ChipsBlockSlot extends Slot {
@@ -79,15 +147,7 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
 
         @Override
         public boolean canInsert(ItemStack stack) {
-            if (stack.getItem() instanceof BlockItem || !stack.contains(DataComponentTypes.BLOCK_STATE)) {
-                return false;
-            }
-
-            BlockStateComponent component = stack.get(DataComponentTypes.BLOCK_STATE);
-
-            return
-                    component != null &&
-                    component.properties().containsKey(ChipsBlockHelpers.CHIPS.getName());
+            return stack.getItem() instanceof BlockItem;
         }
     }
 
@@ -98,7 +158,7 @@ public class ChiselingStationScreenHandler extends ScreenHandler {
 
         @Override
         public boolean canInsert(ItemStack stack) {
-            return stack.isOf(Items.PAPER);
+            return stack.isOf(Items.PAPER) || stack.isOf(ChipsItems.CHIPS_PATTERN_ITEM);
         }
 
         @Override

@@ -1,12 +1,18 @@
 package zedzee.github.io.chips.block;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BlockStateComponent;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import zedzee.github.io.chips.item.ChipsItems;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class ChipsBlockHelpers {
@@ -119,6 +125,32 @@ public class ChipsBlockHelpers {
         }
 
         return j;
+    }
+
+    public static boolean stackHasChips(ItemStack stack) {
+        if (!stack.contains(DataComponentTypes.BLOCK_STATE)) {
+            return false;
+        }
+
+        BlockStateComponent blockState = stack.get(DataComponentTypes.BLOCK_STATE);
+        return blockState.properties().containsKey(CHIPS.getName());
+    }
+
+    public static int getChipsFromStack(ItemStack stack) {
+        if (!stackHasChips(stack)) {
+            return -1;
+        }
+
+        return stack.get(DataComponentTypes.BLOCK_STATE).getValue(CHIPS);
+    }
+
+    public static ItemStack getStackWithChips(ItemStack stack, int chips) {
+        ItemStack copiedStack = stack.copy();
+        Map<String, String> propertyMap = Map.ofEntries(
+                Map.entry(ChipsBlockHelpers.CHIPS.getName(), String.valueOf(chips))
+        );
+        copiedStack.set(DataComponentTypes.BLOCK_STATE, new BlockStateComponent(propertyMap));
+        return copiedStack;
     }
 
     public static VoxelShape getOutlineShape(BlockState state) {
