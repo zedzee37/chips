@@ -4,7 +4,9 @@
   "package": "zedzee.github.io.chips.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "DefaultStackMixin",
     "ChipsPropertyMixin",
+    "DirectionalPlacementMixin",
     "ModifyBlockDropsMixin",
     "OutlineShapeMixin"
   ],

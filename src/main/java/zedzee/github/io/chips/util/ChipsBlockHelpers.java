@@ -1,11 +1,15 @@
-package zedzee.github.io.chips.block;
+package zedzee.github.io.chips.util;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.DirectionTransformation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -15,6 +19,7 @@ import java.util.Optional;
 
 public class ChipsBlockHelpers {
     public static final IntProperty CHIPS = IntProperty.of("chips", 0, 255);
+    public static final EnumProperty<Direction> FACING = HorizontalFacingBlock.FACING;
 
     public static final VoxelShape[] CORNER_SHAPES = Util.make(new VoxelShape[8], cornerShapes -> {
         cornerShapes[0] = VoxelShapes.cuboid(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
@@ -110,7 +115,7 @@ public class ChipsBlockHelpers {
 
         for (int k = 0; k < CORNER_SHAPES.length; k++) {
             if (hasCorner(i, k)) {
-                VoxelShape voxelShape = CORNER_SHAPES[k];
+                VoxelShape voxelShape = rotateShape(CORNER_SHAPES[k], state.get(FACING));
                 Optional<Vec3d> optional = voxelShape.getClosestPointTo(pos);
                 if (optional.isPresent()) {
                     double e = (optional.get()).squaredDistanceTo(pos);
@@ -125,33 +130,20 @@ public class ChipsBlockHelpers {
         return j;
     }
 
-    public static boolean stackHasChips(ItemStack stack) {
-        if (!stack.contains(DataComponentTypes.BLOCK_STATE)) {
-            return false;
-        }
-
-        BlockStateComponent blockState = stack.get(DataComponentTypes.BLOCK_STATE);
-        return blockState.properties().containsKey(CHIPS.getName());
-    }
-
-    public static int getChipsFromStack(ItemStack stack) {
-        if (!stackHasChips(stack)) {
-            return -1;
-        }
-
-        return stack.get(DataComponentTypes.BLOCK_STATE).getValue(CHIPS);
-    }
-
-    public static ItemStack getStackWithChips(ItemStack stack, int chips) {
-        ItemStack copiedStack = stack.copy();
-        Map<String, String> propertyMap = Map.ofEntries(
-                Map.entry(ChipsBlockHelpers.CHIPS.getName(), String.valueOf(chips))
-        );
-        copiedStack.set(DataComponentTypes.BLOCK_STATE, new BlockStateComponent(propertyMap));
-        return copiedStack;
-    }
-
     public static VoxelShape getOutlineShape(BlockState state) {
-        return SHAPES[state.get(CHIPS)];
+        VoxelShape shape = SHAPES[state.get(CHIPS)];
+        Direction direction = state.get(FACING);
+        return rotateShape(shape, direction);
+    }
+
+    private static VoxelShape rotateShape(VoxelShape shape, Direction direction) {
+        switch (direction) {
+            // hacky way to rotate it 180 ig
+            case SOUTH -> shape = VoxelShapes.transform(VoxelShapes.transform(shape, DirectionTransformation.ROT_90_Y_POS), DirectionTransformation.ROT_90_Y_POS);
+            case EAST -> shape = VoxelShapes.transform(shape, DirectionTransformation.ROT_90_Y_NEG);
+            case WEST -> shape = VoxelShapes.transform(shape, DirectionTransformation.ROT_90_Y_POS);
+        }
+
+        return shape;
     }
 }

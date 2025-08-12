@@ -9,7 +9,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 import java.util.HashMap;
 import java.util.List;

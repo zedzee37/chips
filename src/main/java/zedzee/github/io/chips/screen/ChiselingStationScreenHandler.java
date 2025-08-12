@@ -15,8 +15,9 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
-import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.util.ChipsBlockHelpers;
 import zedzee.github.io.chips.item.ChipsItems;
+import zedzee.github.io.chips.util.ChipsItemHelpers;
 
 public class ChiselingStationScreenHandler extends ScreenHandler implements ScreenHandlerListener {
     public static final ScreenHandlerType<ChiselingStationScreenHandler> CHISELING_STATION = register(
@@ -48,9 +49,9 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
         this.context = context;
         this.playerInventory = playerInventory;
         this.craftingInventory = new SimpleInventory(3);
-        this.patternSlot = new PatternSlot(craftingInventory, PATTERN_SLOT_IDX, 0, 0);
-        this.blockSlot = new ChipsBlockSlot(craftingInventory, BLOCK_SLOT_IDX, 20,0);
-        this.resultSlot = new ResultSlot(craftingInventory, 2, 40, 0);
+        this.patternSlot = new PatternSlot(craftingInventory, PATTERN_SLOT_IDX, 27, 47);
+        this.blockSlot = new ChipsBlockSlot(craftingInventory, BLOCK_SLOT_IDX, 76,47);
+        this.resultSlot = new ResultSlot(craftingInventory, 2, 134, 47);
         this.addSlots(playerInventory);
         this.addListener(this);
     }
@@ -115,12 +116,12 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
 
     private void convertToPattern() {
         if (!this.patternSlot.getStack().isOf(Items.PAPER) ||
-                !ChipsBlockHelpers.stackHasChips(this.blockSlot.getStack())) {
+                !ChipsItemHelpers.stackHasChips(this.blockSlot.getStack())) {
             return;
         }
 
-        int chips = ChipsBlockHelpers.getChipsFromStack(this.blockSlot.getStack());
-        this.resultSlot.setStack(ChipsBlockHelpers.getStackWithChips(ChipsItems.CHIPS_PATTERN_ITEM.getDefaultStack(), chips));
+        int chips = ChipsItemHelpers.getChipsFromStack(this.blockSlot.getStack());
+        this.resultSlot.setStack(ChipsItemHelpers.getStackWithChipsCopy(ChipsItems.CHIPS_PATTERN_ITEM.getDefaultStack(), chips));
     }
 
     public void chiselItems() {
@@ -129,9 +130,9 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
         }
 
         ItemStack pattern = this.patternSlot.getStack();
-        int chips = ChipsBlockHelpers.getChipsFromStack(pattern);
+        int chips = ChipsItemHelpers.getChipsFromStack(pattern);
 
-        this.resultSlot.setStack(ChipsBlockHelpers.getStackWithChips(this.blockSlot.getStack(), chips));
+        this.resultSlot.setStack(ChipsItemHelpers.getStackWithChipsCopy(this.blockSlot.getStack(), chips));
     }
 
     @Override
@@ -173,7 +174,7 @@ public class ChiselingStationScreenHandler extends ScreenHandler implements Scre
 
         @Override
         public boolean canInsert(ItemStack stack) {
-            return stack.getItem() instanceof BlockItem;
+            return stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock().getDefaultState().contains(ChipsBlockHelpers.CHIPS);
         }
     }
 

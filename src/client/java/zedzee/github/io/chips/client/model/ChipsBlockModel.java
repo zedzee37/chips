@@ -15,7 +15,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +33,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
             return;
         }
 
-        int shapeIdx = state.get(ChipsBlockHelpers.CHIPS);
-        VoxelShape shape = ChipsBlockHelpers.SHAPES[shapeIdx];
+        VoxelShape shape = ChipsBlockHelpers.getOutlineShape(state);
         shape.forEachBox((fromX, fromY, fromZ, toX, toY, toZ) -> {
             addQuads(emitter, (float) fromX, (float) fromY, (float) fromZ, (float) toX, (float) toY, (float) toZ);
         });

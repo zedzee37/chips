@@ -15,10 +15,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
-import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 public class ChiselItem extends Item {
-    private static final int MAX_USE_TIME = 200;
+    private static final int ANIMATION_TIME = 20;
     private final int useTime;
 
     public ChiselItem(Settings settings, int useTime) {

@@ -8,7 +8,7 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.block.ChipsBlockHelpers;
+import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 import java.util.Map;
 import java.util.function.Function;
