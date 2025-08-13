@@ -16,6 +16,10 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
                 ? original
                 : new ChipsBlockModel()
                 );
+
+        context.modifyItemModelBeforeBake().register((original, ctx) ->
+                new ChipsItemModel(original)
+        );
     }
 
     private boolean shouldRenderChipsModel(BlockState state) {

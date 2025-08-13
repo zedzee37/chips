@@ -4,3 +4,5 @@ accessible method net/minecraft/block/Block setDefaultState (Lnet/minecraft/bloc
 accessible method net/minecraft/block/AbstractBlock getOutlineShape (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;
 
 accessible class net/minecraft/client/render/model/ModelTextures$SpriteEntry
+
+accessible field net/minecraft/client/render/item/model/BasicItemModel settings Lnet/minecraft/client/render/model/ModelSettings;
