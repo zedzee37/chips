@@ -2,7 +2,12 @@ package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.PlayerPickItemEvents;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
+import net.minecraft.block.BlockState;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.util.ChipsBlockHelpers;
@@ -27,6 +32,18 @@ public class Chips implements ModInitializer {
                     )
                     : null
         );
+
+        RegistryEntryAddedCallback.event(Registries.BLOCK).register((rawID, listener, block) -> {
+            BlockState state = block.getDefaultState();
+
+            if (state.contains(ChipsBlockHelpers.CHIPS)) {
+                block.setDefaultState(state.with(ChipsBlockHelpers.CHIPS, 255));
+            }
+
+            if (state.contains(ChipsBlockHelpers.FACING)) {
+                block.setDefaultState(state.with(ChipsBlockHelpers.FACING, Direction.NORTH));
+            }
+        });
     }
 
     public static Identifier identifier(String path) {

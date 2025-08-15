@@ -65,7 +65,7 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
                        int seed) {
         if (
                 !(stack.getItem() instanceof BlockItem blockItem) ||
-                        !ChipsItemHelpers.stackHasChips(stack) ||
+                        !shouldRenderChips(stack) ||
                         !(this.originalModel instanceof BasicItemModel basicItemModel)) {
             this.originalModel.update(state, stack, resolver, displayContext, world, user, seed);
             return;
@@ -76,6 +76,11 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         }
 
         renderModel(state, basicItemModel, stack, displayContext);
+    }
+
+    private boolean shouldRenderChips(ItemStack stack) {
+        int chips = ChipsItemHelpers.getChipsFromStack(stack);
+        return ChipsItemHelpers.stackHasChips(stack) && chips != 255 && chips != 0;
     }
 
     private void renderModel(ItemRenderState state,

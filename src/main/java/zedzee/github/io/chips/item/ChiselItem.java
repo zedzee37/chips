@@ -66,6 +66,7 @@ public class ChiselItem extends Item {
         }
 
         int corner = -1;
+        int chipsValue = getChips(world, state, pos);
 
         // adjust the pos to local coords
         Vec3d adjustedPos = blockHitResult.getPos().subtract(pos.getX(), pos.getY(), pos.getZ());
@@ -85,7 +86,6 @@ public class ChiselItem extends Item {
 
         corner = 1 << corner;
 
-        int chipsValue = state.get(ChipsBlockHelpers.CHIPS);
         int afterChisel = chipsValue & ~(corner);
 
         if (afterChisel == 0) {
@@ -100,5 +100,15 @@ public class ChiselItem extends Item {
 
     private static boolean canChisel(BlockState state, float hardness) {
         return state.contains(ChipsBlockHelpers.CHIPS) && hardness != -1;
+    }
+
+    // has some error correction for 0 chips value
+    private int getChips(World world, BlockState state, BlockPos pos) {
+        int chips = state.get(ChipsBlockHelpers.CHIPS);
+        if (chips == 0) {
+            world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, 255));
+            chips = 255;
+        }
+        return chips;
     }
 }

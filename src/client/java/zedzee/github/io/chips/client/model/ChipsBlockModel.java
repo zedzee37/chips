@@ -1,7 +1,6 @@
 package zedzee.github.io.chips.client.model;
 
 import com.google.common.base.Suppliers;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
