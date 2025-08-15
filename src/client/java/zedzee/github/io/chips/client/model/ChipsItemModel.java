@@ -4,7 +4,6 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.item.ItemRenderState;
@@ -22,19 +21,18 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.util.ChipsBlockHelpers;
 import zedzee.github.io.chips.util.ChipsItemHelpers;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
 
+// this code is a travesty, beware
 public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
     private final ItemModel.Unbaked delegate;
     private ItemModel originalModel;
     private ChipsModel model;
     private Supplier<Baker> bakerSupplier;
-    private Supplier<ChipsSpriteInfo> spriteSupplier;
 
     public ChipsItemModel(ItemModel.Unbaked delegate) {
         this.delegate = delegate;
@@ -42,7 +40,7 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
 
     @Override
     public MapCodec<? extends ItemModel.Unbaked> getCodec() {
-        return null;
+        return delegate.getCodec();
     }
 
     @Override
@@ -74,23 +72,21 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         }
 
         if (model == null) {
-            model = new ChipsModel(
-                    Suppliers.memoize(() -> {
-                        Block block = blockItem.getBlock();
-                        Identifier identifier = Registries.BLOCK.getId(block);
-                        identifier = Identifier.of(identifier.getNamespace(), "block/" + identifier.getPath());
-
-                        BakedSimpleModel model = bakerSupplier.get().getModel(identifier);
-                        Sprite particleSprite = model.getParticleTexture(model.getTextures(), bakerSupplier.get());
-                        HashMap<Direction, Sprite> spriteMap = new HashMap<>();
-                        return new ChipsSpriteInfo(particleSprite, spriteMap);
-                    }
-            ));
+            model = createChipModel(blockItem.getBlock());
         }
 
+        renderModel(state, basicItemModel, stack, displayContext);
+    }
+
+    private void renderModel(ItemRenderState state,
+                             BasicItemModel basicItemModel,
+                             ItemStack stack,
+                             ItemDisplayContext displayContext) {
         state.addModelKey(this);
 
         int chips = ChipsItemHelpers.getChipsFromStack(stack);
+
+        state.addModelKey(chips);
 
         ItemRenderState.LayerRenderState layer = state.newLayer();
         QuadEmitter emitter = layer.emitter();
@@ -99,5 +95,20 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         basicItemModel.settings.addSettings(layer, displayContext);
 
         model.emitQuads(emitter, ChipsBlockHelpers.SHAPES[chips]);
+        state.markAnimated();
+    }
+
+    private ChipsModel createChipModel(Block block) {
+        return new ChipsModel(
+                Suppliers.memoize(() -> {
+                            Identifier identifier = Registries.BLOCK.getId(block);
+                            identifier = Identifier.of(identifier.getNamespace(), "block/" + identifier.getPath());
+
+                            BakedSimpleModel model = bakerSupplier.get().getModel(identifier);
+                            Sprite particleSprite = model.getParticleTexture(model.getTextures(), bakerSupplier.get());
+                            HashMap<Direction, Sprite> spriteMap = new HashMap<>();
+                            return new ChipsSpriteInfo(particleSprite, spriteMap);
+                        }
+                ));
     }
 }
