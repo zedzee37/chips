@@ -5,10 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "DefaultStackMixin",
-    "ChipsPropertyMixin",
     "DirectionalPlacementMixin",
     "ModifyBlockDropsMixin",
-    "OutlineShapeMixin"
+    "OutlineShapeMixin",
+    "ChipsPropertyMixin"
   ],
   "injectors": {
     "defaultRequire": 1
