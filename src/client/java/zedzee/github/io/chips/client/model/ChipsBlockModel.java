@@ -4,6 +4,8 @@ import com.google.common.base.Suppliers;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.registry.Registries;
@@ -14,7 +16,9 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.util.ChipsBlockHelpers;
+import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,11 +32,16 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
     @Override
     public void emitQuads(QuadEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Random random, Predicate<@Nullable Direction> cullTest) {
-        if (!state.contains(ChipsBlockHelpers.CHIPS)) {
+        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             return;
         }
 
-        VoxelShape shape = ChipsBlockHelpers.getOutlineShape(state);
+        BlockEntity blockEntity = blockView.getBlockEntity(pos);
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return;
+        }
+
+        VoxelShape shape = ChipsBlock.getShape(chipsBlockEntity.getChips());
         model.emitQuads(emitter, shape);
     }
 
@@ -53,7 +62,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 //        ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
 //
         spriteSupplier = Suppliers.memoize(() -> {
-            Block block = state.getBlock();
+            Block block = Blocks.DIAMOND_BLOCK;
             Identifier identifier = Registries.BLOCK.getId(block);
             identifier = Identifier.of(identifier.getNamespace(), "block/" + identifier.getPath());
 

@@ -30,7 +30,7 @@ public class ChipsBlocks {
     public static final Block CHIPS_BLOCK = register(
             "chips",
             ChipsBlock::new,
-            AbstractBlock.Settings.create()
+            AbstractBlock.Settings.create().nonOpaque()
     );
 
     private static Block registerWithItem(String path,
@@ -46,6 +46,8 @@ public class ChipsBlocks {
                                           AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);
+
+        settings.registryKey(registryKey);
 
         return Blocks.register(registryKey, factory, settings);
     }

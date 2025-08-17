@@ -16,7 +16,7 @@ import java.util.Optional;
 public record BlockComponent(Block block) {
     public static Codec<BlockComponent> CODEC = RecordCodecBuilder.create(builder ->
             builder.group(
-                    Block.CODEC.codec().fieldOf("block").forGetter(BlockComponent::block)
+                    Registries.BLOCK.getCodec().fieldOf("block").forGetter(BlockComponent::block)
             ).apply(builder, BlockComponent::new));
     public static PacketCodec<ByteBuf, BlockComponent> PACKET_CODEC = PacketCodec.of(
             BlockComponent::encode,

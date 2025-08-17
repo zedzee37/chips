@@ -5,17 +5,20 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public class ChipsBlock extends BlockWithEntity {
@@ -54,30 +57,34 @@ public class ChipsBlock extends BlockWithEntity {
     }
 
     public boolean isFull(BlockPos pos, BlockView world) {
-        return getChips(pos, world).orElse(DEFAULT_CHIPS_VALUE) == 255;
-    }
-
-    public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
-        int i = getChips(pos, view).orElse(DEFAULT_CHIPS_VALUE);
-        double d = Double.MAX_VALUE;
-        int j = -1;
-
-        for (int k = 0; k < CORNER_SHAPES.length; k++) {
-            if (hasCorner(i, k)) {
-                VoxelShape voxelShape = CORNER_SHAPES[k];
-                Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
-                if (optional.isPresent()) {
-                    double e = (optional.get()).squaredDistanceTo(hitPos);
-                    if (e < d) {
-                        d = e;
-                        j = k;
-                    }
-                }
-            }
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
+            return chipsBlockEntity.getChips() == 255;
         }
-
-        return j;
+        return true;
     }
+
+//    public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
+//        int i = getChips(pos, view).orElse(DEFAULT_CHIPS_VALUE);
+//        double d = Double.MAX_VALUE;
+//        int j = -1;
+//
+//        for (int k = 0; k < CORNER_SHAPES.length; k++) {
+//            if (hasCorner(i, k)) {
+//                VoxelShape voxelShape = CORNER_SHAPES[k];
+//                Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
+//                if (optional.isPresent()) {
+//                    double e = (optional.get()).squaredDistanceTo(hitPos);
+//                    if (e < d) {
+//                        d = e;
+//                        j = k;
+//                    }
+//                }
+//            }
+//        }
+//
+//        return j;
+//    }
 
     public ChipsBlock(Settings settings) {
         super(settings);
@@ -93,29 +100,44 @@ public class ChipsBlock extends BlockWithEntity {
         return new ChipsBlockEntity(pos, state);
     }
 
-    public static Optional<Integer> getChips(BlockPos pos, BlockView world) {
-        return
-                getBlockEntity(pos, world)
-                        .map(ChipsBlockEntity::getChips);
-    }
-
-    public static void setChips(BlockPos pos, BlockView world, int chips) {
-        getBlockEntity(pos, world)
-                .ifPresent(entity -> entity.setChips(chips));
-    }
-
-    private static Optional<ChipsBlockEntity> getBlockEntity(BlockPos pos, BlockView world) {
-        BlockEntity entity = world.getBlockEntity(pos);
-        if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(chipsBlockEntity);
-    }
+//    public static Optional<Integer> getChips(BlockPos pos, BlockView world) {
+//        return
+//                findBlockEntity(pos, world)
+//                        .map(ChipsBlockEntity::getChips);
+//    }
+//
+//    public static void setChips(BlockPos pos, BlockView world, int chips) {
+//        findBlockEntity(pos, world)
+//                .ifPresent(entity -> entity.setChips(chips));
+//
+//    }
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        int chips = getChips(pos, world).orElse(DEFAULT_CHIPS_VALUE);
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
+            return getShape(chipsBlockEntity.getChips());
+        }
+
+        return VoxelShapes.empty();
+    }
+//
+//    public static Optional<VoxelShape> getOutlineShape(BlockView world, BlockPos pos) {
+//        return getChips(pos, world)
+//                .map(ChipsBlock::getShape);
+//    }
+
+    public static VoxelShape getShape(int chips) {
         return SHAPES[chips];
+    }
+
+    @Override
+    public boolean hasSidedTransparency(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
+        return isFull(pos, world) ? 0.2F : 1.0F;
     }
 }
