@@ -1,6 +1,8 @@
 package zedzee.github.io.chips.item;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -14,7 +16,10 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 public class ChiselItem extends Item {
@@ -45,6 +50,59 @@ public class ChiselItem extends Item {
         return ProjectileUtil.getCollision(user, EntityPredicates.CAN_HIT, user.getBlockInteractionRange());
     }
 
+//    @Override
+//    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+//        if (remainingUseTicks <= 0 || !(user instanceof PlayerEntity player)) {
+//            user.stopUsingItem();
+//            return;
+//        }
+//
+//        if (!(getHitResult(player) instanceof BlockHitResult blockHitResult)) {
+//            user.stopUsingItem();
+//            return;
+//        }
+//
+//        BlockPos pos = blockHitResult.getBlockPos();
+//        BlockState state = world.getBlockState(pos);
+//
+//        if (!canChisel(state, state.getHardness(world, pos))) {
+//            user.stopUsingItem();
+//            return;
+//        }
+//
+//        int corner = -1;
+//        int chipsValue = getChips(world, state, pos);
+//
+//        // adjust the pos to local coords
+//        Vec3d adjustedPos = blockHitResult.getPos().subtract(pos.getX(), pos.getY(), pos.getZ());
+//        if (state.contains(ChipsBlockHelpers.CHIPS)) {
+//            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
+//        } else if (state.getOutlineShape(world, blockHitResult.getBlockPos()) == VoxelShapes.fullCube()) {
+//            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
+//        } else {
+//            user.stopUsingItem();
+//        }
+//
+//        // do particles here
+//
+//        if (remainingUseTicks != 1 || corner == -1) {
+//            return;
+//        }
+//
+//        corner = 1 << corner;
+//
+//        int afterChisel = chipsValue & ~(corner);
+//
+//        if (afterChisel == 0) {
+//            world.breakBlock(pos, false);
+//        } else {
+//            world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, afterChisel));
+//        }
+//
+//        stack.damage(1, player);
+//        user.stopUsingItem();
+//    }
+
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (remainingUseTicks <= 0 || !(user instanceof PlayerEntity player)) {
@@ -58,57 +116,21 @@ public class ChiselItem extends Item {
         }
 
         BlockPos pos = blockHitResult.getBlockPos();
-        BlockState state = world.getBlockState(pos);
 
-        if (!canChisel(state, state.getHardness(world, pos))) {
-            user.stopUsingItem();
+        if (!canChisel(world, pos)) {
             return;
         }
 
-        int corner = -1;
-        int chipsValue = getChips(world, state, pos);
-
-        // adjust the pos to local coords
-        Vec3d adjustedPos = blockHitResult.getPos().subtract(pos.getX(), pos.getY(), pos.getZ());
-        if (state.contains(ChipsBlockHelpers.CHIPS)) {
-            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
-        } else if (state.getOutlineShape(world, blockHitResult.getBlockPos()) == VoxelShapes.fullCube()) {
-            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
-        } else {
-            user.stopUsingItem();
-        }
-
-        // do particles here
-
-        if (remainingUseTicks != 1 || corner == -1) {
-            return;
-        }
-
-        corner = 1 << corner;
-
-        int afterChisel = chipsValue & ~(corner);
-
-        if (afterChisel == 0) {
-            world.breakBlock(pos, false);
-        } else {
-            world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, afterChisel));
-        }
-
-        stack.damage(1, player);
-        user.stopUsingItem();
+        ChipsBlockEntity entity = (ChipsBlockEntity)world.getBlockEntity(pos);
+        entity.setChips(255);
     }
 
-    private static boolean canChisel(BlockState state, float hardness) {
-        return state.contains(ChipsBlockHelpers.CHIPS) && hardness != -1;
-    }
+//    private static boolean canChisel(BlockState state, float hardness) {
+//        return state.contains(ChipsBlockHelpers.CHIPS) && hardness != -1;
+//    }
 
-    // has some error correction for 0 chips value
-    private int getChips(World world, BlockState state, BlockPos pos) {
-        int chips = state.get(ChipsBlockHelpers.CHIPS);
-        if (chips == 0) {
-            world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, 255));
-            chips = 255;
-        }
-        return chips;
+    public static boolean canChisel(BlockView world, BlockPos pos) {
+        BlockEntity entity = world.getBlockEntity(pos);
+        return entity instanceof ChipsBlockEntity;
     }
 }

@@ -41,7 +41,9 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
             return;
         }
 
-        VoxelShape shape = ChipsBlock.getShape(chipsBlockEntity.getChips());
+        ChipsBlockEntity.ChipsRenderData renderData = (ChipsBlockEntity.ChipsRenderData) chipsBlockEntity.getRenderData();
+
+        VoxelShape shape = ChipsBlock.getShape(renderData.chips());
         model.emitQuads(emitter, shape);
     }
 

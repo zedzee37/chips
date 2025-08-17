@@ -13,6 +13,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 
 import java.util.HashMap;
@@ -46,20 +48,27 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return createNbt(registryLookup);
     }
 
-//    @Override
+    @Override
+    public @Nullable Object getRenderData() {
+        return new ChipsRenderData(chips, blockMap);
+    }
+
+    //    @Override
 //    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
 //        return BlockEntityUpdateS2CPacket.create(this);
 //    }
 
     public void sync() {
-        if (world == null || world.isClient) {
+        if (world == null) {
             return;
         }
 
         world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_LISTENERS);
 
-        markDirty();
-        ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
+        if (!world.isClient) {
+            markDirty();
+            ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
+        }
     }
 
     @Override
@@ -112,4 +121,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         return Optional.of(blockIntegerMap);
     }
+
+    public record ChipsRenderData(int chips, Map<Block, Integer> blockMap) {}
 }
