@@ -27,6 +27,12 @@ public class ChipsBlocks {
             Block.Settings.create().mapColor(MapColor.OAK_TAN).instrument(NoteBlockInstrument.BASS).strength(2.5F).sounds(BlockSoundGroup.WOOD).burnable()
     );
 
+    public static final Block CHIPS_BLOCK = register(
+            "chips",
+            ChipsBlock::new,
+            AbstractBlock.Settings.create()
+    );
+
     private static Block register(String path, Function<AbstractBlock.Settings, Block> factory, AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);
