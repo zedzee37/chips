@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.Map;
 
+@Deprecated
 public class ChipsItemHelpers {
     public static boolean stackHasChips(ItemStack stack) {
         if (!stack.contains(DataComponentTypes.BLOCK_STATE)) {

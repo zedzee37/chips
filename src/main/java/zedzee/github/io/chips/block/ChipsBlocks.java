@@ -47,9 +47,7 @@ public class ChipsBlocks {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);
 
-        final Block block = Blocks.register(registryKey, factory, settings);
-        Items.register(block);
-        return block;
+        return Blocks.register(registryKey, factory, settings);
     }
 
     public static void init() {

@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import zedzee.github.io.chips.block.ChipsBlock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity {
-    private int chips = 255;
-    private Map<Block, Integer> blockMap = Map.of(Blocks.AIR, 255);
+    private int chips = ChipsBlock.DEFAULT_CHIPS_VALUE;
+    private Map<Block, Integer> blockMap = Map.of(Blocks.AIR, ChipsBlock.DEFAULT_CHIPS_VALUE);
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
@@ -52,7 +53,7 @@ public class ChipsBlockEntity extends BlockEntity {
 
     @Override
     protected void readData(ReadView view) {
-        this.chips = view.read("chips", Codec.INT).orElse(255);
+        this.chips = view.read("chips", Codec.INT).orElse(ChipsBlock.DEFAULT_CHIPS_VALUE);
         this.blockMap = new HashMap<>();
 
         ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Block.CODEC.codec());

@@ -13,6 +13,7 @@ import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.Optional;
 
+@Deprecated
 public class ChipsBlockHelpers {
     public static final IntProperty CHIPS = IntProperty.of("chips", 0, 255);
     public static final EnumProperty<Direction> FACING = HorizontalFacingBlock.FACING;
