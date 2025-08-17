@@ -21,7 +21,7 @@ public class ChipsBlocks {
 //            Block.Settings.create().nonOpaque()
 //    );
 
-    public static final Block CHISELING_STATION = register(
+    public static final Block CHISELING_STATION = registerWithItem(
             "chiseling_station",
             ChiselingStation::new,
             Block.Settings.create().mapColor(MapColor.OAK_TAN).instrument(NoteBlockInstrument.BASS).strength(2.5F).sounds(BlockSoundGroup.WOOD).burnable()
@@ -33,7 +33,17 @@ public class ChipsBlocks {
             AbstractBlock.Settings.create()
     );
 
-    private static Block register(String path, Function<AbstractBlock.Settings, Block> factory, AbstractBlock.Settings settings) {
+    private static Block registerWithItem(String path,
+                                          Function<AbstractBlock.Settings, Block> factory,
+                                          AbstractBlock.Settings settings) {
+        Block block = register(path, factory, settings);
+        Items.register(block);
+        return block;
+    }
+
+    private static Block register(String path,
+                                          Function<AbstractBlock.Settings, Block> factory,
+                                          AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);
 

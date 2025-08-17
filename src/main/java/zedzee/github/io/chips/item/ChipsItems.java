@@ -42,6 +42,12 @@ public class ChipsItems {
                     )))
     );
 
+    public static final Item CHIPS_BLOCK_ITEM = register(
+            "chips_block",
+            ChipsBlockItem::new,
+            new Item.Settings()
+    );
+
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
         final RegistryKey<Item> registryKey = RegistryKey.of(RegistryKeys.ITEM, Chips.identifier(path));
         return Items.register(registryKey, factory, settings);
