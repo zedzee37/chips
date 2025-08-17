@@ -10,6 +10,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.util.ChipsBlockHelpers;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsItems;
@@ -23,27 +26,17 @@ public class Chips implements ModInitializer {
     @Override
     public void onInitialize() {
         ChipsBlocks.init();
+        ChipsBlockEntities.init();
+        ChipsComponents.init();
         ChipsItems.init();
 
-        PlayerPickItemEvents.BLOCK.register((player, pos, state, requestIncludeData) ->
-            state.contains(ChipsBlockHelpers.CHIPS) ?
-                    ChipsItemHelpers.getStackWithChipsCopy(
-                            state.getBlock().asItem().getDefaultStack(), state.get(ChipsBlockHelpers.CHIPS)
-                    )
-                    : null
-        );
-
-        RegistryEntryAddedCallback.event(Registries.BLOCK).register((rawID, listener, block) -> {
-            BlockState state = block.getDefaultState();
-
-            if (state.contains(ChipsBlockHelpers.CHIPS)) {
-                block.setDefaultState(state.with(ChipsBlockHelpers.CHIPS, 255));
-            }
-
-            if (state.contains(ChipsBlockHelpers.FACING)) {
-                block.setDefaultState(state.with(ChipsBlockHelpers.FACING, Direction.NORTH));
-            }
-        });
+//        PlayerPickItemEvents.BLOCK.register((player, pos, state, requestIncludeData) ->
+//            state.contains(ChipsBlockHelpers.CHIPS) ?
+//                    ChipsItemHelpers.getStackWithChipsCopy(
+//                            state.getBlock().asItem().getDefaultStack(), state.get(ChipsBlockHelpers.CHIPS)
+//                    )
+//                    : null
+//        );
     }
 
     public static Identifier identifier(String path) {

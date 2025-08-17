@@ -9,7 +9,7 @@ public class ChipsClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ModelLoadingPlugin.register(new ChipsModelLoadingPlugin());
+//        ModelLoadingPlugin.register(new ChipsModelLoadingPlugin());
         ChiselingStationScreen.register();
     }
 }
