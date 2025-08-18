@@ -54,6 +54,15 @@ public class ChipsItems {
                             new BlockComponent(Blocks.DIAMOND_BLOCK))
     );
 
+    public static final Item TEST_BLOCK_ITEM = register(
+            "test_block",
+            ChipsBlockItem::new,
+            new Item.Settings()
+                    .component(
+                            ChipsComponents.BLOCK_COMPONENT_COMPONENT,
+                            new BlockComponent(Blocks.COBBLESTONE))
+    );
+
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
         final RegistryKey<Item> registryKey = RegistryKey.of(RegistryKeys.ITEM, Chips.identifier(path));
         return Items.register(registryKey, factory, settings);

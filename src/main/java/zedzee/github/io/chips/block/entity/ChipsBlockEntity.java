@@ -23,11 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
-    private Map<Block, Integer> blockMap = new HashMap<>() {{
-        put(Blocks.DIAMOND_BLOCK, 14);
-        put(Blocks.EMERALD_BLOCK, 1);
-        put(Blocks.DIRT, 32);
-    }};
+    private Map<Block, Integer> blockMap = new HashMap<>();
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);

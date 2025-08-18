@@ -4,16 +4,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.BlockComponent;
@@ -53,7 +54,7 @@ public class ChipsBlockItem extends BlockItem {
 
         BlockState state = world.getBlockState(pos);
 
-        Chips.LOGGER.info(state.toString());
+        ActionResult result;
 
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             BlockEntity entity = world.getBlockEntity(pos);
@@ -69,58 +70,71 @@ public class ChipsBlockItem extends BlockItem {
                 }
             }
 
-            Chips.LOGGER.info("gug");
             chipsBlockEntity.addChips(blockType, corner);
+            result = ActionResult.SUCCESS;
+        } else {
+            result = tryPlaceAt(context);
         }
 
-        return ActionResult.SUCCESS;
-//
-//
-//        World world = context.getWorld();
-//        BlockPos pos = context.getBlockPos();
-//        Vec3d hitPos = context.getHitPos();
-//
-//        if (world.getBlockState(pos).isOf(ChipsBlocks.CHIPS_BLOCK)) {
-//            BlockEntity blockEntity = world.getBlockEntity(pos);
-//
-//            if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-//                return ActionResult.FAIL;
-//            }
-//
-//            Vec3d relativeHitPos = hitPos.subtract(pos.getX(), pos.getY(), pos.getZ());
-//            int corner = getTargetCorner(relativeHitPos);
-//
-//            if (chipsBlockEntity.hasCorner(corner)) {
-//                return ActionResult.FAIL; // Corner already occupied
-//            }
-//
-//            chipsBlockEntity.addChips(blockType, corner);
-//            return ActionResult.SUCCESS;
-//        }
+        if (result == ActionResult.SUCCESS) {
+            playPlaceSound(world, context.getPlayer(), blockType, context.getBlockPos());
+            stack.decrementUnlessCreative(1, context.getPlayer());
+        }
 
-//        boolean shouldClear = false;
-//        if (!world.getBlockState(asBlockPos).isOf(ChipsBlocks.CHIPS_BLOCK)) {
-//            world.setBlockState(pos, getBlock().getDefaultState());
-//            shouldClear = true;
-//        }
-//
-//        ChipsBlockEntity chipsBlockEntity = (ChipsBlockEntity)world.getBlockEntity(asBlockPos);
-//        if (shouldClear) {
-//            chipsBlockEntity.clear();
-//        }
-//
-//        Block blockType = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
-//
-//        // block coords
-//
-//        chipsBlockEntity.setChips(blockType, corner);
-//
-//        return ActionResult.SUCCESS;
+        return result;
     }
 
-//    public ActionResult tryPlaceAt(ItemPlacementContext context) {
-//
-//    }
+    public ActionResult tryPlaceAt(ItemPlacementContext context) {
+        World world = context.getWorld();
+        BlockPos pos = context.getBlockPos();
+        Vec3d hitPos = context.getHitPos();
+        Vec3d adjustedHitPos = hitPos.subtract(Vec3d.of(pos));
+
+        int corner = getTargetCorner(adjustedHitPos);
+
+        BlockState state = world.getBlockState(pos);
+        if (!state.isAir() && !state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+            return ActionResult.FAIL;
+        }
+
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity == null) {
+            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+            blockEntity = world.getBlockEntity(pos);
+        }
+
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return ActionResult.FAIL;
+        }
+
+        Block blockType = context.getStack().get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
+
+        if (chipsBlockEntity.hasCorner(corner)) {
+            Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(0.1f);
+            adjustedHitPos = adjustedHitPos.add(direction);
+            corner = getTargetCorner(adjustedHitPos);
+
+            if (chipsBlockEntity.hasCorner(corner)) {
+                return ActionResult.FAIL;
+            }
+        }
+
+        chipsBlockEntity.addChips(blockType, corner);
+        return ActionResult.SUCCESS;
+    }
+
+    private void playPlaceSound(World world, PlayerEntity playerEntity, Block blockType, BlockPos blockPos) {
+        BlockState state = blockType.getDefaultState();
+        BlockSoundGroup blockSoundGroup = state.getSoundGroup();
+        world.playSound(
+                playerEntity,
+                blockPos,
+                this.getPlaceSound(state),
+                SoundCategory.BLOCKS,
+                (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                blockSoundGroup.getPitch() * 0.8F
+        );
+    }
 
     public int getTargetCorner(Vec3d relHitPos) {
         int currentCorner = 255;
