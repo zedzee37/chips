@@ -3,15 +3,24 @@ package zedzee.github.io.chips.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.Util;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+
+import java.util.Optional;
 
 public class ChipsBlock extends BlockWithEntity {
     public static final int DEFAULT_CHIPS_VALUE = 1;
@@ -56,27 +65,32 @@ public class ChipsBlock extends BlockWithEntity {
         return true;
     }
 
-//    public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
-//        int i = getChips(pos, view).orElse(DEFAULT_CHIPS_VALUE);
-//        double d = Double.MAX_VALUE;
-//        int j = -1;
-//
-//        for (int k = 0; k < CORNER_SHAPES.length; k++) {
-//            if (hasCorner(i, k)) {
-//                VoxelShape voxelShape = CORNER_SHAPES[k];
-//                Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
-//                if (optional.isPresent()) {
-//                    double e = (optional.get()).squaredDistanceTo(hitPos);
-//                    if (e < d) {
-//                        d = e;
-//                        j = k;
-//                    }
-//                }
-//            }
-//        }
-//
-//        return j;
-//    }
+    public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
+        BlockEntity entity = view.getBlockEntity(pos);
+        if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return 0;
+        }
+
+        int i = chipsBlockEntity.getTotalChips();
+        double d = Double.MAX_VALUE;
+        int j = -1;
+
+        for (int k = 0; k < CORNER_SHAPES.length; k++) {
+            if (hasCorner(i, k)) {
+                VoxelShape voxelShape = CORNER_SHAPES[k];
+                Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
+                if (optional.isPresent()) {
+                    double e = (optional.get()).squaredDistanceTo(hitPos);
+                    if (e < d) {
+                        d = e;
+                        j = k;
+                    }
+                }
+            }
+        }
+
+        return j;
+    }
 
     public ChipsBlock(Settings settings) {
         super(settings);
@@ -113,7 +127,8 @@ public class ChipsBlock extends BlockWithEntity {
 
         return VoxelShapes.empty();
     }
-//
+
+    //
 //    public static Optional<VoxelShape> getOutlineShape(BlockView world, BlockPos pos) {
 //        return getChips(pos, world)
 //                .map(ChipsBlock::getShape);
