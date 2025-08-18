@@ -14,7 +14,6 @@ import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 
 import java.util.HashMap;
@@ -25,21 +24,35 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
-    private int chips = ChipsBlock.DEFAULT_CHIPS_VALUE;
-    private Map<Block, Integer> blockMap = Map.of(Blocks.DIAMOND_BLOCK, ChipsBlock.DEFAULT_CHIPS_VALUE);
+    private Map<Block, Integer> blockMap = new HashMap<>() {{
+        put(Blocks.DIAMOND_BLOCK, 255);
+    }};
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
     }
 
-    public int getChips() {
-        return chips;
+    public int getTotalChips() {
+        return blockMap.values().stream().reduce((a, b) -> a | b).orElse(255);
     }
 
-    public void setChips(int chips) {
-        this.chips = chips;
+    public int getChips(Block block) {
+        return this.blockMap.get(block);
+    }
+
+    public void setChips(Block block, int chips) {
+        this.blockMap.put(block, chips);
         markDirty();
         sync();
+    }
+
+    public void addChips(Block block, int chips) {
+        int currentChips = 0;
+        if (blockMap.containsKey(block)) {
+            currentChips = blockMap.get(block);
+        }
+
+        blockMap.put(block, currentChips | chips);
     }
 
     @Override
@@ -48,10 +61,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return createNbt(registryLookup);
     }
 
-    @Override
-    public @Nullable Object getRenderData() {
-        return new ChipsRenderData(chips, blockMap);
-    }
+//    @Override
+//    public @Nullable Object getRenderData() {
+//        return blockMap;
+//    }
 
     //    @Override
 //    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
@@ -73,8 +86,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     @Override
     protected void writeData(WriteView view) {
-        view.put("chips", Codec.INT, chips);
-
         WriteView.ListAppender<Block> blockListAppender = view.getListAppender("blocks", Registries.BLOCK.getCodec());
         WriteView.ListAppender<Integer> mappedChipsListAppender = view.getListAppender(
                 "mappedChips", Codec.INT
@@ -90,7 +101,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     @Override
     protected void readData(ReadView view) {
-        this.chips = view.read("chips", Codec.INT).orElse(ChipsBlock.DEFAULT_CHIPS_VALUE);
         this.blockMap = new HashMap<>();
 
         ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Registries.BLOCK.getCodec());
@@ -98,7 +108,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                 "mappedChips", Codec.INT
         );
 
-        this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(Map.of());
+        this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(new HashMap<>());
         sync();
         super.readData(view);
     }
@@ -119,8 +129,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                         mappedChips::get
                 ));
 
-        return Optional.of(blockIntegerMap);
+        return Optional.of(new HashMap<>(blockIntegerMap));
     }
-
-    public record ChipsRenderData(int chips, Map<Block, Integer> blockMap) {}
 }

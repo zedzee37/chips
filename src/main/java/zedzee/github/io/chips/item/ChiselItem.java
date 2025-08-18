@@ -2,6 +2,7 @@ package zedzee.github.io.chips.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -122,7 +123,7 @@ public class ChiselItem extends Item {
         }
 
         ChipsBlockEntity entity = (ChipsBlockEntity)world.getBlockEntity(pos);
-        entity.setChips(255);
+        entity.setChips(Blocks.DIAMOND_BLOCK, 255);
     }
 
 //    private static boolean canChisel(BlockState state, float hardness) {

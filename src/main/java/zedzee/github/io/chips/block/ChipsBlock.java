@@ -5,21 +5,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
-
-import java.util.Optional;
 
 public class ChipsBlock extends BlockWithEntity {
     public static final int DEFAULT_CHIPS_VALUE = 1;
@@ -59,7 +51,7 @@ public class ChipsBlock extends BlockWithEntity {
     public boolean isFull(BlockPos pos, BlockView world) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-            return chipsBlockEntity.getChips() == 255;
+            return chipsBlockEntity.getTotalChips() == 255;
         }
         return true;
     }
@@ -116,7 +108,7 @@ public class ChipsBlock extends BlockWithEntity {
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-            return getShape(chipsBlockEntity.getChips());
+            return getShape(chipsBlockEntity.getTotalChips());
         }
 
         return VoxelShapes.empty();

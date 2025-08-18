@@ -22,6 +22,7 @@ import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -41,9 +42,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
             return;
         }
 
-        ChipsBlockEntity.ChipsRenderData renderData = (ChipsBlockEntity.ChipsRenderData) chipsBlockEntity.getRenderData();
-
-        VoxelShape shape = ChipsBlock.getShape(renderData.chips());
+        VoxelShape shape = ChipsBlock.getShape(chipsBlockEntity.getTotalChips());
         model.emitQuads(emitter, shape);
     }
 
