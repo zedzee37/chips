@@ -34,7 +34,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public int getTotalChips() {
-        return blockMap.values().stream().reduce((a, b) -> a | b).orElse(255);
+        int total = 0;
+        for (int value : blockMap.values()) {
+            total |= value;
+        }
+        return total;
     }
 
     public int getChips(Block block) {
@@ -51,6 +55,16 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         sync();
     }
 
+    public void clear() {
+        this.blockMap.clear();
+        markDirty();
+        sync();
+    }
+
+    public boolean hasCorner(int corner) {
+        return (getTotalChips() & corner) != 0;
+    }
+
     public void addChips(Block block, int chips) {
         int currentChips = 0;
         if (blockMap.containsKey(block)) {
@@ -58,6 +72,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         }
 
         blockMap.put(block, currentChips | chips);
+        setChips(block, currentChips | chips);
     }
 
     @Override

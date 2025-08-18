@@ -1,5 +1,6 @@
 package zedzee.github.io.chips.item;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.item.Item;
@@ -8,6 +9,8 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.component.BlockComponent;
+import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
 import java.util.Map;
@@ -46,6 +49,9 @@ public class ChipsItems {
             "chips_block",
             ChipsBlockItem::new,
             new Item.Settings()
+                    .component(
+                            ChipsComponents.BLOCK_COMPONENT_COMPONENT,
+                            new BlockComponent(Blocks.DIAMOND_BLOCK))
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
