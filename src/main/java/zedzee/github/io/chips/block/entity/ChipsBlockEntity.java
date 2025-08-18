@@ -13,19 +13,20 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.block.ChipsBlock;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     private Map<Block, Integer> blockMap = new HashMap<>() {{
-        put(Blocks.DIAMOND_BLOCK, 255);
+        put(Blocks.DIAMOND_BLOCK, 14);
+        put(Blocks.EMERALD_BLOCK, 1);
+        put(Blocks.DIRT, 32);
     }};
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
@@ -38,6 +39,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public int getChips(Block block) {
         return this.blockMap.get(block);
+    }
+
+    public void forEachKey(Consumer<Block> blockConsumer) {
+        blockMap.keySet().forEach(blockConsumer);
     }
 
     public void setChips(Block block, int chips) {
