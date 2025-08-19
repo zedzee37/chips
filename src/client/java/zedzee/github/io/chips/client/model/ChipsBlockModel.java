@@ -3,7 +3,6 @@ package zedzee.github.io.chips.client.model;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.Sprite;
@@ -19,7 +18,6 @@ import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
-import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.HashMap;
@@ -30,7 +28,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ChipsBlockModel implements BlockStateModel, BlockStateModel.UnbakedGrouped {
-    private static final Identifier TEMP_BLOCK_TEXTURE = Identifier.ofVanilla("block/spruce_planks");
     private Sprite particleSprite;
     private ChipsModel model;
 

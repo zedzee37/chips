@@ -1,8 +1,6 @@
 package zedzee.github.io.chips.item;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
@@ -11,9 +9,7 @@ import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.component.BlockComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
-import zedzee.github.io.chips.util.ChipsBlockHelpers;
 
-import java.util.Map;
 import java.util.function.Function;
 
 public class ChipsItems {
@@ -33,16 +29,6 @@ public class ChipsItems {
             new Item.Settings()
                     .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
                     .maxCount(1)
-    );
-
-    public static final Item CHIPS_PATTERN_ITEM = register(
-            "chips_pattern",
-            (ChipsPattern::new),
-            new Item.Settings()
-                    .maxCount(1)
-                    .component(DataComponentTypes.BLOCK_STATE, new BlockStateComponent(Map.ofEntries(
-                            Map.entry(ChipsBlockHelpers.CHIPS.getName(), "255")
-                    )))
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
