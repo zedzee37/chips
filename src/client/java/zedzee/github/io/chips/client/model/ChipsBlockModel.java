@@ -1,13 +1,9 @@
 package zedzee.github.io.chips.client.model;
 
-import com.google.common.base.Functions;
-import com.google.common.base.Suppliers;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.Sprite;
@@ -24,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.render.RenderData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,12 +46,12 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
             return;
         }
 
-        BlockEntity blockEntity = blockView.getBlockEntity(pos);
-        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+        Object renderData = blockView.getBlockEntityRenderData(pos);
+        if (!(renderData instanceof RenderData chipsRenderData)) {
             return;
         }
 
-        model.emitQuads(emitter, chipsBlockEntity, block -> {
+        model.emitQuads(emitter, chipsRenderData, block -> {
             int tint = ColorHelper.getArgb(255, 255, 255, 255);
 
             BlockState defaultState = block.getDefaultState();
@@ -84,7 +81,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     public BlockStateModel bake(BlockState state, Baker baker) {
 //        ErrorCollectingSpriteGetter spriteGetter = baker.getSpriteGetter();
 //
-        BiFunction<ChipsBlockEntity, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter =
+        BiFunction<RenderData, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter =
                 (blockEntity, tintGetter) -> {
             HashMap<VoxelShape, ChipsSpriteInfo> spriteInfo = new HashMap<>();
 

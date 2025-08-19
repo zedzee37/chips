@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -13,6 +12,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.render.RenderData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         this.blockMap.clear();
         markDirty();
         sync();
+    }
+
+    @Override
+    public @Nullable Object getRenderData() {
+        return new ChipsRenderData(blockMap);
     }
 
     public boolean hasCorner(int corner) {
@@ -146,5 +152,22 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                 ));
 
         return Optional.of(new HashMap<>(blockIntegerMap));
+    }
+
+    public class ChipsRenderData implements RenderData {
+        private final Map<Block, Integer> blockMap;
+
+        public ChipsRenderData(Map<Block, Integer> blockMap) {
+            this.blockMap = blockMap;
+        }
+
+        public int getChips(Block block) {
+            return blockMap.get(block);
+        }
+
+        @Override
+        public void forEachKey(Consumer<Block> consumer) {
+            blockMap.keySet().forEach(consumer);
+        }
     }
 }

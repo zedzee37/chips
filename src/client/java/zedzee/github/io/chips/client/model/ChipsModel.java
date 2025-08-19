@@ -6,15 +6,15 @@ import net.minecraft.block.Block;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
-import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.render.RenderData;
 
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public record ChipsModel(BiFunction<ChipsBlockEntity, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter) {
-    public void emitQuads(QuadEmitter emitter, ChipsBlockEntity entity, Function<Block, Integer> tintGetter) {
-        Map<VoxelShape, ChipsSpriteInfo> spriteInfo = spriteGetter.apply(entity, tintGetter);
+public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter) {
+    public void emitQuads(QuadEmitter emitter, RenderData renderData, Function<Block, Integer> tintGetter) {
+        Map<VoxelShape, ChipsSpriteInfo> spriteInfo = spriteGetter.apply(renderData, tintGetter);
 
         for (VoxelShape shape : spriteInfo.keySet()) {
             shape.forEachBox((fromX, fromY, fromZ, toX, toY, toZ) -> {
