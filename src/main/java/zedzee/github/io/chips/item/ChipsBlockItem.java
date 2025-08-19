@@ -21,6 +21,8 @@ import zedzee.github.io.chips.component.BlockComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 
 public class ChipsBlockItem extends BlockItem {
+    private final static float EPSILON = 0.01f;
+
     public ChipsBlockItem(Settings settings) {
         super(ChipsBlocks.CHIPS_BLOCK, settings);
     }
@@ -44,9 +46,9 @@ public class ChipsBlockItem extends BlockItem {
         World world = context.getWorld();
         Vec3d hitPos = context.getHitPos();
         BlockPos pos = new BlockPos(
-                (int) Math.floor(hitPos.getX()),
-                (int) Math.floor(hitPos.getY()),
-                (int) Math.floor(hitPos.getZ())
+                (int) hitPos.getX(),
+                (int) hitPos.getY(),
+                (int) hitPos.getZ()
         );
 
         Vec3d adjustedHitPos = hitPos.subtract(pos.getX(), pos.getY(), pos.getZ());
@@ -63,13 +65,19 @@ public class ChipsBlockItem extends BlockItem {
             }
 
             if (chipsBlockEntity.hasCorner(corner)) {
-                adjustedHitPos = adjustedHitPos.subtract(new Vec3d(0.1, 0.1, 0.1));
+                Chips.LOGGER.info(hitPos.toString());
+                Chips.LOGGER.info(pos.toString());
+                Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(EPSILON);
+                adjustedHitPos = adjustedHitPos.add(direction);
+
                 corner = getTargetCorner(adjustedHitPos);
+
                 if (chipsBlockEntity.hasCorner(corner)) {
                     return ActionResult.FAIL;
                 }
             }
-
+            Chips.LOGGER.info(hitPos.toString());
+            Chips.LOGGER.info(pos.toString());
             chipsBlockEntity.addChips(blockType, corner);
             result = ActionResult.SUCCESS;
         } else {
@@ -110,7 +118,7 @@ public class ChipsBlockItem extends BlockItem {
         Block blockType = context.getStack().get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
 
         if (chipsBlockEntity.hasCorner(corner)) {
-            Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(0.1f);
+            Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(EPSILON);
             adjustedHitPos = adjustedHitPos.add(direction);
             corner = getTargetCorner(adjustedHitPos);
 
@@ -175,24 +183,4 @@ public class ChipsBlockItem extends BlockItem {
 
         return currentCorner;
     }
-
-//    private Vec3d correctPos(Vec3d pos, int totalChips) {
-//        double correctedX = pos.getX();
-//        double correctedY = pos.getY();
-//        double correctedZ = pos.getZ();
-//
-//        if (correctedX == 0.5f) {
-//
-//        }
-//
-//        if (correctedZ == 0.5f) {
-//
-//        }
-//
-//        if (correctedZ == 0.5f) {
-//
-//        }
-//
-//        return new Vec3d(correctedX, correctedY, correctedZ);
-//    }
 }

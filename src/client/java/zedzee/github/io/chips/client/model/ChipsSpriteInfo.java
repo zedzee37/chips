@@ -5,5 +5,5 @@ import net.minecraft.util.math.Direction;
 
 import java.util.Map;
 
-public record ChipsSpriteInfo(Sprite particleSprite, Map<Direction, Sprite> spriteMap) {
+public record ChipsSpriteInfo(Sprite particleSprite, Map<Direction, Sprite> spriteMap, int tint) {
 }

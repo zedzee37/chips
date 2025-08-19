@@ -60,7 +60,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.COBBLESTONE))
+                            new BlockComponent(Blocks.OAK_LEAVES))
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {

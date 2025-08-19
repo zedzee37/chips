@@ -121,7 +121,6 @@ public class ChipsBlock extends BlockWithEntity {
 
         return VoxelShapes.empty();
     }
-
     //
 //    public static Optional<VoxelShape> getOutlineShape(BlockView world, BlockPos pos) {
 //        return getChips(pos, world)
@@ -134,6 +133,11 @@ public class ChipsBlock extends BlockWithEntity {
 
     @Override
     public boolean hasSidedTransparency(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected boolean isTransparent(BlockState state) {
         return true;
     }
 

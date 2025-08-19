@@ -2,24 +2,24 @@ package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.block.Block;
+import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public record ChipsModel(Function<ChipsBlockEntity, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter) {
-    public void emitQuads(QuadEmitter emitter, ChipsBlockEntity entity) {
-        Map<VoxelShape, ChipsSpriteInfo> spriteInfo = spriteGetter.apply(entity);
+public record ChipsModel(BiFunction<ChipsBlockEntity, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter) {
+    public void emitQuads(QuadEmitter emitter, ChipsBlockEntity entity, Function<Block, Integer> tintGetter) {
+        Map<VoxelShape, ChipsSpriteInfo> spriteInfo = spriteGetter.apply(entity, tintGetter);
 
         for (VoxelShape shape : spriteInfo.keySet()) {
-            Sprite sprite = spriteInfo.get(shape).particleSprite();
-
             shape.forEachBox((fromX, fromY, fromZ, toX, toY, toZ) -> {
                 addQuads(emitter,
-                        sprite,
+                        spriteInfo.get(shape),
                         (float) fromX,
                         (float) fromY,
                         (float) fromZ,
@@ -31,7 +31,7 @@ public record ChipsModel(Function<ChipsBlockEntity, Map<VoxelShape, ChipsSpriteI
     }
 
     private void addQuads(QuadEmitter emitter,
-                          Sprite sprite,
+                          ChipsSpriteInfo spriteInfo,
                           float fromX,
                           float fromY,
                           float fromZ,
@@ -40,13 +40,13 @@ public record ChipsModel(Function<ChipsBlockEntity, Map<VoxelShape, ChipsSpriteI
                           float toZ
     ) {
         for (Direction direction : Direction.values()) {
-            emitQuad(emitter, sprite, direction, fromX, fromY, fromZ, toX, toY, toZ);
+            emitQuad(emitter, spriteInfo, direction, fromX, fromY, fromZ, toX, toY, toZ);
         }
     }
 
     private void emitQuad(
             QuadEmitter emitter,
-            Sprite sprite,
+            ChipsSpriteInfo spriteInfo,
             Direction direction,
             float fromX,
             float fromY,
@@ -96,20 +96,22 @@ public record ChipsModel(Function<ChipsBlockEntity, Map<VoxelShape, ChipsSpriteI
                 break;
         }
 
-        emit(emitter, sprite, direction);
+        emit(emitter, spriteInfo, direction);
     }
 
-    private void emit(QuadEmitter emitter, Sprite sprite, Direction direction) {
+    private void emit(QuadEmitter emitter, ChipsSpriteInfo spriteInfo, Direction direction) {
 //        ChipsSpriteInfo info = spriteGetter.get();
 //        if (info.spriteMap().containsKey(direction)) {
 //            emitter.spriteBake(info.spriteMap().get(direction), MutableQuadView.BAKE_LOCK_UV);
 //        } else {
 //            emitter.spriteBake(info.particleSprite(), MutableQuadView.BAKE_LOCK_UV);
 //        }
+        emitter.renderLayer(BlockRenderLayer.TRANSLUCENT);
 
-        emitter.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
+        int tint = spriteInfo.tint();
+        emitter.spriteBake(spriteInfo.particleSprite(), MutableQuadView.BAKE_LOCK_UV);
 
-        emitter.color(-1, -1, -1, -1);
+        emitter.color(tint, tint, tint, tint);
         emitter.emit();
     }
 }
