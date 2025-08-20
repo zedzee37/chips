@@ -21,11 +21,11 @@ public class ChipsBlocks {
 //            Block.Settings.create().nonOpaque()
 //    );
 
-    public static final Block CHISELING_STATION = registerWithItem(
-            "chiseling_station",
-            ChiselingStation::new,
-            Block.Settings.create().mapColor(MapColor.OAK_TAN).instrument(NoteBlockInstrument.BASS).strength(2.5F).sounds(BlockSoundGroup.WOOD).burnable()
-    );
+//    public static final Block CHISELING_STATION = registerWithItem(
+//            "chiseling_station",
+//            ChiselingStation::new,
+//            Block.Settings.create().mapColor(MapColor.OAK_TAN).instrument(NoteBlockInstrument.BASS).strength(2.5F).sounds(BlockSoundGroup.WOOD).burnable()
+//    );
 
     public static final Block CHIPS_BLOCK = register(
             "chips",

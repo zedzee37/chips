@@ -9,6 +9,7 @@ import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.render.item.model.ItemModel;
 import net.minecraft.client.render.model.BakedSimpleModel;
 import net.minecraft.client.render.model.Baker;
+import net.minecraft.client.render.model.ModelSettings;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
@@ -31,9 +32,7 @@ import java.util.function.Consumer;
 public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
     public static MapCodec<ChipsItemModel> CODEC = MapCodec.unit(new ChipsItemModel());
     private ChipsModel model;
-
-    public ChipsItemModel() {
-    }
+    private ModelSettings settings;
 
     @Override
     public MapCodec<? extends ItemModel.Unbaked> getCodec() {
@@ -54,6 +53,11 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
 
                 Baker baker = context.blockModelBaker();
                 BakedSimpleModel model = baker.getModel(identifier);
+
+                if (settings == null) {
+                    settings = ModelSettings.resolveSettings(baker, model, model.getTextures());
+                }
+
                 Sprite particleSprite = model.getParticleTexture(model.getTextures(), baker);
                 HashMap<Direction, Sprite> spriteMap = new HashMap<>();
 
@@ -98,12 +102,16 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         model.emitQuads(emitter, renderData, blockType -> ColorHelper.getArgb(
                 255, 255, 255, 255)
         );
+
+        settings.addSettings(layer, displayContext);
+
+//        resolver.update(state, stack, displayContext, world, user, seed);
     }
 
     record ChipsItemRenderData(Block block) implements RenderData {
         @Override
         public int getChips(Block block) {
-            return 1;
+            return 32;
         }
 
         @Override
