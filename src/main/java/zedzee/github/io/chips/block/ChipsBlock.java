@@ -136,10 +136,10 @@ public class ChipsBlock extends BlockWithEntity {
         return true;
     }
 
-    @Override
-    protected boolean isTransparent(BlockState state) {
-        return true;
-    }
+//    @Override
+//    protected boolean isTransparent(BlockState state) {
+//        return true;
+//    }
 
     @Override
     public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {

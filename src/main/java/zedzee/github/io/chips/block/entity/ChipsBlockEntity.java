@@ -154,7 +154,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return Optional.of(new HashMap<>(blockIntegerMap));
     }
 
-    public class ChipsRenderData implements RenderData {
+    public static class ChipsRenderData implements RenderData {
         private final Map<Block, Integer> blockMap;
 
         public ChipsRenderData(Map<Block, Integer> blockMap) {

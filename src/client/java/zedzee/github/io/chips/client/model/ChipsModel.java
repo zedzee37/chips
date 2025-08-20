@@ -106,7 +106,7 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
 //        } else {
 //            emitter.spriteBake(info.particleSprite(), MutableQuadView.BAKE_LOCK_UV);
 //        }
-        emitter.renderLayer(BlockRenderLayer.TRANSLUCENT);
+        emitter.renderLayer(BlockRenderLayer.CUTOUT);
 
         int tint = spriteInfo.tint();
         emitter.spriteBake(spriteInfo.particleSprite(), MutableQuadView.BAKE_LOCK_UV);

@@ -37,7 +37,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.GRASS_BLOCK))
+                            new BlockComponent(Blocks.OAK_LEAVES))
     );
 
     public static final Item TEST_BLOCK_ITEM = register(
