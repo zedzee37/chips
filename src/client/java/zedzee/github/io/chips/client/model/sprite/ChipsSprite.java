@@ -1,4 +1,4 @@
-package zedzee.github.io.chips.client.model;
+package zedzee.github.io.chips.client.model.sprite;
 
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.ColorHelper;

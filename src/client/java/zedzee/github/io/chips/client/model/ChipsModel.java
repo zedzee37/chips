@@ -6,6 +6,8 @@ import net.minecraft.block.Block;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
+import zedzee.github.io.chips.client.model.sprite.ChipsSpriteInfo;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.List;

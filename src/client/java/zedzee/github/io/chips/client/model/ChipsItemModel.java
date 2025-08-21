@@ -22,6 +22,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
+import zedzee.github.io.chips.client.model.sprite.ChipsSpriteInfo;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.render.RenderData;
 
