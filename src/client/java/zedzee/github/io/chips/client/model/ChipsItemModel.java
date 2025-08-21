@@ -26,6 +26,7 @@ import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 // this code is a travesty, beware
@@ -59,11 +60,11 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
                 }
 
                 Sprite particleSprite = model.getParticleTexture(model.getTextures(), baker);
-                HashMap<Direction, Sprite> spriteMap = new HashMap<>();
+                HashMap<Direction, List<ChipsSprite>> spriteMap = new HashMap<>();
 
                 int tint = tintGetter.apply(block);
 
-                spriteInfo.put(shape, new ChipsSpriteInfo(particleSprite, spriteMap, tint));
+                spriteInfo.put(shape, new ChipsSpriteInfo(new ChipsSprite(particleSprite, tint), spriteMap));
             });
 
             return spriteInfo;

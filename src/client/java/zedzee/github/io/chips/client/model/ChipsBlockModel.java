@@ -88,12 +88,15 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
                 BakedSimpleModel model = baker.getModel(identifier);
                 Sprite partSprite = model.getParticleTexture(model.getTextures(), baker);
-                HashMap<Direction, Sprite> spriteMap = new HashMap<>();
+                HashMap<Direction, List<ChipsSprite>> spriteMap = new HashMap<>();
 
-                ChipsSpriteInfo chipsSpriteInfo = new ChipsSpriteInfo(partSprite, spriteMap, tintGetter.apply(block));
+                ChipsSpriteInfo chipsSpriteInfo = new ChipsSpriteInfo(
+                        new ChipsSprite(partSprite, tintGetter.apply(block)),
+                        spriteMap
+                );
 
                 if (particleSprite == null) {
-                    particleSprite = chipsSpriteInfo.particleSprite();
+                    particleSprite = chipsSpriteInfo.getParticleSprite().sprite();
                 }
 
                 spriteInfo.put(

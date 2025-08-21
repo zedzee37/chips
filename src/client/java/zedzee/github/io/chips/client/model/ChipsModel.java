@@ -8,6 +8,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import zedzee.github.io.chips.render.RenderData;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -40,13 +41,22 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
                           float toZ
     ) {
         for (Direction direction : Direction.values()) {
-            emitQuad(emitter, spriteInfo, direction, fromX, fromY, fromZ, toX, toY, toZ);
+            List<ChipsSprite> sprites = spriteInfo.getSprites(direction);
+
+            if (sprites.isEmpty()) {
+                emitQuad(emitter, spriteInfo.getParticleSprite(), direction, fromX, fromY, fromZ, toX, toY, toZ);
+                continue;
+            }
+
+            sprites.forEach(sprite ->
+                    emitQuad(emitter, sprite, direction, fromX, fromY, fromZ, toX, toY, toZ)
+                );
         }
     }
 
     private void emitQuad(
             QuadEmitter emitter,
-            ChipsSpriteInfo spriteInfo,
+            ChipsSprite sprite,
             Direction direction,
             float fromX,
             float fromY,
@@ -96,10 +106,10 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
                 break;
         }
 
-        emit(emitter, spriteInfo, direction);
+        emit(emitter, sprite, direction);
     }
 
-    private void emit(QuadEmitter emitter, ChipsSpriteInfo spriteInfo, Direction direction) {
+    private void emit(QuadEmitter emitter, ChipsSprite sprite, Direction direction) {
 //        ChipsSpriteInfo info = spriteGetter.get();
 //        if (info.spriteMap().containsKey(direction)) {
 //            emitter.spriteBake(info.spriteMap().get(direction), MutableQuadView.BAKE_LOCK_UV);
@@ -108,8 +118,8 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
 //        }
         emitter.renderLayer(BlockRenderLayer.CUTOUT);
 
-        int tint = spriteInfo.tint();
-        emitter.spriteBake(spriteInfo.particleSprite(), MutableQuadView.BAKE_LOCK_UV);
+        int tint = sprite.tint();
+        emitter.spriteBake(sprite.sprite(), MutableQuadView.BAKE_LOCK_UV);
 
         emitter.color(tint, tint, tint, tint);
         emitter.emit();
