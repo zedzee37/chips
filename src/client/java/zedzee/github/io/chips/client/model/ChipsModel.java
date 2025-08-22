@@ -7,7 +7,6 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.shape.VoxelShape;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
 import zedzee.github.io.chips.client.model.sprite.ChipsSpriteInfo;
 import zedzee.github.io.chips.render.RenderData;

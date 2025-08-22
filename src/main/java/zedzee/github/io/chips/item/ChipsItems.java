@@ -37,7 +37,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.GRASS_BLOCK))
+                            new BlockComponent(Blocks.NETHER_BRICKS))
     );
 
     public static final Item TEST_BLOCK_ITEM = register(
@@ -46,7 +46,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.DIAMOND_BLOCK))
+                            new BlockComponent(Blocks.EMERALD_BLOCK))
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
