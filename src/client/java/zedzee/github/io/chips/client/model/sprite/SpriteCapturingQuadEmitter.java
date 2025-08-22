@@ -15,7 +15,26 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class SpriteCapturingQuadEmitter implements QuadEmitter {
+    private final Map<Direction, List<ChipsSprite>> quadMap = new HashMap<>();
+
+    private ChipsSprite.Builder spriteBuilder = new ChipsSprite.Builder();
+    private Direction currentDirection = Direction.NORTH;
+
+    public SpriteCapturingQuadEmitter() {
+        initBuilder();
+    }
+
+    private void initBuilder() {
+        this.spriteBuilder = new ChipsSprite.Builder();
+        this.currentDirection = Direction.NORTH;
+    }
+
     @Override
     public QuadEmitter pos(int vertexIndex, float x, float y, float z) {
         return null;
@@ -118,7 +137,15 @@ public class SpriteCapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public QuadEmitter emit() {
-        return null;
+        buildSprite();
+        initBuilder();
+        return this;
+    }
+
+    private void buildSprite() {
+        quadMap.putIfAbsent(currentDirection, new ArrayList<>());
+        List<ChipsSprite> spriteList = quadMap.get(currentDirection);
+        spriteList.add(spriteBuilder.build());
     }
 
     @Override
