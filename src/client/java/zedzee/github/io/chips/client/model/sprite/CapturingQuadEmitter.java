@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,13 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SpriteCapturingQuadEmitter implements QuadEmitter {
+// this probably shouldnt be done, but i think i have to?
+public class CapturingQuadEmitter implements QuadEmitter {
     private final Map<Direction, List<ChipsSprite>> quadMap = new HashMap<>();
 
     private ChipsSprite.Builder spriteBuilder = new ChipsSprite.Builder();
     private Direction currentDirection = Direction.NORTH;
 
-    public SpriteCapturingQuadEmitter() {
+    public CapturingQuadEmitter() {
         initBuilder();
     }
 
@@ -62,7 +64,8 @@ public class SpriteCapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public QuadEmitter nominalFace(@Nullable Direction face) {
-        return null;
+        this.currentDirection = face;
+        return this;
     }
 
     @Override
@@ -286,5 +289,11 @@ public class SpriteCapturingQuadEmitter implements QuadEmitter {
     @Override
     public void toVanilla(int[] target, int startIndex) {
 
+    }
+
+    @Override
+    public QuadEmitter spriteBake(Sprite sprite, int bakeFlags) {
+        spriteBuilder.sprite(sprite);
+        return this;
     }
 }

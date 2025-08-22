@@ -3,8 +3,6 @@ package zedzee.github.io.chips.client.model;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.Sprite;
@@ -22,7 +20,7 @@ import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
 import zedzee.github.io.chips.client.model.sprite.ChipsSpriteInfo;
-import zedzee.github.io.chips.client.model.sprite.SpriteCapturingQuadEmitter;
+import zedzee.github.io.chips.client.model.sprite.CapturingQuadEmitter;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.HashMap;
@@ -36,10 +34,10 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     private Sprite particleSprite;
     private ChipsModel model;
 
-    private final SpriteCapturingQuadEmitter capturingEmitter;
+    private final CapturingQuadEmitter capturingEmitter;
 
     public ChipsBlockModel() {
-        capturingEmitter = new SpriteCapturingQuadEmitter();
+        capturingEmitter = new CapturingQuadEmitter();
     }
 
     @Override
