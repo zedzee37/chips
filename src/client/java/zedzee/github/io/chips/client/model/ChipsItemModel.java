@@ -66,7 +66,7 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
 
                 int tint = tintGetter.apply(block);
 
-                spriteInfo.put(shape, new ChipsSpriteInfo(new ChipsSprite(particleSprite, tint), spriteMap));
+                spriteInfo.put(shape, new ChipsSpriteInfo(new ChipsSprite(particleSprite), spriteMap));
             });
 
             return spriteInfo;

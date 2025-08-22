@@ -11,7 +11,7 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
 
         context.modifyBlockModelOnLoad().register((original, ctx) ->
                 ctx.state().isOf(ChipsBlocks.CHIPS_BLOCK)
-                        ? new ChipsBlockModel()
+                        ? new TestBlockModel()
                         : original
         );
 

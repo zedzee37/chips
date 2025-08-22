@@ -6,6 +6,8 @@ import net.minecraft.block.Block;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import org.joml.Vector3f;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
 import zedzee.github.io.chips.client.model.sprite.ChipsSpriteInfo;
 import zedzee.github.io.chips.render.RenderData;
@@ -16,6 +18,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<VoxelShape, ChipsSpriteInfo>> spriteGetter) {
+    private static final double Z_FIGHTING_FIX = 0.01;
+
     public void emitQuads(QuadEmitter emitter, RenderData renderData, Function<Block, Integer> tintGetter) {
         Map<VoxelShape, ChipsSpriteInfo> spriteInfo = spriteGetter.apply(renderData, tintGetter);
 
@@ -45,14 +49,32 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
         for (Direction direction : Direction.values()) {
             List<ChipsSprite> sprites = spriteInfo.getSprites(direction);
 
-            if (sprites.isEmpty()) {
-                emitQuad(emitter, spriteInfo.getParticleSprite(), direction, fromX, fromY, fromZ, toX, toY, toZ);
-                continue;
-            }
+//            if (sprites.isEmpty()) {
+//                emitQuad(emitter, spriteInfo.getParticleSprite(), direction, fromX, fromY, fromZ, toX, toY, toZ);
+//                continue;
+//            }
 
-            sprites.forEach(sprite ->
-                    emitQuad(emitter, sprite, direction, fromX, fromY, fromZ, toX, toY, toZ)
+            Vector3f dir = direction.getUnitVector().mul((float)Z_FIGHTING_FIX);
+            for (int i = 0; i < sprites.size(); i++) {
+                Vector3f offset = new Vector3f(dir).mul(i);
+                ChipsSprite sprite = sprites.get(i);
+
+                if (sprite.sprite() == null) {
+                    continue;
+                }
+
+                emitQuad(
+                        emitter,
+                        sprite,
+                        direction,
+                        fromX + offset.x,
+                        fromY + offset.y,
+                        fromZ + offset.z,
+                        toX + offset.x,
+                        toY + offset.y,
+                        toZ + offset.z
                 );
+            }
         }
     }
 
@@ -120,10 +142,9 @@ public record ChipsModel(BiFunction<RenderData, Function<Block, Integer>, Map<Vo
 //        }
         emitter.renderLayer(BlockRenderLayer.CUTOUT);
 
-        int tint = sprite.tint();
         emitter.spriteBake(sprite.sprite(), MutableQuadView.BAKE_LOCK_UV);
 
-        emitter.color(tint, tint, tint, tint);
+        emitter.color(-1, -1, -1, -1);
         emitter.emit();
     }
 }

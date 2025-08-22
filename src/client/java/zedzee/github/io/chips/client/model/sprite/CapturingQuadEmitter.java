@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
+import zedzee.github.io.chips.Chips;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 // this probably shouldnt be done, but i think i have to?
 public class CapturingQuadEmitter implements QuadEmitter {
-    private final Map<Direction, List<ChipsSprite>> quadMap = new HashMap<>();
+    private Map<Direction, List<ChipsSprite>> quadMap = new HashMap<>();
 
     private ChipsSprite.Builder spriteBuilder = new ChipsSprite.Builder();
     private Direction currentDirection = Direction.NORTH;
@@ -37,6 +38,10 @@ public class CapturingQuadEmitter implements QuadEmitter {
         this.currentDirection = Direction.NORTH;
     }
 
+    public void captureTo(Map<Direction, List<ChipsSprite>> quadMap) {
+        this.quadMap = quadMap;
+    }
+
     @Override
     public QuadEmitter pos(int vertexIndex, float x, float y, float z) {
         return null;
@@ -44,6 +49,7 @@ public class CapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public QuadEmitter color(int vertexIndex, int color) {
+        spriteBuilder.color(vertexIndex, color);
         return null;
     }
 
@@ -125,7 +131,10 @@ public class CapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public QuadEmitter fromBakedQuad(BakedQuad quad) {
-        return null;
+        spriteBuilder.sprite(quad.sprite());
+        spriteBuilder.tintIndex(quad.tintIndex());
+        currentDirection = quad.face();
+        return this;
     }
 
     @Override
@@ -146,9 +155,18 @@ public class CapturingQuadEmitter implements QuadEmitter {
     }
 
     private void buildSprite() {
-        quadMap.putIfAbsent(currentDirection, new ArrayList<>());
+        if (!spriteBuilder.canBuild()) {
+            initBuilder();
+            return;
+        }
+
+        if (!quadMap.containsKey(currentDirection)) {
+            quadMap.put(currentDirection, new ArrayList<>());
+        }
         List<ChipsSprite> spriteList = quadMap.get(currentDirection);
-        spriteList.add(spriteBuilder.build());
+        if (spriteList != null) {
+            spriteList.add(spriteBuilder.build());
+        }
     }
 
     @Override
@@ -238,7 +256,7 @@ public class CapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public @Nullable Direction nominalFace() {
-        return null;
+        return currentDirection;
     }
 
     @Override
