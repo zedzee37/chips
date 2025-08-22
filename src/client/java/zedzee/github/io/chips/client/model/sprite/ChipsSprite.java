@@ -16,6 +16,12 @@ public record ChipsSprite(Sprite sprite, int tintIndex, int[] colors) {
         return colArray;
     }
 
+    public void mixColor(int color) {
+        for (int i = 0; i < colors.length; i++) {
+            colors[i] = ColorHelper.mix(colors[i], color);
+        }
+    }
+
     public static class Builder {
         private Sprite sprite;
         private int tintIndex;

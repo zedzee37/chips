@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import zedzee.github.io.chips.Chips;
 
 import java.util.ArrayList;
 import java.util.HashMap;

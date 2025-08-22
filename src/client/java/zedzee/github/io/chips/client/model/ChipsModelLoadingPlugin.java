@@ -11,14 +11,14 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
 
         context.modifyBlockModelOnLoad().register((original, ctx) ->
                 ctx.state().isOf(ChipsBlocks.CHIPS_BLOCK)
-                        ? new TestBlockModel()
+                        ? new NewChipsBlockModel()
                         : original
         );
-
-        context.modifyItemModelBeforeBake().register((original, ctx) ->
-                ctx.itemId().equals(Registries.ITEM.getId(ChipsItems.CHIPS_BLOCK_ITEM)) ?
-                        new ChipsItemModel() : original
-        );
+//
+//        context.modifyItemModelBeforeBake().register((original, ctx) ->
+//                ctx.itemId().equals(Registries.ITEM.getId(ChipsItems.CHIPS_BLOCK_ITEM)) ?
+//                        new ChipsItemModel() : original
+//        );
     }
 //    private boolean shouldRenderChipsModel(BlockState state) {
 //        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255 && state.get(ChipsBlockHelpers.CHIPS) != 0;
