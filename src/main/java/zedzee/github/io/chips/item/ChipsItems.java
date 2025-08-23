@@ -46,7 +46,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.EMERALD_BLOCK))
+                            new BlockComponent(Blocks.STRIPPED_CHERRY_WOOD))
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
