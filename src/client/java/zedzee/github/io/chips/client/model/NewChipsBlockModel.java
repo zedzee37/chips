@@ -67,7 +67,11 @@ public class NewChipsBlockModel implements BlockStateModel, BlockStateModel.Unba
                 Map<Direction, List<ChipsSprite>> sprites = modelHelper.getSprites(blockView, pos, random);
                 this.particleSprite = modelHelper.getParticleSprite();
 
-                spriteInfoMap.put(shape, new ChipsSpriteInfo(new ChipsSprite(particleSprite), sprites));
+                spriteInfoMap.put(shape, new ChipsSpriteInfo(
+                        new ChipsSprite(particleSprite),
+                        sprites,
+                        renderData.shouldUseDefaultUv(block))
+                );
             });
 
             return spriteInfoMap;

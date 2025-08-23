@@ -65,7 +65,8 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
                         fromZ,
                         toX,
                         toY,
-                        toZ
+                        toZ,
+                        spriteInfo.shouldUseDefaultUv()
                 );
             });
         }
@@ -80,7 +81,8 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
             float fromZ,
             float toX,
             float toY,
-            float toZ
+            float toZ,
+            boolean defaultUv
     ) {
 
         emitter.nominalFace(direction);
@@ -124,7 +126,7 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
                 break;
         }
 
-        applySprite(emitter, sprite, direction, fromX, fromY, fromZ, toX, toY, toZ);
+        applySprite(emitter, sprite, direction, fromX, fromY, fromZ, toX, toY, toZ, defaultUv);
         emit(emitter, sprite);
     }
 
@@ -137,10 +139,15 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
             float fromZ,
             float toX,
             float toY,
-            float toZ
+            float toZ,
+            boolean defaultUv
     ) {
         Sprite actualSprite = sprite.sprite();
         emitter.spriteBake(actualSprite, MutableQuadView.BAKE_LOCK_UV);
+
+        if (defaultUv) {
+            return;
+        }
 
         float minU = actualSprite.getMinU();
         float maxU = actualSprite.getMaxU();

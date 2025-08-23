@@ -4,10 +4,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.type.BlocksAttacksComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
@@ -35,6 +37,33 @@ public class ChipsBlockItem extends BlockItem {
     }
 
     @Override
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        ItemStack stack = context.getStack();
+        if (!stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+            return super.useOnBlock(context);
+        }
+        BlockComponent component = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
+        Block blockType = component.block();
+
+        boolean isPlayerSneaking = context.getPlayer() != null && context.getPlayer().isSneaking();
+
+        BlockPos pos = context.getBlockPos();
+        World world = context.getWorld();
+        BlockState state = world.getBlockState(pos);
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return super.useOnBlock(context);
+        }
+
+        if (isPlayerSneaking && state.isOf(ChipsBlocks.CHIPS_BLOCK) && chipsBlockEntity.hasBlock(blockType)) {
+            chipsBlockEntity.toggleDefaultUv(blockType);
+            return ActionResult.SUCCESS;
+        }
+
+        return super.useOnBlock(context);
+    }
+
+    @Override
     public ActionResult place(ItemPlacementContext context) {
         ItemStack stack = context.getStack();
         if (!stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
@@ -51,13 +80,12 @@ public class ChipsBlockItem extends BlockItem {
                 (int) hitPos.getZ()
         );
 
+
         Vec3d adjustedHitPos = hitPos.subtract(pos.getX(), pos.getY(), pos.getZ());
         int corner = getTargetCorner(adjustedHitPos);
 
         BlockState state = world.getBlockState(pos);
-
         ActionResult result;
-
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             BlockEntity entity = world.getBlockEntity(pos);
             if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {

@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ChipsSpriteInfo {
-    private ChipsSprite particleSprite;
-    private Map<Direction, List<ChipsSprite>> spriteMap;
+    private final ChipsSprite particleSprite;
+    private final Map<Direction, List<ChipsSprite>> spriteMap;
+    private final boolean defaultUv;
 
-    public ChipsSpriteInfo(ChipsSprite particleSprite, Map<Direction, List<ChipsSprite>> spriteMap) {
+    public ChipsSpriteInfo(ChipsSprite particleSprite, Map<Direction, List<ChipsSprite>> spriteMap, boolean defaultUv) {
         this.particleSprite = particleSprite;
         this.spriteMap = spriteMap;
+        this.defaultUv = defaultUv;
     }
 
     public ChipsSprite getParticleSprite() {
@@ -20,5 +22,9 @@ public class ChipsSpriteInfo {
 
     public List<ChipsSprite> getSprites(Direction direction) {
         return spriteMap.containsKey(direction) ? spriteMap.get(direction) : List.of();
+    }
+
+    public boolean shouldUseDefaultUv() {
+        return this.defaultUv;
     }
 }

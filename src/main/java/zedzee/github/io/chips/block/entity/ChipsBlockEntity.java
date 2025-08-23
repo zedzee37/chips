@@ -1,6 +1,7 @@
 package zedzee.github.io.chips.block.entity;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
-    private Map<Block, Integer> blockMap = new HashMap<>();
+    private Map<Block, BlockData> blockMap = new HashMap<>();
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
@@ -32,14 +33,14 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public int getTotalChips() {
         int total = 0;
-        for (int value : blockMap.values()) {
-            total |= value;
+        for (BlockData value : blockMap.values()) {
+            total |= value.getChips();
         }
         return total;
     }
 
     public int getChips(Block block) {
-        return this.blockMap.get(block);
+        return this.blockMap.get(block).getChips();
     }
 
     public void forEachKey(Consumer<Block> blockConsumer) {
@@ -47,8 +48,28 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public void setChips(Block block, int chips) {
-        this.blockMap.put(block, chips);
+        if (this.blockMap.containsKey(block)) {
+            BlockData data = this.blockMap.get(block);
+            data.setChips(chips);
+        } else {
+            this.blockMap.put(block, new BlockData(chips));
+        }
         markDirty();
+        sync();
+    }
+
+    public boolean hasBlock(Block block) {
+        return blockMap.containsKey(block);
+    }
+
+    public void toggleDefaultUv(Block block) {
+        if (!this.blockMap.containsKey(block)) {
+            return;
+        }
+
+        BlockData data = this.blockMap.get(block);
+        data.setDefaultUv(!data.shouldUseDefaultUv());
+        this.markDirty();
         sync();
     }
 
@@ -70,11 +91,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     public void addChips(Block block, int chips) {
         int currentChips = 0;
         if (blockMap.containsKey(block)) {
-            currentChips = blockMap.get(block);
+            currentChips = blockMap.get(block).getChips();
         }
 
-        blockMap.put(block, currentChips | chips);
-        setChips(block, currentChips | chips);
+        int newChips = currentChips | chips;
+        setChips(block, newChips);
     }
 
     @Override
@@ -109,8 +130,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     @Override
     protected void writeData(WriteView view) {
         WriteView.ListAppender<Block> blockListAppender = view.getListAppender("blocks", Registries.BLOCK.getCodec());
-        WriteView.ListAppender<Integer> mappedChipsListAppender = view.getListAppender(
-                "mappedChips", Codec.INT
+        WriteView.ListAppender<BlockData> mappedChipsListAppender = view.getListAppender(
+                "mappedChips", BlockData.CODEC
         );
 
         blockMap.forEach((block, chipMap) -> {
@@ -126,8 +147,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         this.blockMap = new HashMap<>();
 
         ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Registries.BLOCK.getCodec());
-        ReadView.TypedListReadView<Integer> mappedChipsList = view.getTypedListView(
-                "mappedChips", Codec.INT
+        ReadView.TypedListReadView<BlockData> mappedChipsList = view.getTypedListView(
+                "mappedChips", BlockData.CODEC
         );
 
         this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(new HashMap<>());
@@ -135,16 +156,16 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         super.readData(view);
     }
 
-    private Optional<Map<Block, Integer>> zipBlockMap(
+    private Optional<Map<Block, BlockData>> zipBlockMap(
             ReadView.TypedListReadView<Block> blockList,
-            ReadView.TypedListReadView<Integer> mappedChipsList) {
+            ReadView.TypedListReadView<BlockData> mappedChipsList) {
         List<Block> blocks = blockList.stream().toList();
-        List<Integer> mappedChips = mappedChipsList.stream().toList();
+        List<BlockData> mappedChips = mappedChipsList.stream().toList();
 
         if (blocks.size() != mappedChips.size()) {
             return Optional.empty();
         }
-        Map<Block, Integer> blockIntegerMap = IntStream.range(0, blocks.size())
+        Map<Block, BlockData> blockIntegerMap = IntStream.range(0, blocks.size())
                 .boxed()
                 .collect(Collectors.toMap(
                         blocks::get,
@@ -155,19 +176,62 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public static class ChipsRenderData implements RenderData {
-        private final Map<Block, Integer> blockMap;
+        private final Map<Block, BlockData> blockMap;
 
-        public ChipsRenderData(Map<Block, Integer> blockMap) {
+        public ChipsRenderData(Map<Block, BlockData> blockMap) {
             this.blockMap = blockMap;
         }
 
         public int getChips(Block block) {
-            return blockMap.get(block);
+            return blockMap.get(block).getChips();
         }
 
         @Override
         public void forEachKey(Consumer<Block> consumer) {
             blockMap.keySet().forEach(consumer);
+        }
+
+        @Override
+        public boolean shouldUseDefaultUv(Block block) {
+            return blockMap.get(block).shouldUseDefaultUv();
+        }
+    }
+
+    public static class BlockData {
+        public static final Codec<BlockData> CODEC = RecordCodecBuilder.create(
+                builder -> builder.group(
+                        Codec.INT.fieldOf("chips_value").forGetter(BlockData::getChips),
+                        Codec.BOOL.fieldOf("should_use_default_uv").forGetter(BlockData::shouldUseDefaultUv)
+                ).apply(builder, BlockData::new)
+        );
+
+        private int chips;
+        private boolean defaultUv;
+
+        private BlockData(int chips, boolean defaultUv) {
+            this.chips = chips;
+            this.defaultUv = defaultUv;
+        }
+
+        public BlockData(int chips) {
+            this.chips = chips;
+            this.defaultUv = false;
+        }
+
+        public void setDefaultUv(boolean to) {
+            this.defaultUv = to;
+        }
+
+        public boolean shouldUseDefaultUv() {
+            return this.defaultUv;
+        }
+
+        public void setChips(int chips) {
+            this.chips = chips;
+        }
+
+        public int getChips() {
+            return this.chips;
         }
     }
 }
