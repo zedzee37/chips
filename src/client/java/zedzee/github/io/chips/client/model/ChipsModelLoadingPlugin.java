@@ -1,9 +1,7 @@
 package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.minecraft.registry.Registries;
 import zedzee.github.io.chips.block.ChipsBlocks;
-import zedzee.github.io.chips.item.ChipsItems;
 
 public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
     @Override
@@ -11,7 +9,7 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
 
         context.modifyBlockModelOnLoad().register((original, ctx) ->
                 ctx.state().isOf(ChipsBlocks.CHIPS_BLOCK)
-                        ? new NewChipsBlockModel()
+                        ? new ChipsBlockModel()
                         : original
         );
 //
