@@ -110,7 +110,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
         return particleSprites.get(i);
     }
 
-    private static record GeometryKey(RenderData renderData) {
+    private record GeometryKey(RenderData renderData) {
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof GeometryKey(RenderData data))) {
