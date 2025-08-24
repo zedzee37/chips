@@ -145,23 +145,33 @@ public class ChipsBlock extends BlockWithEntity {
 //
 //    }
 
+//    @Override
+//    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+//        VoxelShape shape = getCollisionShape(state, world, pos, context);
+//
+//        if (context instanceof EntityShapeContext entityShapeContext &&
+//                entityShapeContext.getEntity() instanceof PlayerEntity player &&
+//                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
+//        ) {
+//            int corner = getHoveredCorner(world, player);
+//
+//            if (corner == -1) {
+//                return shape;
+//            }
+//
+//            return getShape(1 << corner);
+//        }
+//        return shape;
+//    }
+
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        VoxelShape shape = getCollisionShape(state, world, pos, context);
-
-        if (context instanceof EntityShapeContext entityShapeContext &&
-                entityShapeContext.getEntity() instanceof PlayerEntity player &&
-                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
-        ) {
-            int corner = getHoveredCorner(world, player);
-
-            if (corner == -1) {
-                return shape;
-            }
-
-            return getShape(1 << corner);
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
+            return getShape(chipsBlockEntity.getTotalChips());
         }
-        return shape;
+
+        return VoxelShapes.empty();
     }
 
     @Override
