@@ -44,7 +44,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.COPPER_GRATE))
+                            new BlockComponent(Blocks.GRASS_BLOCK))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                             new IndividualChipsComponent())
@@ -56,7 +56,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.STRIPPED_OAK_WOOD))
+                            new BlockComponent(Blocks.COPPER_GRATE))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                             new IndividualChipsComponent())
