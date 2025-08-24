@@ -56,7 +56,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
 
         ChipsModel model = new ChipsModel(renderData -> {
             Map<VoxelShape, ChipsSpriteInfo> spriteInfoMap = new HashMap<>();
-            renderData.forEachKey(block -> {
+            renderData.forEachBlock(block -> {
                 int chips = renderData.getChips(block);
                 VoxelShape shape = ChipsBlock.getShape(chips);
 
@@ -97,7 +97,7 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
         Random random = Random.create();
 
         List<Sprite> particleSprites = new ArrayList<>();
-        chipsRenderData.forEachKey(block -> {
+        chipsRenderData.forEachBlock(block -> {
             BlockStateModel model = MinecraftClient.getInstance().getBlockRenderManager().getModel(block.getDefaultState());
             particleSprites.add(model.particleSprite(blockView, pos, state));
         });

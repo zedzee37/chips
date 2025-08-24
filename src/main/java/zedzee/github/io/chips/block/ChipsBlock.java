@@ -51,6 +51,14 @@ public class ChipsBlock extends BlockWithEntity {
         return 1 << corner;
     }
 
+    public static int countCorners(int flags) {
+        int count = 0;
+        for (int i = 0; i < 8; i++) {
+            count += ((1 << i) & flags) != 0 ? 1 : 0;
+        }
+        return count;
+    }
+
     public boolean isFull(BlockPos pos, BlockView world) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {

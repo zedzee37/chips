@@ -21,8 +21,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.EmptyBlockRenderView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.client.model.sprite.ChipsSprite;
@@ -51,7 +49,7 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         model = new ChipsModel(renderData -> {
             HashMap<VoxelShape, ChipsSpriteInfo> spriteInfo = new HashMap<>();
 
-            renderData.forEachKey(block -> {
+            renderData.forEachBlock(block -> {
                 int chips = renderData.getChips(block);
                 VoxelShape shape = ChipsBlock.getShape(chips);
 
@@ -126,7 +124,7 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
         }
 
         @Override
-        public void forEachKey(Consumer<Block> consumer) {
+        public void forEachBlock(Consumer<Block> consumer) {
             consumer.accept(block);
         }
 
