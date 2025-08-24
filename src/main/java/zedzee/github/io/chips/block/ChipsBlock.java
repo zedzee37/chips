@@ -1,18 +1,28 @@
 package zedzee.github.io.chips.block;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.Util;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.component.ChipsComponents;
 
 import java.util.Optional;
 
@@ -68,6 +78,8 @@ public class ChipsBlock extends BlockWithEntity {
     }
 
     public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
+        hitPos = hitPos.subtract(Vec3d.of(pos));
+
         BlockEntity entity = view.getBlockEntity(pos);
         if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
             return 0;
@@ -122,6 +134,27 @@ public class ChipsBlock extends BlockWithEntity {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        VoxelShape shape = getCollisionShape(state, world, pos, context);
+
+        if (context instanceof EntityShapeContext entityShapeContext &&
+                entityShapeContext.getEntity() instanceof PlayerEntity player &&
+                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
+        ) {
+            HitResult result = ProjectileUtil.getCollision(player, EntityPredicates.CAN_HIT, player.getBlockInteractionRange());
+
+            if (!(result instanceof BlockHitResult blockHitResult)) {
+                return shape;
+            }
+
+            int corner = getClosestSlice(world, pos, blockHitResult.getPos());
+
+            return getShape(1 << corner);
+        }
+        return shape;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
             return getShape(chipsBlockEntity.getTotalChips());
@@ -129,11 +162,11 @@ public class ChipsBlock extends BlockWithEntity {
 
         return VoxelShapes.empty();
     }
-    //
-//    public static Optional<VoxelShape> getOutlineShape(BlockView world, BlockPos pos) {
-//        return getChips(pos, world)
-//                .map(ChipsBlock::getShape);
-//    }
+
+    @Override
+    protected VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+        return getCollisionShape(state, world, pos, ShapeContext.absent());
+    }
 
     public static VoxelShape getShape(int chips) {
         return SHAPES[chips];

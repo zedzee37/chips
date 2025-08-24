@@ -9,6 +9,7 @@ import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.component.BlockComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
+import zedzee.github.io.chips.component.IndividualChipsComponent;
 
 import java.util.function.Function;
 
@@ -22,6 +23,9 @@ public class ChipsItems {
                     .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
                     .maxDamage(100)
                     .maxCount(1)
+                    .component(
+                            ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
+                            new IndividualChipsComponent())
     );
     public static final Item CREATIVE_CHISEL_ITEM = register(
             "creative_chisel",
@@ -29,6 +33,9 @@ public class ChipsItems {
             new Item.Settings()
                     .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
                     .maxCount(1)
+                    .component(
+                            ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
+                            new IndividualChipsComponent())
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
@@ -38,6 +45,9 @@ public class ChipsItems {
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
                             new BlockComponent(Blocks.COPPER_GRATE))
+                    .component(
+                            ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
+                            new IndividualChipsComponent())
     );
 
     public static final Item TEST_BLOCK_ITEM = register(
@@ -47,6 +57,9 @@ public class ChipsItems {
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
                             new BlockComponent(Blocks.STRIPPED_OAK_WOOD))
+                    .component(
+                            ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
+                            new IndividualChipsComponent())
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {

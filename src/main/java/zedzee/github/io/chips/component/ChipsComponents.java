@@ -12,5 +12,11 @@ public class ChipsComponents {
             ComponentType.<BlockComponent>builder().codec(BlockComponent.CODEC).build()
     );
 
+    public static final ComponentType<IndividualChipsComponent> INDIVIDUAL_CHIPS_COMPONENT_COMPONENT = Registry.register(
+            Registries.DATA_COMPONENT_TYPE,
+            Chips.identifier("individual_chips"),
+            ComponentType.<IndividualChipsComponent>builder().codec(IndividualChipsComponent.CODEC).build()
+    );
+
     public static void init() {}
 }
