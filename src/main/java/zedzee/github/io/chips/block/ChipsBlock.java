@@ -77,6 +77,19 @@ public class ChipsBlock extends BlockWithEntity {
         return true;
     }
 
+    // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
+    public static int getHoveredCorner(BlockView world, PlayerEntity player) {
+        int corner = -1;
+        HitResult result = ProjectileUtil.getCollision(player, EntityPredicates.CAN_HIT, player.getBlockInteractionRange());
+
+        if (result instanceof BlockHitResult blockHitResult) {
+            corner = getClosestSlice(world, blockHitResult.getBlockPos(), blockHitResult.getPos());
+        }
+
+        return corner;
+    }
+
+    // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
     public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
         hitPos = hitPos.subtract(Vec3d.of(pos));
 
@@ -140,13 +153,11 @@ public class ChipsBlock extends BlockWithEntity {
                 entityShapeContext.getEntity() instanceof PlayerEntity player &&
                 player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
         ) {
-            HitResult result = ProjectileUtil.getCollision(player, EntityPredicates.CAN_HIT, player.getBlockInteractionRange());
+            int corner = getHoveredCorner(world, player);
 
-            if (!(result instanceof BlockHitResult blockHitResult)) {
+            if (corner == -1) {
                 return shape;
             }
-
-            int corner = getClosestSlice(world, pos, blockHitResult.getPos());
 
             return getShape(1 << corner);
         }
