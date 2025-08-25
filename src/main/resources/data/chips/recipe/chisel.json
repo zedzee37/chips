@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  i",
+    " I ",
+    "O  "
+  ],
+  "key": {
+    "i": "minecraft:iron_ingot",
+    "I": "minecraft:iron_nugget",
+    "O": "#minecraft:planks"
+  },
+  "result": {
+    "id": "chips:chisel",
+    "count": 1
+  }
+}

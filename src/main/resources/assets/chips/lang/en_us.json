@@ -1,3 +1,4 @@
 {
-  "container.chiseling": "Chiseling Station"
+  "item.chips.chisel": "Chisel",
+  "item.chips.creative_chisel": "Creative Chisel"
 }

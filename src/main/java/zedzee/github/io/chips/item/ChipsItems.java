@@ -20,7 +20,7 @@ public class ChipsItems {
             "chisel",
             (settings) -> new ChiselItem(settings, DEFAULT_USE_TIME),
             new Item.Settings()
-                    .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
+                    .sword(ToolMaterial.IRON, 1.0f, 2.0f)
                     .maxDamage(100)
                     .maxCount(1)
                     .component(
@@ -31,7 +31,7 @@ public class ChipsItems {
             "creative_chisel",
             (settings) -> new ChiselItem(settings, 1),
             new Item.Settings()
-                    .sword(ToolMaterial.GOLD, 1.0f, 2.0f)
+                    .sword(ToolMaterial.NETHERITE, 1.0f, 2.0f)
                     .maxCount(1)
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
