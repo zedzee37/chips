@@ -1,10 +1,12 @@
 package zedzee.github.io.chips.item;
 
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.type.BlocksAttacksComponent;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
@@ -13,14 +15,19 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.BlockComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
+
+import java.util.Optional;
 
 public class ChipsBlockItem extends BlockItem {
     private final static float EPSILON = 0.01f;
@@ -38,28 +45,29 @@ public class ChipsBlockItem extends BlockItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        ItemStack stack = context.getStack();
-        if (!stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
-            return super.useOnBlock(context);
-        }
-        BlockComponent component = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
-        Block blockType = component.block();
-
-        boolean isPlayerSneaking = context.getPlayer() != null && context.getPlayer().isSneaking();
-
-        BlockPos pos = context.getBlockPos();
-        World world = context.getWorld();
-        BlockState state = world.getBlockState(pos);
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return super.useOnBlock(context);
-        }
-
-        if (isPlayerSneaking && state.isOf(ChipsBlocks.CHIPS_BLOCK) && chipsBlockEntity.hasBlock(blockType)) {
-            chipsBlockEntity.toggleDefaultUv(blockType);
-            return ActionResult.SUCCESS;
-        }
-
+        // TODO: add this to the chisel functionality
+//        ItemStack stack = context.getStack();
+//        if (!stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+//            return super.useOnBlock(context);
+//        }
+//        BlockComponent component = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
+//        Block blockType = component.block();
+//
+//        boolean isPlayerSneaking = context.getPlayer() != null && context.getPlayer();
+//
+//        BlockPos pos = context.getBlockPos();
+//        World world = context.getWorld();
+//        BlockState state = world.getBlockState(pos);
+//        BlockEntity blockEntity = world.getBlockEntity(pos);
+//        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+//            return super.useOnBlock(context);
+//        }
+//
+//        if (isPlayerSneaking && state.isOf(ChipsBlocks.CHIPS_BLOCK) && chipsBlockEntity.hasBlock(blockType)) {
+//            chipsBlockEntity.toggleDefaultUv(blockType);
+//            return ActionResult.SUCCESS;
+//        }
+//
         return super.useOnBlock(context);
     }
 
@@ -74,88 +82,61 @@ public class ChipsBlockItem extends BlockItem {
 
         World world = context.getWorld();
         Vec3d hitPos = context.getHitPos();
-        BlockPos pos = new BlockPos(
-                (int) hitPos.getX(),
-                (int) hitPos.getY(),
-                (int) hitPos.getZ()
+
+        // this code sucks
+        BlockPos flooredPos = new BlockPos(
+                hitPos.getX() >= 0 ? (int) Math.floor(hitPos.getX()) : (int) ((Math.ceil(-hitPos.getX()) * -1)),
+                hitPos.getY() >= 0 ? (int) Math.floor(hitPos.getY()) : ((int) (Math.ceil(-hitPos.getY()) * -1)),
+                hitPos.getZ() >= 0 ? (int) Math.floor(hitPos.getZ()) : ((int) Math.ceil(-hitPos.getZ()) * -1)
         );
 
-
-        Vec3d adjustedHitPos = hitPos.subtract(pos.getX(), pos.getY(), pos.getZ());
-        int corner = getTargetCorner(adjustedHitPos);
-
-        BlockState state = world.getBlockState(pos);
-        ActionResult result;
+        BlockState state = world.getBlockState(flooredPos);
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            BlockEntity entity = world.getBlockEntity(pos);
-            if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack);
+        }
+
+        return tryPlaceAt(world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack);
+    }
+
+    private ActionResult tryPlaceAt(
+            World world,
+            BlockPos pos,
+            Vec3d absHitPos,
+            Block block,
+            PlayerEntity player,
+            ItemStack stack
+    ) {
+        BlockState state = world.getBlockState(pos);
+        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+            if (!state.isAir()) {
                 return ActionResult.FAIL;
             }
 
-            if (chipsBlockEntity.hasCorner(corner)) {
-                Chips.LOGGER.info(hitPos.toString());
-                Chips.LOGGER.info(pos.toString());
-                Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(EPSILON);
-                adjustedHitPos = adjustedHitPos.add(direction);
-
-                corner = getTargetCorner(adjustedHitPos);
-
-                if (chipsBlockEntity.hasCorner(corner)) {
-                    return ActionResult.FAIL;
-                }
-            }
-            Chips.LOGGER.info(hitPos.toString());
-            Chips.LOGGER.info(pos.toString());
-            chipsBlockEntity.addChips(blockType, corner);
-            result = ActionResult.SUCCESS;
-        } else {
-            result = tryPlaceAt(context);
-        }
-
-        if (result == ActionResult.SUCCESS) {
-            playPlaceSound(world, context.getPlayer(), blockType, context.getBlockPos());
-            stack.decrementUnlessCreative(1, context.getPlayer());
-        }
-
-        return result;
-    }
-
-    public ActionResult tryPlaceAt(ItemPlacementContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getBlockPos();
-        Vec3d hitPos = context.getHitPos();
-        Vec3d adjustedHitPos = hitPos.subtract(Vec3d.of(pos));
-
-        int corner = getTargetCorner(adjustedHitPos);
-
-        BlockState state = world.getBlockState(pos);
-        if (!state.isAir() && !state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return ActionResult.FAIL;
+            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+            state = world.getBlockState(pos);
         }
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity == null) {
-            world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
-            blockEntity = world.getBlockEntity(pos);
-        }
-
         if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
             return ActionResult.FAIL;
         }
 
-        Block blockType = context.getStack().get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
+        int targetCorner = getTargetCorner(absHitPos.subtract(Vec3d.of(pos)));
+        if (chipsBlockEntity.hasCorner(targetCorner)) {
+            absHitPos = absHitPos.subtract(new Vec3d(EPSILON, EPSILON, EPSILON));
+            targetCorner = getTargetCorner(absHitPos.subtract(Vec3d.of(pos)));
 
-        if (chipsBlockEntity.hasCorner(corner)) {
-            Vec3d direction = Vec3d.of(pos).subtract(hitPos).normalize().multiply(EPSILON);
-            adjustedHitPos = adjustedHitPos.add(direction);
-            corner = getTargetCorner(adjustedHitPos);
-
-            if (chipsBlockEntity.hasCorner(corner)) {
+            if (chipsBlockEntity.hasCorner(targetCorner)) {
                 return ActionResult.FAIL;
             }
         }
 
-        chipsBlockEntity.addChips(blockType, corner);
+        chipsBlockEntity.addChips(block, targetCorner);
+
+        playPlaceSound(world, player, block, pos);
+        world.emitGameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Emitter.of(player, state));
+        stack.decrementUnlessCreative(1, player);
+
         return ActionResult.SUCCESS;
     }
 

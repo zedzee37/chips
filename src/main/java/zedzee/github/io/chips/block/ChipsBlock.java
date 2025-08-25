@@ -95,7 +95,7 @@ public class ChipsBlock extends BlockWithEntity {
 
         BlockEntity entity = view.getBlockEntity(pos);
         if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return 0;
+            return -1;
         }
 
         int i = chipsBlockEntity.getTotalChips();
@@ -106,7 +106,7 @@ public class ChipsBlock extends BlockWithEntity {
             if (hasCorner(i, k)) {
                 VoxelShape voxelShape = CORNER_SHAPES[k];
                 Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
-                if (optional.isPresent() && voxelShape.getBoundingBox().contains(hitPos)) {
+                if (optional.isPresent() && voxelShape.getBoundingBox().contains(pos)) {
                     double e = (optional.get()).squaredDistanceTo(hitPos);
                     if (e < d) {
                         d = e;
@@ -145,34 +145,34 @@ public class ChipsBlock extends BlockWithEntity {
 //
 //    }
 
-//    @Override
-//    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-//        VoxelShape shape = getCollisionShape(state, world, pos, context);
-//
-//        if (context instanceof EntityShapeContext entityShapeContext &&
-//                entityShapeContext.getEntity() instanceof PlayerEntity player &&
-//                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
-//        ) {
-//            int corner = getHoveredCorner(world, player);
-//
-//            if (corner == -1) {
-//                return shape;
-//            }
-//
-//            return getShape(1 << corner);
-//        }
-//        return shape;
-//    }
-
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-            return getShape(chipsBlockEntity.getTotalChips());
-        }
+        VoxelShape shape = getCollisionShape(state, world, pos, context);
 
-        return VoxelShapes.empty();
+        if (context instanceof EntityShapeContext entityShapeContext &&
+                entityShapeContext.getEntity() instanceof PlayerEntity player &&
+                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
+        ) {
+            int corner = getHoveredCorner(world, player);
+
+            if (corner == -1) {
+                return shape;
+            }
+
+            return getShape(1 << corner);
+        }
+        return shape;
     }
+
+//    @Override
+//    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+//        BlockEntity blockEntity = world.getBlockEntity(pos);
+//        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
+//            return getShape(chipsBlockEntity.getTotalChips());
+//        }
+//
+//        return VoxelShapes.empty();
+//    }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
