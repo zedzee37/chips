@@ -92,7 +92,10 @@ public class ChipsBlockItem extends BlockItem {
 
         BlockState state = world.getBlockState(flooredPos);
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack);
+            ActionResult result = tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack);
+            if (result == ActionResult.SUCCESS) {
+                return ActionResult.SUCCESS;
+            }
         }
 
         return tryPlaceAt(world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack);
