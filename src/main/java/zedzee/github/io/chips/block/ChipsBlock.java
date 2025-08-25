@@ -107,7 +107,7 @@ public class ChipsBlock extends BlockWithEntity {
             if (hasCorner(i, k)) {
                 VoxelShape voxelShape = CORNER_SHAPES[k];
                 Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
-                if (optional.isPresent() && voxelShape.getBoundingBox().contains(pos)) {
+                if (optional.isPresent()) {
                     double e = (optional.get()).squaredDistanceTo(hitPos);
                     if (e < d) {
                         d = e;
