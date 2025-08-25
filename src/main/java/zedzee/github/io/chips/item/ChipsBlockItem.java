@@ -28,6 +28,9 @@ import zedzee.github.io.chips.component.BlockComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ChipsBlockItem extends BlockItem {
     private final static float EPSILON = 0.01f;
@@ -91,14 +94,17 @@ public class ChipsBlockItem extends BlockItem {
         );
 
         BlockState state = world.getBlockState(flooredPos);
+
+        // im not sorry
+        Predicate<BlockPos> canReplace = blockPos -> world.getBlockState(blockPos).canReplace(context);
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            ActionResult result = tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack);
+            ActionResult result = tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack, canReplace);
             if (result == ActionResult.SUCCESS) {
                 return ActionResult.SUCCESS;
             }
         }
 
-        return tryPlaceAt(world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack);
+        return tryPlaceAt(world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack, canReplace);
     }
 
     private ActionResult tryPlaceAt(
@@ -107,11 +113,12 @@ public class ChipsBlockItem extends BlockItem {
             Vec3d absHitPos,
             Block block,
             PlayerEntity player,
-            ItemStack stack
+            ItemStack stack,
+            Predicate<BlockPos> canReplace
     ) {
         BlockState state = world.getBlockState(pos);
         if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            if (!state.isAir()) {
+            if (!canReplace.test(pos)) {
                 return ActionResult.FAIL;
             }
 
