@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -201,5 +202,15 @@ public class ChipsBlockItem extends BlockItem {
         }
 
         return currentCorner;
+    }
+
+    @Override
+    public Text getName(ItemStack stack) {
+        if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+            BlockComponent blockComponent = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
+            Text blockName = blockComponent.block().getName();
+            return blockName.copy().append(" ").append(Text.translatable("item.chips.chips_block.chip"));
+        }
+        return super.getName(stack);
     }
 }
