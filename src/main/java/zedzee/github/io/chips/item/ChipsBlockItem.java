@@ -47,6 +47,12 @@ public class ChipsBlockItem extends BlockItem {
         return defaultStack;
     }
 
+    public static ItemStack getStack(Block block) {
+        ItemStack stack = ChipsItems.CHIPS_BLOCK_ITEM.getDefaultStack().copy();
+        stack.set(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new BlockComponent(block));
+        return stack;
+    }
+
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
         // TODO: add this to the chisel functionality

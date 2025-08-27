@@ -1,23 +1,31 @@
 package zedzee.github.io.chips.item;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+
+import java.util.List;
 
 public class ChiselItem extends Item {
     private static final int ANIMATION_TIME = 20;
@@ -31,8 +39,25 @@ public class ChiselItem extends Item {
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
         PlayerEntity playerEntity = context.getPlayer();
-        if (playerEntity != null && this.getHitResult(playerEntity).getType() == HitResult.Type.BLOCK) {
-            playerEntity.setCurrentHand(context.getHand());
+        if (playerEntity != null) {
+            HitResult result = this.getHitResult(playerEntity);
+
+            if (result instanceof BlockHitResult blockHitResult) {
+                World world = context.getWorld();
+                BlockPos pos = blockHitResult.getBlockPos();
+
+                boolean isChipsBlock = world.getBlockState(pos).isOf(ChipsBlocks.CHIPS_BLOCK);
+                BlockEntity blockEntity = world.getBlockEntity(pos);
+
+                if (playerEntity.isSneaking() && isChipsBlock && blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
+                    int getHitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer());
+                    Block block = chipsBlockEntity.getBlockAtCorner(1 << getHitCorner);
+                    chipsBlockEntity.toggleDefaultUv(block);
+                    playerEntity.swingHand(context.getHand());
+                } else {
+                    playerEntity.setCurrentHand(context.getHand());
+                }
+            }
         }
 
         return ActionResult.CONSUME;
@@ -47,87 +72,94 @@ public class ChiselItem extends Item {
         return ProjectileUtil.getCollision(user, EntityPredicates.CAN_HIT, user.getBlockInteractionRange());
     }
 
-//    @Override
-//    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-//        if (remainingUseTicks <= 0 || !(user instanceof PlayerEntity player)) {
-//            user.stopUsingItem();
-//            return;
-//        }
-//
-//        if (!(getHitResult(player) instanceof BlockHitResult blockHitResult)) {
-//            user.stopUsingItem();
-//            return;
-//        }
-//
-//        BlockPos pos = blockHitResult.getBlockPos();
-//        BlockState state = world.getBlockState(pos);
-//
-//        if (!canChisel(state, state.getHardness(world, pos))) {
-//            user.stopUsingItem();
-//            return;
-//        }
-//
-//        int corner = -1;
-//        int chipsValue = getChips(world, state, pos);
-//
-//        // adjust the pos to local coords
-//        Vec3d adjustedPos = blockHitResult.getPos().subtract(pos.getX(), pos.getY(), pos.getZ());
-//        if (state.contains(ChipsBlockHelpers.CHIPS)) {
-//            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
-//        } else if (state.getOutlineShape(world, blockHitResult.getBlockPos()) == VoxelShapes.fullCube()) {
-//            corner = ChipsBlockHelpers.getClosestSlice(state, adjustedPos);
-//        } else {
-//            user.stopUsingItem();
-//        }
-//
-//        // do particles here
-//
-//        if (remainingUseTicks != 1 || corner == -1) {
-//            return;
-//        }
-//
-//        corner = 1 << corner;
-//
-//        int afterChisel = chipsValue & ~(corner);
-//
-//        if (afterChisel == 0) {
-//            world.breakBlock(pos, false);
-//        } else {
-//            world.setBlockState(pos, state.with(ChipsBlockHelpers.CHIPS, afterChisel));
-//        }
-//
-//        stack.damage(1, player);
-//        user.stopUsingItem();
-//    }
+    private boolean canChisel(BlockView world, BlockPos pos, Entity user) {
+        if (world.getBlockEntity(pos) instanceof ChipsBlockEntity) {
+            return true;
+        }
+
+        ShapeContext shapeContext = ShapeContext.of(user);
+        BlockState state = world.getBlockState(pos);
+        VoxelShape shape = state.getOutlineShape(world, pos, shapeContext);
+
+        return shape == VoxelShapes.fullCube();
+    }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (remainingUseTicks <= 0 || !(user instanceof PlayerEntity player)) {
+        if (use(world, user, stack, remainingUseTicks) == ActionResult.FAIL) {
             user.stopUsingItem();
-            return;
+        }
+    }
+
+    private ActionResult use(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (!(user instanceof PlayerEntity player)) {
+            return ActionResult.FAIL;
         }
 
-        if (!(getHitResult(player) instanceof BlockHitResult blockHitResult)) {
-            user.stopUsingItem();
-            return;
+        HitResult hitResult = getHitResult(player);
+
+        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+            return ActionResult.FAIL;
         }
 
-        BlockPos pos = blockHitResult.getBlockPos();
+        BlockPos blockPos = blockHitResult.getBlockPos();
 
-        if (!canChisel(world, pos)) {
-            return;
+        if (!canChisel(world, blockPos, user)) {
+            return ActionResult.FAIL;
         }
 
-        ChipsBlockEntity entity = (ChipsBlockEntity)world.getBlockEntity(pos);
-        entity.setChips(Blocks.DIAMOND_BLOCK, 255);
+        if (remainingUseTicks != 1) {
+            return ActionResult.SUCCESS;
+        }
+
+        BlockEntity blockEntity = world.getBlockEntity(blockPos);
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            Block block = world.getBlockState(blockPos).getBlock();
+            world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+
+            blockEntity = world.getBlockEntity(blockPos);
+
+            if ((!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity))) {
+                return ActionResult.FAIL;
+            }
+
+            chipsBlockEntity.addChips(block, 255);
+        } else {
+            // TODO: add particles here
+            int corner = 1 << ChipsBlock.getHoveredCorner(world, player);
+
+            if (corner == chipsBlockEntity.getTotalChips()) {
+                chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(player, blockType, world, blockPos));
+                world.breakBlock(blockPos, false);
+            } else {
+                List<Block> removedCorners = chipsBlockEntity.removeChips(corner);
+                removedCorners.forEach(blockType -> destroyChipEffects(player, blockType, world, blockPos));
+            }
+        }
+
+        return ActionResult.SUCCESS;
+    }
+
+    private void playBreakSound(PlayerEntity player, Block block, World world, BlockPos pos) {
+        BlockState state = block.getDefaultState();
+        BlockSoundGroup blockSoundGroup = state.getSoundGroup();
+        world.playSound(
+                player,
+                pos,
+                blockSoundGroup.getBreakSound(),
+                SoundCategory.BLOCKS,
+                (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                blockSoundGroup.getPitch() * 0.8F
+        );
+        world.addBlockBreakParticles(pos, state);
+    }
+
+    private void destroyChipEffects(PlayerEntity player, Block block, World world, BlockPos pos) {
+        Block.dropStack(world, pos, ChipsBlockItem.getStack(block));
+        playBreakSound(player, block, world, pos);
     }
 
 //    private static boolean canChisel(BlockState state, float hardness) {
 //        return state.contains(ChipsBlockHelpers.CHIPS) && hardness != -1;
 //    }
-
-    public static boolean canChisel(BlockView world, BlockPos pos) {
-        BlockEntity entity = world.getBlockEntity(pos);
-        return entity instanceof ChipsBlockEntity;
-    }
 }

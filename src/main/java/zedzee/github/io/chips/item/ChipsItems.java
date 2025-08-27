@@ -29,7 +29,7 @@ public class ChipsItems {
     );
     public static final Item CREATIVE_CHISEL_ITEM = register(
             "creative_chisel",
-            (settings) -> new ChiselItem(settings, 1),
+            (settings) -> new ChiselItem(settings, 20),
             new Item.Settings()
                     .sword(ToolMaterial.NETHERITE, 1.0f, 2.0f)
                     .maxCount(1)

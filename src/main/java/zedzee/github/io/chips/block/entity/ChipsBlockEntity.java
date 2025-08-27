@@ -16,10 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.render.RenderData;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -96,6 +93,48 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         int newChips = currentChips | chips;
         setChips(block, newChips);
+    }
+
+    public List<Block> removeChips(int chips) {
+        List<Block> removedChips = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            int targetCorner = 1 << i;
+            if ((targetCorner & chips) == 0) {
+                continue;
+            }
+
+            forEachKey(block -> {
+                int blockChips = getChips(block);
+                if ((blockChips & targetCorner) == 0) {
+                    return;
+                }
+
+                removeChips(block, targetCorner);
+                removedChips.add(block);
+            });
+        }
+        return removedChips;
+    }
+
+    public void removeChips(Block block, int chips) {
+        if (!blockMap.containsKey(block)) {
+            return;
+        }
+
+        int currentChips = blockMap.get(block).getChips();
+        int newChips = currentChips & (~chips);
+        setChips(block, newChips);
+    }
+
+    public @Nullable Block getBlockAtCorner(int corner) {
+        for (Block key : blockMap.keySet()) {
+            int chips = getChips(key);
+            if ((chips & corner) != 0) {
+                return key;
+            }
+        }
+
+        return null;
     }
 
     @Override
