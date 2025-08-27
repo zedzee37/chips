@@ -48,7 +48,12 @@ public class ChipsBlockModel implements BlockStateModel, BlockStateModel.Unbaked
     public void resolve(Resolver resolver) {}
 
     @Override
-    public void emitQuads(QuadEmitter emitter, BlockRenderView blockView, BlockPos pos, BlockState state, Random random, Predicate<@Nullable Direction> cullTest) {
+    public void emitQuads(QuadEmitter emitter,
+                          BlockRenderView blockView,
+                          BlockPos pos,
+                          BlockState state,
+                          Random random,
+                          Predicate<@Nullable Direction> cullTest) {
         Object objRenderData = blockView.getBlockEntityRenderData(pos);
         if (!(objRenderData instanceof RenderData chipsRenderData)) {
             return;
