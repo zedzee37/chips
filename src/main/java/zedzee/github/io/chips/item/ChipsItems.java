@@ -56,7 +56,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.DIRT))
+                            new BlockComponent(Blocks.COPPER_GRATE))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                             new IndividualChipsComponent())
