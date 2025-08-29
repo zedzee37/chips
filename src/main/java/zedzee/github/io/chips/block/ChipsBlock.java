@@ -10,7 +10,10 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
@@ -21,10 +24,13 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ChipsBlock extends BlockWithEntity {
