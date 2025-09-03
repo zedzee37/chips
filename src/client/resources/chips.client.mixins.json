@@ -4,6 +4,7 @@
   "package": "zedzee.github.io.chips.client.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AnimatedClientPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

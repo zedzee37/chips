@@ -1,5 +1,9 @@
 package zedzee.github.io.chips.item;
 
+import dev.kosmx.playerAnim.api.layered.IAnimation;
+import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
+import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -20,6 +24,9 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.animation.ChipsAnimatedPlayer;
+import zedzee.github.io.chips.animation.ChipsAnimations;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
@@ -110,6 +117,12 @@ public class ChiselItem extends Item {
 
         if (!canChisel(world, blockPos, user)) {
             return ActionResult.FAIL;
+        }
+
+        if (player instanceof ChipsAnimatedPlayer animatedPlayer) {
+            ModifierLayer<IAnimation> layer = animatedPlayer.chips_getModAnimation();
+            layer.setAnimation(ChipsAnimations.CHIPS_CHISEL_ANIMATION.playAnimation());
+            layer.tick();
         }
 
         if (remainingUseTicks != 1) {
