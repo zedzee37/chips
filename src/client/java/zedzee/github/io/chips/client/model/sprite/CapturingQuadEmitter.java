@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: implement the rest of the methods
+// TODO: implement the rest of the method
 // this probably shouldnt be done, but i think i have to?
 public class CapturingQuadEmitter implements QuadEmitter {
     private Map<Direction, List<ChipsSprite>> quadMap = new HashMap<>();
