@@ -1,14 +1,20 @@
 package zedzee.github.io.chips.client;
 
+import dev.kosmx.playerAnim.api.IPlayable;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.FirstPersonModifier;
+import dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.Arm;
+import net.minecraft.util.Hand;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
 import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
@@ -29,7 +35,35 @@ public class ChipsClient implements ClientModInitializer {
             ModifierLayer<IAnimation> animLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
                     .getPlayerAssociatedData(context.player())
                     .get(ChipsAnimations.CHIPS_ANIMATOR_ID);
-            animLayer.setAnimation(new KeyframeAnimationPlayer((KeyframeAnimation) PlayerAnimationRegistry.getAnimation(ChipsAnimations.CHIPS_CHISEL_ANIMATION_ID)));
+            if (animLayer == null || animLayer.isActive()) {
+                return;
+            }
+
+//            for (String anim : anims.keySet()) {
+//                Chips.LOGGER.info(anim);
+//            }
+
+            // hardcoded for now no idea what is happenign
+            IPlayable playable = PlayerAnimationRegistry.getAnimation(ChipsAnimations.CHIPS_CHISEL_ANIMATION_ID);
+//            IPlayable playable = anims.get("chisel");
+
+            if (playable instanceof KeyframeAnimation keyframeAnimation && payload.play()) {
+                boolean shouldSwap = shouldSwapHand(context.player());
+                if (animLayer.size() == 0 && shouldSwap) {
+                    animLayer.addModifier(new MirrorModifier(), 0);
+                } else if (animLayer.size() > 0 && !shouldSwap) {
+                    animLayer.removeModifier(0);
+                }
+
+                KeyframeAnimation.AnimationBuilder builder = keyframeAnimation.mutableCopy();
+
+                animLayer.setAnimation(new KeyframeAnimationPlayer(builder.build()));
+            }
         });
+    }
+
+    private boolean shouldSwapHand(ClientPlayerEntity clientPlayer) {
+        return (clientPlayer.getMainArm() == Arm.LEFT && clientPlayer.getActiveHand() == Hand.MAIN_HAND) ||
+                (clientPlayer.getMainArm() == Arm.RIGHT && clientPlayer.getActiveHand() == Hand.OFF_HAND);
     }
 }

@@ -1,8 +1,8 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"chip": {
-			"loop": true,
+		"chisel": {
+			"loop": false,
 			"animation_length": 0.6667,
 			"bones": {
 				"right_arm": {

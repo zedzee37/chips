@@ -2,6 +2,7 @@ package zedzee.github.io.chips.client.animation;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.FirstPersonModifier;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -16,7 +17,8 @@ public class ChipsAnimations {
     public static void init() {
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(CHIPS_ANIMATOR_ID, PRIORITY, player -> {
             if (player instanceof ClientPlayerEntity) {
-                return new ModifierLayer<>();
+                ModifierLayer<IAnimation> animLayer = new ModifierLayer<>();
+                return animLayer;
             }
             return null;
         });

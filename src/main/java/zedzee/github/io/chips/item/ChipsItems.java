@@ -14,7 +14,7 @@ import zedzee.github.io.chips.component.IndividualChipsComponent;
 import java.util.function.Function;
 
 public class ChipsItems {
-    public static final int DEFAULT_USE_TIME = 200;
+    public static final int DEFAULT_USE_TIME = 50;
 
     public static final Item CHISEL_ITEM = register(
             "chisel",

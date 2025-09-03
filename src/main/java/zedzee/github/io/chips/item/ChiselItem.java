@@ -7,21 +7,29 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.BrushItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Arm;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
@@ -30,7 +38,7 @@ import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 import java.util.List;
 
 public class ChiselItem extends Item {
-    private static final int ANIMATION_TIME = 20;
+    private static final int ANIMATION_TIME = 16;
     private final int useTime;
 
     public ChiselItem(Settings settings, int useTime) {
@@ -128,6 +136,14 @@ public class ChiselItem extends Item {
             ServerPlayNetworking.send((ServerPlayerEntity) player, new ChiselAnimationPayload(true));
         }
 
+        if ((remainingUseTicks % ANIMATION_TIME) == 0 && remainingUseTicks != 0) {
+            Block hoveredBlock = getHoveredBlock(world, blockPos, player);
+            if (hoveredBlock != null) {
+                playHitSound(player, hoveredBlock, world, blockPos);
+                addHitParticles(world, blockHitResult, hoveredBlock, player);
+            }
+        }
+
         if (remainingUseTicks != 1) {
             return ActionResult.SUCCESS;
         }
@@ -145,7 +161,6 @@ public class ChiselItem extends Item {
 
             chipsBlockEntity.addChips(block, 255);
         } else {
-            // TODO: add particles here
             int corner = 1 << ChipsBlock.getHoveredCorner(world, player);
 
             if (corner == chipsBlockEntity.getTotalChips()) {
@@ -157,7 +172,24 @@ public class ChiselItem extends Item {
             }
         }
 
+        stack.damage(1, player);
+
         return ActionResult.SUCCESS;
+    }
+
+    private @Nullable Block getHoveredBlock(World world, BlockPos pos, PlayerEntity player) {
+        BlockState state = world.getBlockState(pos);
+        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+            return state.getBlock();
+        }
+
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return null;
+        }
+
+        int corner = 1 << ChipsBlock.getHoveredCorner(world, player);
+        return chipsBlockEntity.firstBlockWithCorner(corner);
     }
 
     private void playBreakSound(PlayerEntity player, Block block, World world, BlockPos pos) {
@@ -172,6 +204,34 @@ public class ChiselItem extends Item {
                 blockSoundGroup.getPitch() * 0.8F
         );
         world.addBlockBreakParticles(pos, state);
+    }
+
+    // blatantly stolen from BrushItem
+    private void addHitParticles(World world, BlockHitResult hitResult, Block blockType, PlayerEntity player) {
+        double d = (double)3.0F;
+        int i = player.getMainArm() == Arm.RIGHT ? 1 : -1;
+        int j = world.getRandom().nextBetweenExclusive(7, 12);
+        BlockStateParticleEffect blockStateParticleEffect = new BlockStateParticleEffect(ParticleTypes.BLOCK, blockType.getDefaultState());
+        Direction direction = hitResult.getSide();
+        BrushItem.DustParticlesOffset dustParticlesOffset = BrushItem.DustParticlesOffset.fromSide(player.getRotationVec(0.0f), direction);
+        Vec3d vec3d = hitResult.getPos();
+
+        for(int k = 0; k < j; ++k) {
+            world.addParticleClient(blockStateParticleEffect, vec3d.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), vec3d.y, vec3d.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * (double)3.0F * world.getRandom().nextDouble(), (double)0.0F, dustParticlesOffset.zd() * (double)i * (double)3.0F * world.getRandom().nextDouble());
+        }
+    }
+
+    private void playHitSound(PlayerEntity player, Block block, World world, BlockPos pos) {
+        BlockState state = block.getDefaultState();
+        BlockSoundGroup blockSoundGroup = state.getSoundGroup();
+        world.playSound(
+                player,
+                pos,
+                blockSoundGroup.getHitSound(),
+                SoundCategory.BLOCKS,
+                (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                blockSoundGroup.getPitch() * 0.8F
+        );
     }
 
     private void destroyChipEffects(PlayerEntity player, Block block, World world, BlockPos pos) {

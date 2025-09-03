@@ -55,6 +55,17 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         sync();
     }
 
+    @Nullable
+    public Block firstBlockWithCorner(int corner) {
+        for (Block block : blockMap.keySet()) {
+            int chips = this.getChips(block);
+            if ((chips & corner) != 0) {
+                return block;
+            }
+        }
+        return null;
+    }
+
     public boolean hasBlock(Block block) {
         return blockMap.containsKey(block);
     }
