@@ -78,11 +78,6 @@ public class ChiselItem extends Item {
 
         ShapeContext shapeContext = ShapeContext.of(user);
         BlockState state = world.getBlockState(pos);
-
-        if (state.getHardness(world, pos) == -1.0f) {
-            return false;
-        }
-
         VoxelShape shape = state.getOutlineShape(world, pos, shapeContext);
 
         return shape == VoxelShapes.fullCube();

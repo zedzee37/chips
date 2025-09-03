@@ -30,7 +30,7 @@ public class ChipsBlocks {
     public static final Block CHIPS_BLOCK = register(
             "chips",
             ChipsBlock::new,
-            AbstractBlock.Settings.create().nonOpaque().strength(0.5f)
+            AbstractBlock.Settings.create().nonOpaque()
     );
 
     private static Block registerWithItem(String path,
