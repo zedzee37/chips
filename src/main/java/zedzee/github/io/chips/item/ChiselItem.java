@@ -1,9 +1,6 @@
 package zedzee.github.io.chips.item;
 
-import dev.kosmx.playerAnim.api.layered.IAnimation;
-import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
-import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -14,6 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
@@ -24,12 +22,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.animation.ChipsAnimatedPlayer;
-import zedzee.github.io.chips.animation.ChipsAnimations;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 import java.util.List;
 
@@ -119,10 +115,17 @@ public class ChiselItem extends Item {
             return ActionResult.FAIL;
         }
 
-        if (player instanceof ChipsAnimatedPlayer animatedPlayer) {
-            ModifierLayer<IAnimation> layer = animatedPlayer.chips_getModAnimation();
-            layer.setAnimation(ChipsAnimations.CHIPS_CHISEL_ANIMATION.playAnimation());
-            layer.tick();
+//        if (player instanceof ChipsAnimatedPlayer animatedPlayer) {
+//            Chips.LOGGER.info("gug");
+//            IPlayable playable = ChipsAnimations.CHIPS_CHISEL_ANIMATION.get();
+//            if (playable != null) {
+//                Chips.LOGGER.info("gork");
+//                playable.playAnimation();
+//            }
+//        }
+
+        if (!world.isClient()) {
+            ServerPlayNetworking.send((ServerPlayerEntity) player, new ChiselAnimationPayload(true));
         }
 
         if (remainingUseTicks != 1) {
