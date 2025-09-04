@@ -12,11 +12,18 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
 import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
+import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 public class ChipsClient implements ClientModInitializer {
@@ -58,6 +65,16 @@ public class ChipsClient implements ClientModInitializer {
                 KeyframeAnimation.AnimationBuilder builder = keyframeAnimation.mutableCopy();
 
                 animLayer.setAnimation(new KeyframeAnimationPlayer(builder.build()));
+            }
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(ChipsBlockChangePayload.ID, (payload, context) -> {
+            World world = context.player().getWorld();
+            world.setBlockState(payload.pos(), ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+
+            BlockEntity be = world.getBlockEntity(payload.pos());
+            if (be instanceof ChipsBlockEntity chipsBlockEntity) {
+                chipsBlockEntity.addChips(payload.block(), 255);
             }
         });
     }

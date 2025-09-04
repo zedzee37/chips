@@ -33,6 +33,9 @@ import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.component.BlockComponent;
+import zedzee.github.io.chips.component.ChipsComponents;
+import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 import java.util.List;
@@ -137,7 +140,7 @@ public class ChiselItem extends Item {
         }
 
         if ((remainingUseTicks % ANIMATION_TIME) == 0 && remainingUseTicks != 0) {
-            Block hoveredBlock = getHoveredBlock(world, blockPos, player);
+            Block hoveredBlock = getHoveredBlock(world, blockPos, blockHitResult);
             if (hoveredBlock != null) {
                 playHitSound(player, hoveredBlock, world, blockPos);
                 addHitParticles(world, blockHitResult, hoveredBlock, player);
@@ -150,18 +153,21 @@ public class ChiselItem extends Item {
 
         BlockEntity blockEntity = world.getBlockEntity(blockPos);
         if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            Block block = world.getBlockState(blockPos).getBlock();
-            world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+            if (!world.isClient()) {
+                Block block = world.getBlockState(blockPos).getBlock();
+                world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
 
-            blockEntity = world.getBlockEntity(blockPos);
+                blockEntity = world.getBlockEntity(blockPos);
 
-            if ((!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity))) {
-                return ActionResult.FAIL;
+                if ((!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity))) {
+                    return ActionResult.FAIL;
+                }
+
+                chipsBlockEntity.addChips(block, 255);
+                ServerPlayNetworking.send((ServerPlayerEntity) player, new ChipsBlockChangePayload(blockPos, block));
             }
-
-            chipsBlockEntity.addChips(block, 255);
         } else {
-            int corner = 1 << ChipsBlock.getHoveredCorner(world, player);
+            int corner = 1 << ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos());
 
             if (corner == chipsBlockEntity.getTotalChips()) {
                 chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(player, blockType, world, blockPos));
@@ -177,7 +183,7 @@ public class ChiselItem extends Item {
         return ActionResult.SUCCESS;
     }
 
-    private @Nullable Block getHoveredBlock(World world, BlockPos pos, PlayerEntity player) {
+    private @Nullable Block getHoveredBlock(World world, BlockPos pos, BlockHitResult hitResult) {
         BlockState state = world.getBlockState(pos);
         if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             return state.getBlock();
@@ -188,7 +194,7 @@ public class ChiselItem extends Item {
             return null;
         }
 
-        int corner = 1 << ChipsBlock.getHoveredCorner(world, player);
+        int corner = 1 << ChipsBlock.getClosestSlice(world, pos, hitResult.getPos());
         return chipsBlockEntity.firstBlockWithCorner(corner);
     }
 

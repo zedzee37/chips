@@ -9,6 +9,7 @@ import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsItems;
+import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 public class Chips implements ModInitializer {
@@ -24,6 +25,7 @@ public class Chips implements ModInitializer {
         ChipsItems.init();
 
         PayloadTypeRegistry.playS2C().register(ChiselAnimationPayload.ID, ChiselAnimationPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
     }
 
     public static Identifier identifier(String path) {

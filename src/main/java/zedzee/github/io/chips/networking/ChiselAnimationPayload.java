@@ -12,6 +12,7 @@ public record ChiselAnimationPayload(boolean play) implements CustomPayload {
     public static final CustomPayload.Id<ChiselAnimationPayload> ID = new CustomPayload.Id<>(IDENTIFIER);
     public static final PacketCodec<RegistryByteBuf, ChiselAnimationPayload> CODEC =
             PacketCodec.tuple(PacketCodecs.BOOLEAN, ChiselAnimationPayload::play, ChiselAnimationPayload::new);
+
     @Override
     public Id<? extends CustomPayload> getId() {
         return ID;
