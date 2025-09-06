@@ -10,6 +10,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+// TODO: FIX THIS OR FIND BETTER SOLUTION
 // i hate that i need this
 public class BlockRayMarcher {
 
