@@ -25,10 +25,15 @@ public abstract class DebugRayMarchRendererMixin {
         ClientPlayerEntity player = client.player;
 
         if (player != null) {
-            DebugRenderer.drawBox(matrices, vertexConsumers, new Box(
-                    player.getPos(),
-                    player.getPos().add(10, 10, 10)
-            ), 255, 255, 255, 255);
+            DebugRenderer.drawBox(
+                    matrices,
+                    vertexConsumers,
+                    Box.of(player.getPos(), 1, 1, 1),
+                    255,
+                    255,
+                    255,
+                    125
+            );
         }
     }
 }
