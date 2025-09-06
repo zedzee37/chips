@@ -1,13 +1,20 @@
 package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.PlayerPickItemEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
@@ -26,6 +33,36 @@ public class Chips implements ModInitializer {
 
         PayloadTypeRegistry.playS2C().register(ChiselAnimationPayload.ID, ChiselAnimationPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
+
+        PlayerPickItemEvents.BLOCK.register(
+                (player, pos, state, requestIncludeData) -> {
+                    if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+                        return null;
+                    }
+
+                    World world = player.getWorld();
+                    BlockEntity be = world.getBlockEntity(pos);
+
+                    if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
+                        return null;
+                    }
+
+                    int hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
+                    if (hoveredCorner == -1) {
+                        return null;
+                    }
+
+                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner << 1);
+                    LOGGER.info("1");
+
+                    if (block == null) {
+                        return null;
+                    }
+
+                    Chips.LOGGER.info(block.getName().toString());
+
+                    return ChipsBlockItem.getStack(block);
+        });
     }
 
     public static Identifier identifier(String path) {
