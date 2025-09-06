@@ -12,19 +12,33 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.debug.DebugRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.BlockRayMarcher;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
 import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
+
+import java.lang.management.MemoryNotificationInfo;
 
 public class ChipsClient implements ClientModInitializer {
     @Override
@@ -77,6 +91,52 @@ public class ChipsClient implements ClientModInitializer {
                 chipsBlockEntity.addChips(payload.block(), 255);
             }
         });
+
+//        WorldRenderEvents.LAST.register(context -> {
+//            MinecraftClient client = MinecraftClient.getInstance();
+//            ClientPlayerEntity player = client.player;
+//
+//            MatrixStack stack = context.matrixStack();
+//            VertexConsumerProvider consumers = context.consumers();
+//
+//            if (player == null || stack == null || consumers == null) {
+//                return;
+//            }
+//
+//            Vec3d direction = Vec3d.fromPolar(player.getPitch(), player.getYaw());
+//            Vec3d end = player.getEyePos().add(direction.multiply(player.getBlockInteractionRange()));
+//
+//            RaycastContext raycastContext = new RaycastContext(
+//                    player.getEyePos(),
+//                    end,
+//                    RaycastContext.ShapeType.COLLIDER,
+//                    RaycastContext.FluidHandling.NONE,
+//                    player
+//            );
+//            HitResult hitResult = player.getWorld().raycast(raycastContext);
+//
+//            if (hitResult == null) {
+//                return;
+//            }
+//
+//            stack.push();
+//
+//            // compensate for camera pos
+//            stack.translate(context.camera().getCameraPos().negate());
+//
+//
+//            DebugRenderer.drawBox(
+//                    stack,
+//                    consumers,
+//                    Box.of(hitResult.getPos(), 0.1, 0.1, 0.1),
+//                    0.5f,
+//                    0.0f,
+//                    0.0f,
+//                    0.5f
+//            );
+//
+//            stack.pop();
+//        });
     }
 
     private boolean shouldSwapHand(ClientPlayerEntity clientPlayer) {

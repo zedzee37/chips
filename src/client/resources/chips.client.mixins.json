@@ -4,7 +4,6 @@
   "package": "zedzee.github.io.chips.client.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "DebugRayMarchRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

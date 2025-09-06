@@ -24,10 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.*;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
@@ -96,11 +93,19 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
 
     // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
     public static int getHoveredCorner(BlockView world, PlayerEntity player) {
-        int corner = -1;
-        BlockHitResult blockHitResult = BlockRayMarcher.march(player, player.getBlockInteractionRange(), 0.125f);
+        Vec3d direction = Vec3d.fromPolar(player.getPitch(), player.getYaw());
+        Vec3d end = player.getEyePos().add(direction.multiply(player.getBlockInteractionRange()));
+        RaycastContext raycastContext = new RaycastContext(
+                player.getEyePos(),
+                end,
+                RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE,
+                player
+        );
+        HitResult hitResult = player.getWorld().raycast(raycastContext);
 
-        if (blockHitResult == null) {
-            return corner;
+        if (!(hitResult instanceof BlockHitResult blockHitResult)) {
+            return -1;
         }
 
         return getClosestSlice(world, blockHitResult.getBlockPos(), blockHitResult.getPos());
