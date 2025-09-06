@@ -142,8 +142,7 @@ public class ChiselItem extends Item {
         if ((remainingUseTicks % ANIMATION_TIME) == 0 && remainingUseTicks != 0) {
             Block hoveredBlock = getHoveredBlock(world, blockPos, blockHitResult);
             if (hoveredBlock != null) {
-                playHitSound(player, hoveredBlock, world, blockPos);
-                addHitParticles(world, blockHitResult, hoveredBlock, player);
+                playHitSound(player, hoveredBlock, world, blockPos); addHitParticles(world, blockHitResult, hoveredBlock, player);
             }
         }
 
@@ -154,8 +153,13 @@ public class ChiselItem extends Item {
         BlockEntity blockEntity = world.getBlockEntity(blockPos);
         if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
             if (!world.isClient()) {
-                Block block = world.getBlockState(blockPos).getBlock();
+                BlockState state = world.getBlockState(blockPos);
+                Block block = state.getBlock();
                 world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+
+                if (blockEntity != null) {
+                    blockEntity.onBlockReplaced(blockPos, state);
+                }
 
                 blockEntity = world.getBlockEntity(blockPos);
 
