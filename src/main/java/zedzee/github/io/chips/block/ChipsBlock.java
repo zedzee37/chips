@@ -93,7 +93,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
     public static int getHoveredCorner(BlockView world, PlayerEntity player) {
         int corner = -1;
-        BlockHitResult blockHitResult = BlockRayMarcher.march(player, player.getBlockInteractionRange(), 0.24f);
+        BlockHitResult blockHitResult = BlockRayMarcher.march(player, player.getBlockInteractionRange(), 0.125f);
 
         if (blockHitResult == null) {
             return corner;

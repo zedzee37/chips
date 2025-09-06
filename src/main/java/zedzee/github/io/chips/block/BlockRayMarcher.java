@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
@@ -46,15 +45,11 @@ public class BlockRayMarcher {
     }
 
     private static Vec3d getVectorToNextGrid(Vec3d direction, Vec3d position, float gridSize) {
-        double relX = positiveModulo(position.x, gridSize);
-        double relY = positiveModulo(position.y, gridSize);
-        double relZ = positiveModulo(position.z, gridSize);
+        double dx = calculateStep(direction.x, position.x, gridSize);
+        double dy = calculateStep(direction.y, position.y, gridSize);
+        double dz = calculateStep(direction.z, position.z, gridSize);
 
-        Vec3d step = new Vec3d(
-                direction.x > 0 ? gridSize - relX : (relX == 0 ? 0 : -relX),
-                direction.y > 0 ? gridSize - relY : (relY == 0 ? 0 : -relY),
-                direction.z > 0 ? gridSize - relZ : (relZ == 0 ? 0 : -relZ)
-        );
+        Vec3d step = new Vec3d(dx, dy, dz);
 
         Vec3d tValues = new Vec3d(
                 safeDiv(step.x, direction.x),
@@ -62,8 +57,19 @@ public class BlockRayMarcher {
                 safeDiv(step.z, direction.z)
         );
 
-        double minT = Math.min(tValues.x, Math.min(tValues.y, tValues.z)) + 0.001;
+        double minT = Math.min(tValues.x, Math.min(tValues.y, tValues.z));
         return direction.normalize().multiply(minT);
+    }
+
+    private static double calculateStep(double dirComponent, double posComponent, double gridSize) {
+        if (Math.abs(dirComponent) < 1e-6) return Double.MAX_VALUE;
+
+        double gridPos = Math.floor(posComponent / gridSize) * gridSize;
+        if (dirComponent > 0) {
+            return gridPos + gridSize - posComponent;
+        } else {
+            return gridPos - posComponent;
+        }
     }
 
     private static double safeDiv(double a, double b) {
