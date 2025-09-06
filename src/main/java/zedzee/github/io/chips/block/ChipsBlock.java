@@ -230,6 +230,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
             return getShape(chipsBlockEntity.getTotalChips());
+
         }
 
         return VoxelShapes.empty();
