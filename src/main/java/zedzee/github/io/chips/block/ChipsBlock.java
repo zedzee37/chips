@@ -1,34 +1,33 @@
 package zedzee.github.io.chips.block;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.serialization.MapCodec;
-import com.sun.jna.platform.win32.OaIdl;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.EntityShapeContext;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.item.ChipsBlockItem;
@@ -37,8 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ChipsBlock extends BlockWithEntity {
+public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public static final int DEFAULT_CHIPS_VALUE = 1;
+
     public static final VoxelShape[] CORNER_SHAPES = Util.make(new VoxelShape[8], cornerShapes -> {
         cornerShapes[0] = VoxelShapes.cuboid(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
         cornerShapes[1] = VoxelShapes.cuboid(0.5, 0.0, 0.0, 1.0, 0.5, 0.5);
@@ -49,6 +49,8 @@ public class ChipsBlock extends BlockWithEntity {
         cornerShapes[6] = VoxelShapes.cuboid(0.0, 0.5, 0.5, 0.5, 1.0, 1.0);
         cornerShapes[7] = VoxelShapes.cuboid(0.5, 0.5, 0.5, 1.0, 1.0, 1.0);
     });
+
+    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     public static final VoxelShape[] SHAPES = Util.make(new VoxelShape[256], voxelShapes -> {
         for (int i = 0; i < voxelShapes.length; i++) {
@@ -132,6 +134,10 @@ public class ChipsBlock extends BlockWithEntity {
 
     public ChipsBlock(Settings settings) {
         super(settings);
+        setDefaultState(
+                getDefaultState()
+                        .with(WATERLOGGED, false)
+        );
     }
 
     @Override
@@ -239,5 +245,31 @@ public class ChipsBlock extends BlockWithEntity {
     @Override
     public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
         return isFull(pos, world) ? 0.2F : 1.0F;
+    }
+
+    @Override
+    protected FluidState getFluidState(BlockState state) {
+        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public BlockState getStateForNeighborUpdate(BlockState state,
+                                                WorldView world,
+                                                ScheduledTickView tickView,
+                                                BlockPos pos,
+                                                Direction direction,
+                                                BlockPos neighborPos,
+                                                BlockState neighborState,
+                                                Random random) {
+        if (state.get(WATERLOGGED)) {
+            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        }
+
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+    }
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        builder.add(WATERLOGGED);
     }
 }
