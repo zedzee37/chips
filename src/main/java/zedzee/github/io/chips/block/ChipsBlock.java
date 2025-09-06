@@ -175,13 +175,16 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         VoxelShape shape = getCollisionShape(state, world, pos, context);
 
+        BlockEntity be = world.getBlockEntity(pos);
         if (context instanceof EntityShapeContext entityShapeContext &&
                 entityShapeContext.getEntity() instanceof PlayerEntity player &&
-                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT)
+                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT) &&
+                be instanceof ChipsBlockEntity chipsBlockEntity
         ) {
             int corner = getHoveredCorner(world, player);
 
-            if (corner == -1) {
+            boolean hitOtherChipsBlock = !chipsBlockEntity.hasCorner(1 << corner);
+            if (corner == -1 || hitOtherChipsBlock) {
                 return shape;
             }
 
