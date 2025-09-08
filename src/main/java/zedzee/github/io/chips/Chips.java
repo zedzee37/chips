@@ -52,14 +52,11 @@ public class Chips implements ModInitializer {
                         return null;
                     }
 
-                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner << 1);
-                    LOGGER.info("1");
+                    Block block = chipsBlockEntity.getBlockAtCorner(1 << hoveredCorner);
 
                     if (block == null) {
                         return null;
                     }
-
-                    Chips.LOGGER.info(block.getName().toString());
 
                     return ChipsBlockItem.getStack(block);
         });
