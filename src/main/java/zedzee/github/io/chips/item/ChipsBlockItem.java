@@ -1,16 +1,16 @@
 package zedzee.github.io.chips.item;
 
+import net.fabricmc.fabric.impl.recipe.ingredient.builtin.ComponentsIngredient;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.Component;
+import net.minecraft.component.ComponentChanges;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.*;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.Registries;
@@ -35,6 +35,8 @@ import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -111,10 +113,7 @@ public class ChipsBlockItem extends BlockItem {
     }
 
     private RecipeEntry<?> getRecipeEntry(RegistryKey<Recipe<?>> key, Block block) {
-        Optional<Ingredient> chipIngredient = Ingredient.ofItem(getStack(block).);
-        ArrayList<Optional<Ingredient>> ingredients = new ArrayList<>();
-
-        RawShapedRecipe recipe = new RawShapedRecipe(3, 3, ingredients, Optional.empty());
+        RawShapedRecipe recipe = new RawShapedRecipe(3, 3, getIngredients(block), Optional.empty());
 
         return new RecipeEntry<CraftingRecipe>(
                 key,
@@ -125,6 +124,33 @@ public class ChipsBlockItem extends BlockItem {
                         block.asItem().getDefaultStack()
                 )
         );
+    }
+
+    private List<Optional<Ingredient>> getIngredients(Block block) {
+        Ingredient baseIngredient = Ingredient.ofItem(ChipsItems.CHIPS_BLOCK_ITEM);
+        ComponentChanges.Builder builder = ComponentChanges.builder();
+        builder.add(new Component<>(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new ChipsBlockItemComponent(block)));
+
+        Optional<Ingredient> componentsIngredient = Optional.of(
+                new ComponentsIngredient(baseIngredient, builder.build())
+                        .toVanilla()
+        );
+        Optional<Ingredient> slimeBallIngredient = Optional.of(Ingredient.ofItem(Items.SLIME_BALL));
+        ArrayList<Optional<Ingredient>> ingredients = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            ingredients.add(componentsIngredient);
+        }
+
+        ingredients.add(componentsIngredient);
+        ingredients.add(slimeBallIngredient);
+        ingredients.add(componentsIngredient);
+
+        for (int i = 0; i < 3; i++) {
+            ingredients.add(componentsIngredient);
+        }
+
+        return ingredients;
     }
 
     @Override
