@@ -7,6 +7,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
@@ -14,6 +17,7 @@ import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.*;
@@ -150,7 +154,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        sync();
         return createNbt(registryLookup);
     }
 
@@ -159,10 +162,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 //        return blockMap;
 //    }
 
-    //    @Override
-//    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
-//        return BlockEntityUpdateS2CPacket.create(this);
-//    }
+    @Override
+    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
 
     public void sync() {
         if (world == null) {

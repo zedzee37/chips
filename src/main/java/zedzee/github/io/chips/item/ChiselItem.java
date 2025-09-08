@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -23,18 +24,17 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
-import zedzee.github.io.chips.component.BlockComponent;
-import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
@@ -126,15 +126,6 @@ public class ChiselItem extends Item {
             return ActionResult.FAIL;
         }
 
-//        if (player instanceof ChipsAnimatedPlayer animatedPlayer) {
-//            Chips.LOGGER.info("gug");
-//            IPlayable playable = ChipsAnimations.CHIPS_CHISEL_ANIMATION.get();
-//            if (playable != null) {
-//                Chips.LOGGER.info("gork");
-//                playable.playAnimation();
-//            }
-//        }
-
         if (!world.isClient()) {
             ServerPlayNetworking.send((ServerPlayerEntity) player, new ChiselAnimationPayload(true));
         }
@@ -174,15 +165,22 @@ public class ChiselItem extends Item {
             int corner = 1 << ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos());
 
             if (corner == chipsBlockEntity.getTotalChips()) {
-                chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(player, blockType, world, blockPos));
+                chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(
+                        player, blockType, world, hitResult.getPos(), blockPos
+                ));
+
                 world.breakBlock(blockPos, false);
             } else {
                 List<Block> removedCorners = chipsBlockEntity.removeChips(corner);
-                removedCorners.forEach(blockType -> destroyChipEffects(player, blockType, world, blockPos));
+                removedCorners.forEach(blockType -> destroyChipEffects(
+                        player, blockType, world, hitResult.getPos(), blockPos
+                ));
             }
         }
 
-        stack.damage(1, player);
+        if (!stack.isOf(ChipsItems.CREATIVE_CHISEL_ITEM)) {
+            stack.damage(1, player);
+        }
 
         return ActionResult.SUCCESS;
     }
@@ -244,9 +242,24 @@ public class ChiselItem extends Item {
         );
     }
 
-    private void destroyChipEffects(PlayerEntity player, Block block, World world, BlockPos pos) {
-        Block.dropStack(world, pos, ChipsBlockItem.getStack(block));
-        playBreakSound(player, block, world, pos);
+    private void destroyChipEffects(PlayerEntity player, Block block, World world, Vec3d pos, BlockPos blockPos) {
+        playBreakSound(player, block, world, blockPos);
+        dropStack(world, ChipsBlockItem.getStack(block), pos);
+    }
+
+    private void dropStack(World world, ItemStack stack, Vec3d pos) {
+        Random random = world.getRandom();
+
+        ItemEntity itemEntity = new ItemEntity(
+                world,
+                pos.getX(), pos.getY(), pos.getZ(),
+                stack,
+                MathHelper.nextDouble(random, -0.125f, 0.125f),
+                MathHelper.nextDouble(random, 0.0, 0.125f),
+                MathHelper.nextDouble(random, -0.125f, 0.125f)
+        );
+        itemEntity.setToDefaultPickupDelay();
+        world.spawnEntity(itemEntity);
     }
 
 //    private static boolean canChisel(BlockState state, float hardness) {
