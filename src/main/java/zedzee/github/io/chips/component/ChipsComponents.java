@@ -6,10 +6,10 @@ import net.minecraft.registry.Registry;
 import zedzee.github.io.chips.Chips;
 
 public class ChipsComponents {
-    public static final ComponentType<BlockComponent> BLOCK_COMPONENT_COMPONENT = Registry.register(
+    public static final ComponentType<ChipsBlockItemComponent> BLOCK_COMPONENT_COMPONENT = Registry.register(
             Registries.DATA_COMPONENT_TYPE,
             Chips.identifier("block_component"),
-            ComponentType.<BlockComponent>builder().codec(BlockComponent.CODEC).build()
+            ComponentType.<ChipsBlockItemComponent>builder().codec(ChipsBlockItemComponent.CODEC).build()
     );
 
     public static final ComponentType<IndividualChipsComponent> INDIVIDUAL_CHIPS_COMPONENT_COMPONENT = Registry.register(

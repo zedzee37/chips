@@ -1,12 +1,14 @@
 package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerPickItemEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
@@ -24,14 +26,10 @@ import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.item.ChipsItems;
-import zedzee.github.io.chips.mixin.PreparedRecipesAccessor;
-import zedzee.github.io.chips.mixin.RecipeMapAccessor;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Chips implements ModInitializer {
     public static final String MOD_ID = "chips";
@@ -50,30 +48,40 @@ public class Chips implements ModInitializer {
 
         // maybe this for custom crafting?
         // TODO: test this
-        ServerTickEvents.START_SERVER_TICK.register((server) -> {
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
             ServerRecipeManager recipeManager = server.getRecipeManager();
-            PreparedRecipesAccessor preparedRecipesAccessor = (PreparedRecipesAccessor) recipeManager;
 
-            PreparedRecipes recipes = preparedRecipesAccessor.getPreparedRecipes();
-            RecipeMapAccessor recipeMapAccessor = (RecipeMapAccessor) recipes;
-
-            Map<RegistryKey<Recipe<?>>, RecipeEntry<?>> recipeMap = recipeMapAccessor.getRecipeMap();
+            Collection<RecipeEntry<?>> oldRecipes = recipeManager.values();
+            ArrayList<RecipeEntry<?>> recipeEntries = new ArrayList<>(oldRecipes);
 
             RegistryKey<Recipe<?>> key = RegistryKey.of(RegistryKeys.RECIPE, Chips.identifier("test"));
-            recipeMap.put(
+
+            RecipeEntry<Recipe<?>> entry = new RecipeEntry<>(
                     key,
-                    new RecipeEntry<CraftingRecipe>(key,
-                            new ShapedRecipe(
-                                    "",
-                                    CraftingRecipeCategory.MISC,
-                                    new RawShapedRecipe(
-                                            1, 1,
-                                            List.of(Optional.of(Ingredient.ofItem(Items.DIAMOND))),
-                                            Optional.empty()),
-                                    ChipsBlockItem.getStack(Blocks.DIAMOND_BLOCK)
-                            )
+                    new ShapedRecipe(
+                            "",
+                            CraftingRecipeCategory.MISC,
+                            new RawShapedRecipe(
+                                    1, 1,
+                                    List.of(Optional.of(Ingredient.ofItem(Items.DIAMOND))),
+                                    Optional.empty()),
+                            ChipsBlockItem.getStack(Blocks.DIAMOND_BLOCK)
                     )
             );
+
+            recipeEntries.add(entry);
+
+            recipeManager.preparedRecipes = PreparedRecipes.of(recipeEntries);
+//            PreparedRecipes recipes = preparedRecipesAccessor.getPreparedRecipes();
+//            RecipeMapAccessor recipeMapAccessor = (RecipeMapAccessor) recipes;
+//
+//            Map<RegistryKey<Recipe<?>>, RecipeEntry<?>> recipeMap = recipeMapAccessor.getRecipeMap();
+//
+//            recipeMap.put(
+//                    key,
+//                    new RecipeEntry<CraftingRecipe>(key,
+//                    )
+//            );
         });
 
         PlayerPickItemEvents.BLOCK.register(

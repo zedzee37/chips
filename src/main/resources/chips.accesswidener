@@ -7,3 +7,4 @@ accessible class net/minecraft/client/render/model/ModelTextures$SpriteEntry
 accessible class net/minecraft/item/BrushItem$DustParticlesOffset
 
 accessible field net/minecraft/client/render/item/model/BasicItemModel settings Lnet/minecraft/client/render/model/ModelSettings;
+accessible field net/minecraft/recipe/ServerRecipeManager preparedRecipes Lnet/minecraft/recipe/PreparedRecipes;

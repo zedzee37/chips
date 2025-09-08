@@ -7,7 +7,7 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.component.BlockComponent;
+import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.component.IndividualChipsComponent;
 
@@ -44,7 +44,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.GRASS_BLOCK))
+                            new ChipsBlockItemComponent(Blocks.GRASS_BLOCK))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                             new IndividualChipsComponent())
@@ -56,7 +56,7 @@ public class ChipsItems {
             new Item.Settings()
                     .component(
                             ChipsComponents.BLOCK_COMPONENT_COMPONENT,
-                            new BlockComponent(Blocks.COPPER_GRATE))
+                            new ChipsBlockItemComponent(Blocks.COPPER_GRATE))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                             new IndividualChipsComponent())

@@ -1,37 +1,42 @@
 package zedzee.github.io.chips.item;
 
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.type.BlocksAttacksComponent;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.recipe.*;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
+import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
-import zedzee.github.io.chips.component.BlockComponent;
+import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class ChipsBlockItem extends BlockItem {
     private final static float EPSILON = 0.01f;
@@ -43,13 +48,13 @@ public class ChipsBlockItem extends BlockItem {
     @Override
     public ItemStack getDefaultStack() {
         ItemStack defaultStack = super.getDefaultStack();
-        defaultStack.set(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new BlockComponent(Blocks.DIAMOND_BLOCK));
+        defaultStack.set(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new ChipsBlockItemComponent(Blocks.DIAMOND_BLOCK));
         return defaultStack;
     }
 
     public static ItemStack getStack(Block block) {
         ItemStack stack = ChipsItems.CHIPS_BLOCK_ITEM.getDefaultStack().copy();
-        stack.set(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new BlockComponent(block));
+        stack.set(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new ChipsBlockItemComponent(block));
         return stack;
     }
 
@@ -79,6 +84,47 @@ public class ChipsBlockItem extends BlockItem {
 //        }
 //
         return super.useOnBlock(context);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
+        if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+            MinecraftServer server = world.getServer();
+            ServerRecipeManager serverRecipeManager = server.getRecipeManager();
+
+            Block blockType = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
+
+            RegistryKey<Recipe<?>> recipeRegistryKey = getRecipeKey(blockType);
+            if (serverRecipeManager.get(recipeRegistryKey).isEmpty()) {
+                ArrayList<RecipeEntry<?>> recipeEntries = new ArrayList<>(serverRecipeManager.values());
+                recipeEntries.add(getRecipeEntry(recipeRegistryKey, blockType));
+                serverRecipeManager.preparedRecipes = PreparedRecipes.of(recipeEntries);
+            }
+        }
+
+        super.inventoryTick(stack, world, entity, slot);
+    }
+
+    private RegistryKey<Recipe<?>> getRecipeKey(Block block) {
+        Identifier identifier = Chips.identifier("chips_item_" + Registries.BLOCK.getId(block).getPath());
+        return RegistryKey.of(RegistryKeys.RECIPE, identifier);
+    }
+
+    private RecipeEntry<?> getRecipeEntry(RegistryKey<Recipe<?>> key, Block block) {
+        Optional<Ingredient> chipIngredient = Ingredient.ofItem(getStack(block).);
+        ArrayList<Optional<Ingredient>> ingredients = new ArrayList<>();
+
+        RawShapedRecipe recipe = new RawShapedRecipe(3, 3, ingredients, Optional.empty());
+
+        return new RecipeEntry<CraftingRecipe>(
+                key,
+                new ShapedRecipe(
+                        "",
+                        CraftingRecipeCategory.MISC,
+                        recipe,
+                        block.asItem().getDefaultStack()
+                )
+        );
     }
 
     @Override
@@ -213,7 +259,7 @@ public class ChipsBlockItem extends BlockItem {
     @Override
     public Text getName(ItemStack stack) {
         if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
-            BlockComponent blockComponent = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
+            ChipsBlockItemComponent blockComponent = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
             Text blockName = blockComponent.block().getName();
             return blockName.copy().append(" ").append(Text.translatable("item.chips.chips_block.chip"));
         }

@@ -7,7 +7,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import zedzee.github.io.chips.Chips;
-import zedzee.github.io.chips.component.BlockComponent;
+import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 
 public record ChipsBlockChangePayload(BlockPos pos, Block block) implements CustomPayload {
     public static final Identifier IDENTIFIER = Chips.identifier("chips_block_change");
@@ -15,7 +15,7 @@ public record ChipsBlockChangePayload(BlockPos pos, Block block) implements Cust
     public static final PacketCodec<RegistryByteBuf, ChipsBlockChangePayload> CODEC =
             PacketCodec.tuple(
                     BlockPos.PACKET_CODEC, ChipsBlockChangePayload::pos,
-                    BlockComponent.BLOCK_PACKET_CODEC, ChipsBlockChangePayload::block,
+                    ChipsBlockItemComponent.BLOCK_PACKET_CODEC, ChipsBlockChangePayload::block,
                     ChipsBlockChangePayload::new);
 
     @Override
