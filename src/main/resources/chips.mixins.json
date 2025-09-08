@@ -4,6 +4,7 @@
   "package": "zedzee.github.io.chips.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "PreparedRecipesAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
