@@ -13,6 +13,7 @@ import net.minecraft.client.render.model.Baker;
 import net.minecraft.client.render.model.ModelSettings;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -64,8 +65,15 @@ public class ChipsItemModel implements ItemModel.Unbaked, ItemModel {
                 }
 
                 BlockStateModelHelper helper = new BlockStateModelHelper(block);
+
+                BlockPos originPos = BlockPos.ORIGIN;
+                PlayerEntity player = MinecraftClient.getInstance().player;
+                if (player != null) {
+                    originPos = player.getBlockPos();
+                }
+
                 Map<Direction, List<ChipsSprite>> spriteMap = helper.getSprites(
-                        MinecraftClient.getInstance().world, BlockPos.ORIGIN, Random.create()
+                        MinecraftClient.getInstance().world, originPos, Random.create()
                 );
 
                 spriteInfo.put(shape, new ChipsSpriteInfo(
