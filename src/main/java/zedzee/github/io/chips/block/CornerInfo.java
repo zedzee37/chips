@@ -3,6 +3,7 @@ package zedzee.github.io.chips.block;
 import zedzee.github.io.chips.Chips;
 
 // Standardize passing information about corners.
+// TODO: replace everything with this
 public record CornerInfo(int index, int corner) {
 
     // TODO: test if this needs index + 1
