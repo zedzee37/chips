@@ -49,6 +49,7 @@ public class Chips implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
 
         // maybe this for custom crafting?
+        // TODO: test this
         ServerTickEvents.START_SERVER_TICK.register((server) -> {
             ServerRecipeManager recipeManager = server.getRecipeManager();
             PreparedRecipesAccessor preparedRecipesAccessor = (PreparedRecipesAccessor) recipeManager;

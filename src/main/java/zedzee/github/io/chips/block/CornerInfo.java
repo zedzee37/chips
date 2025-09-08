@@ -4,6 +4,8 @@ import zedzee.github.io.chips.Chips;
 
 // Standardize passing information about corners.
 public record CornerInfo(int index, int corner) {
+
+    // TODO: test if this needs index + 1
     public static CornerInfo fromCorner(int corner) {
         int index = Integer.numberOfLeadingZeros(corner);
 
