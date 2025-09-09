@@ -1,8 +1,13 @@
 package zedzee.github.io.chips.item;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
@@ -15,6 +20,9 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -32,6 +40,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
@@ -40,9 +49,13 @@ import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class ChiselItem extends Item {
+    public static final int MIN_USE_TIME = 3;
     private static final int ANIMATION_TIME = 16;
+
     private final int useTime;
 
     public ChiselItem(Settings settings, int useTime) {
@@ -79,7 +92,20 @@ public class ChiselItem extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return useTime;
+        int currentUseTime = useTime;
+
+        World world = user.getWorld();
+        DynamicRegistryManager registryManager = world.getRegistryManager();
+
+        Optional<RegistryEntry.Reference<Enchantment>> maybeEfficiencyEntry = registryManager.getOptionalEntry(Enchantments.EFFICIENCY);
+
+        if (maybeEfficiencyEntry.isPresent()) {
+            int level = EnchantmentHelper.getLevel(maybeEfficiencyEntry.get(), stack);
+            int reduction = 5 * level;
+            currentUseTime -= reduction;
+        }
+
+        return Math.max(MIN_USE_TIME, currentUseTime);
     }
 
     private HitResult getHitResult(PlayerEntity user) {
@@ -179,9 +205,7 @@ public class ChiselItem extends Item {
             }
         }
 
-        if (!stack.isOf(ChipsItems.CREATIVE_CHISEL_ITEM)) {
-            stack.damage(1, player);
-        }
+        stack.damage(1, player);
 
         return ActionResult.SUCCESS;
     }

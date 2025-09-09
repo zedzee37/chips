@@ -1,15 +1,16 @@
 package zedzee.github.io.chips.item;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Unit;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
-import zedzee.github.io.chips.component.IndividualChipsComponent;
 
 import java.util.function.Function;
 
@@ -25,17 +26,23 @@ public class ChipsItems {
                     .maxCount(1)
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
-                            new IndividualChipsComponent())
+                            Unit.INSTANCE)
+                    .enchantable(3)
     );
     public static final Item CREATIVE_CHISEL_ITEM = register(
             "creative_chisel",
-            (settings) -> new ChiselItem(settings, 20),
+            (settings) -> new ChiselItem(settings, ChiselItem.MIN_USE_TIME),
             new Item.Settings()
                     .sword(ToolMaterial.NETHERITE, 1.0f, 2.0f)
                     .maxCount(1)
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
-                            new IndividualChipsComponent())
+                            Unit.INSTANCE)
+                    .enchantable(3)
+                    .component(
+                            DataComponentTypes.UNBREAKABLE,
+                            Unit.INSTANCE
+                    )
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
@@ -47,7 +54,7 @@ public class ChipsItems {
                             new ChipsBlockItemComponent(Blocks.GRASS_BLOCK))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
-                            new IndividualChipsComponent())
+                            Unit.INSTANCE)
     );
 
     public static final Item TEST_BLOCK_ITEM = register(
@@ -59,7 +66,7 @@ public class ChipsItems {
                             new ChipsBlockItemComponent(Blocks.COPPER_GRATE))
                     .component(
                             ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
-                            new IndividualChipsComponent())
+                            Unit.INSTANCE)
     );
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
