@@ -30,8 +30,6 @@ import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
-import java.util.*;
-
 public class Chips implements ModInitializer {
     public static final String MOD_ID = "chips";
 
@@ -65,7 +63,7 @@ public class Chips implements ModInitializer {
                         return null;
                     }
 
-                    Block block = chipsBlockEntity.getBlockAtCorner(1 << hoveredCorner);
+                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
 
                     if (block == null) {
                         return null;
