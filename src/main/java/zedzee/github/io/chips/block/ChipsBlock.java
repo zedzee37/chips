@@ -83,6 +83,17 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return count;
     }
 
+    public static boolean canBeChipped(Block block) {
+        BlockState defaultState = block.getDefaultState();
+
+        try {
+            VoxelShape shape = defaultState.getOutlineShape(null, null, ShapeContext.absent());
+            return shape == VoxelShapes.fullCube();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean isFull(BlockPos pos, BlockView world) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {

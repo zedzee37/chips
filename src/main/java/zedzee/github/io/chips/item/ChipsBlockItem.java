@@ -35,7 +35,6 @@ import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
