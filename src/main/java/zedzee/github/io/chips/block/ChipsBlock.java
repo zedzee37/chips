@@ -92,7 +92,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     }
 
     // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
-    public static int getHoveredCorner(BlockView world, PlayerEntity player) {
+    public static CornerInfo getHoveredCorner(BlockView world, PlayerEntity player) {
         Vec3d direction = Vec3d.fromPolar(player.getPitch(), player.getYaw());
         Vec3d end = player.getEyePos().add(direction.multiply(player.getBlockInteractionRange()));
         RaycastContext raycastContext = new RaycastContext(
@@ -105,19 +105,19 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         HitResult hitResult = player.getWorld().raycast(raycastContext);
 
         if (!(hitResult instanceof BlockHitResult blockHitResult)) {
-            return -1;
+            return CornerInfo.EMPTY;
         }
 
         return getClosestSlice(world, blockHitResult.getBlockPos(), blockHitResult.getPos());
     }
 
     // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
-    public static int getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
+    public static CornerInfo getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
         hitPos = hitPos.subtract(Vec3d.of(pos));
 
         BlockEntity entity = view.getBlockEntity(pos);
         if (!(entity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return -1;
+            return CornerInfo.EMPTY;
         }
 
         int i = chipsBlockEntity.getTotalChips();
@@ -138,7 +138,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
             }
         }
 
-        return j;
+        return CornerInfo.fromIndex(j);
     }
 
     public ChipsBlock(Settings settings) {
@@ -181,14 +181,14 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
                 player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT) &&
                 be instanceof ChipsBlockEntity chipsBlockEntity
         ) {
-            int corner = getHoveredCorner(world, player);
+            int corner = getHoveredCorner(world, player).shape();
 
-            boolean hitOtherChipsBlock = !chipsBlockEntity.hasCorner(1 << corner);
+            boolean hitOtherChipsBlock = !chipsBlockEntity.hasCorner(corner);
             if (corner == -1 || hitOtherChipsBlock) {
                 return shape;
             }
 
-            return getShape(1 << corner);
+            return getShape(corner);
         }
         return shape;
     }

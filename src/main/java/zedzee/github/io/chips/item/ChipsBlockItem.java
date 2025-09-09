@@ -61,34 +61,6 @@ public class ChipsBlockItem extends BlockItem {
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        // TODO: add this to the chisel functionality
-//        ItemStack stack = context.getStack();
-//        if (!stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
-//            return super.useOnBlock(context);
-//        }
-//        BlockComponent component = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
-//        Block blockType = component.block();
-//
-//        boolean isPlayerSneaking = context.getPlayer() != null && context.getPlayer();
-//
-//        BlockPos pos = context.getBlockPos();
-//        World world = context.getWorld();
-//        BlockState state = world.getBlockState(pos);
-//        BlockEntity blockEntity = world.getBlockEntity(pos);
-//        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-//            return super.useOnBlock(context);
-//        }
-//
-//        if (isPlayerSneaking && state.isOf(ChipsBlocks.CHIPS_BLOCK) && chipsBlockEntity.hasBlock(blockType)) {
-//            chipsBlockEntity.toggleDefaultUv(blockType);
-//            return ActionResult.SUCCESS;
-//        }
-//
-        return super.useOnBlock(context);
-    }
-
-    @Override
     public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
         if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
             MinecraftServer server = world.getServer();

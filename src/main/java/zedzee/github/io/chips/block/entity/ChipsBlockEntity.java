@@ -18,6 +18,7 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.*;
@@ -60,10 +61,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     @Nullable
-    public Block firstBlockWithCorner(int corner) {
+    public Block firstBlockWithCorner(CornerInfo corner) {
         for (Block block : blockMap.keySet()) {
             int chips = this.getChips(block);
-            if ((chips & corner) != 0) {
+            if ((chips & corner.shape()) != 0) {
                 return block;
             }
         }

@@ -20,6 +20,7 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
@@ -46,44 +47,6 @@ public class Chips implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ChiselAnimationPayload.ID, ChiselAnimationPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
 
-        // maybe this for custom crafting?
-        // TODO: test this
-        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
-            ServerRecipeManager recipeManager = server.getRecipeManager();
-
-            Collection<RecipeEntry<?>> oldRecipes = recipeManager.values();
-            ArrayList<RecipeEntry<?>> recipeEntries = new ArrayList<>(oldRecipes);
-
-            RegistryKey<Recipe<?>> key = RegistryKey.of(RegistryKeys.RECIPE, Chips.identifier("test"));
-
-            RecipeEntry<Recipe<?>> entry = new RecipeEntry<>(
-                    key,
-                    new ShapedRecipe(
-                            "",
-                            CraftingRecipeCategory.MISC,
-                            new RawShapedRecipe(
-                                    1, 1,
-                                    List.of(Optional.of(Ingredient.ofItem(Items.DIAMOND))),
-                                    Optional.empty()),
-                            ChipsBlockItem.getStack(Blocks.DIAMOND_BLOCK)
-                    )
-            );
-
-            recipeEntries.add(entry);
-
-            recipeManager.preparedRecipes = PreparedRecipes.of(recipeEntries);
-//            PreparedRecipes recipes = preparedRecipesAccessor.getPreparedRecipes();
-//            RecipeMapAccessor recipeMapAccessor = (RecipeMapAccessor) recipes;
-//
-//            Map<RegistryKey<Recipe<?>>, RecipeEntry<?>> recipeMap = recipeMapAccessor.getRecipeMap();
-//
-//            recipeMap.put(
-//                    key,
-//                    new RecipeEntry<CraftingRecipe>(key,
-//                    )
-//            );
-        });
-
         PlayerPickItemEvents.BLOCK.register(
                 (player, pos, state, requestIncludeData) -> {
                     if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
@@ -97,7 +60,7 @@ public class Chips implements ModInitializer {
                         return null;
                     }
 
-                    int hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
+                    int hoveredCorner = ChipsBlock.getHoveredCorner(world, player).shape();
                     if (hoveredCorner == -1) {
                         return null;
                     }

@@ -3,18 +3,17 @@ package zedzee.github.io.chips.block;
 import zedzee.github.io.chips.Chips;
 
 // Standardize passing information about corners.
-// TODO: replace everything with this
-public record CornerInfo(int index, int corner) {
+public record CornerInfo(int index, int shape) {
+    public static final CornerInfo EMPTY = new CornerInfo(-1, -1);
 
-    // TODO: test if this needs index + 1
-    public static CornerInfo fromCorner(int corner) {
-        int index = Integer.numberOfLeadingZeros(corner);
+    public static CornerInfo fromShape(int shape) {
+        int index = Integer.numberOfLeadingZeros(shape);
 
-        if ((1 << index) != corner) {
+        if ((1 << index) != shape) {
             Chips.LOGGER.warn("Non corner shape passed.");
         }
 
-        return new CornerInfo(index, corner);
+        return new CornerInfo(index, shape);
     }
 
     public static CornerInfo fromIndex(int index) {

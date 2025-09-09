@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
@@ -63,8 +64,8 @@ public class ChiselItem extends Item {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
 
                 if (playerEntity.isSneaking() && isChipsBlock && blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-                    int getHitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer());
-                    Block block = chipsBlockEntity.getBlockAtCorner(1 << getHitCorner);
+                    int hitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer()).shape();
+                    Block block = chipsBlockEntity.getBlockAtCorner(hitCorner);
                     chipsBlockEntity.toggleDefaultUv(block);
                     playerEntity.swingHand(context.getHand());
                 } else {
@@ -162,7 +163,7 @@ public class ChiselItem extends Item {
                 ServerPlayNetworking.send((ServerPlayerEntity) player, new ChipsBlockChangePayload(blockPos, block));
             }
         } else {
-            int corner = 1 << ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos());
+            int corner = ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos()).shape();
 
             if (corner == chipsBlockEntity.getTotalChips()) {
                 chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(
@@ -196,7 +197,7 @@ public class ChiselItem extends Item {
             return null;
         }
 
-        int corner = 1 << ChipsBlock.getClosestSlice(world, pos, hitResult.getPos());
+        CornerInfo corner = ChipsBlock.getClosestSlice(world, pos, hitResult.getPos());
         return chipsBlockEntity.firstBlockWithCorner(corner);
     }
 
