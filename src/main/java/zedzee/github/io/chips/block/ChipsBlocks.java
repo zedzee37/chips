@@ -11,6 +11,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.function.Function;
 
@@ -27,10 +28,12 @@ public class ChipsBlocks {
 //            Block.Settings.create().mapColor(MapColor.OAK_TAN).instrument(NoteBlockInstrument.BASS).strength(2.5F).sounds(BlockSoundGroup.WOOD).burnable()
 //    );
 
-    public static final Block CHIPS_BLOCK = register(
-            "chips",
+    public static final Block CHIPS_BLOCK = register("chips",
             ChipsBlock::new,
-            AbstractBlock.Settings.create().nonOpaque().strength(0.5f)
+            AbstractBlock.Settings.create()
+                    .nonOpaque()
+                    .strength(0.5f)
+                    .luminance(state -> state.get(ChipsBlock.LIGHT_LEVEL))
     );
 
     private static Block registerWithItem(String path,

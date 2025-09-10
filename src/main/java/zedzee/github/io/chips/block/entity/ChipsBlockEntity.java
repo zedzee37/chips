@@ -18,6 +18,8 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
+import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.render.RenderData;
 
@@ -56,6 +58,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         } else {
             this.blockMap.put(block, new BlockData(chips));
         }
+
         markDirty();
         sync();
     }
@@ -172,6 +175,18 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         if (world == null) {
             return;
         }
+
+        // calculate lighthing changes
+        int totalLuminance = 0;
+        for (Block curBlock : blockMap.keySet()) {
+            BlockState defaultState = curBlock.getDefaultState();
+            int luminance = defaultState.getLuminance();
+            totalLuminance += luminance / 8;
+        }
+        totalLuminance = Math.min(15, totalLuminance);
+
+        Chips.LOGGER.info(String.valueOf(totalLuminance));
+        world.setBlockState(pos, world.getBlockState(pos).with(ChipsBlock.LIGHT_LEVEL, totalLuminance), Block.NOTIFY_ALL);
 
         world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_LISTENERS);
 
