@@ -4,6 +4,8 @@
   "package": "zedzee.github.io.chips.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "EntityStepSoundMixin",
+    "LivingEntityFallSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

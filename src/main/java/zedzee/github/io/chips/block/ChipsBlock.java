@@ -307,9 +307,8 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         Set<BlockSoundGroup> soundGroups = getSoundGroups(world, pos);
 
-        soundGroups.forEach(soundGroup -> {
-            world.playSound(player, pos, soundGroup.getBreakSound(), SoundCategory.BLOCKS);
-        });
+        soundGroups.forEach(soundGroup ->
+                world.playSound(player, pos, soundGroup.getBreakSound(), SoundCategory.BLOCKS));
 
         return super.onBreak(world, pos, state, player);
     }
@@ -322,15 +321,9 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
 
         Set<BlockSoundGroup> groups = new HashSet<>();
 
-        chipsBlockEntity.forEachKey(block -> {
-            groups.add(block.getDefaultState().getSoundGroup());
-        });
+        chipsBlockEntity.forEachKey(block ->
+                groups.add(block.getDefaultState().getSoundGroup()));
 
         return groups;
-    }
-
-    @Override
-    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
-        super.onSteppedOn(world, pos, state, entity);
     }
 }
