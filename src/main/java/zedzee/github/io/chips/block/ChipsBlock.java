@@ -14,6 +14,7 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -35,9 +36,7 @@ import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.item.ChipsBlockItem;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public static final int DEFAULT_CHIPS_VALUE = 1;
@@ -299,7 +298,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         builder.add(WATERLOGGED);
     }
 
-    // TODO: sound stuff here
     @Override
     protected BlockSoundGroup getSoundGroup(BlockState state) {
         return BlockSoundGroup.INTENTIONALLY_EMPTY;
@@ -307,7 +305,28 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
 
     @Override
     public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        Set<BlockSoundGroup> soundGroups = getSoundGroups(world, pos);
+
+        soundGroups.forEach(soundGroup -> {
+            world.playSound(player, pos, soundGroup.getBreakSound(), SoundCategory.BLOCKS);
+        });
+
         return super.onBreak(world, pos, state, player);
+    }
+
+    public static Set<BlockSoundGroup> getSoundGroups(BlockView world, BlockPos pos) {
+        BlockEntity be = world.getBlockEntity(pos);
+        if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return Set.of();
+        }
+
+        Set<BlockSoundGroup> groups = new HashSet<>();
+
+        chipsBlockEntity.forEachKey(block -> {
+            groups.add(block.getDefaultState().getSoundGroup());
+        });
+
+        return groups;
     }
 
     @Override
