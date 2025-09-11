@@ -19,4 +19,8 @@ public record CornerInfo(int index, int shape) {
     public static CornerInfo fromIndex(int index) {
         return new CornerInfo(index, 1 << index);
     }
+
+    public boolean exists() {
+        return index != -1 && shape != -1;
+    }
 }

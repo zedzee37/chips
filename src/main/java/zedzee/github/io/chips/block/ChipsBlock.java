@@ -3,6 +3,8 @@ package zedzee.github.io.chips.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -111,18 +113,22 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return true;
     }
 
-    // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
-    public static CornerInfo getHoveredCorner(BlockView world, PlayerEntity player) {
-        Vec3d direction = Vec3d.fromPolar(player.getPitch(), player.getYaw());
-        Vec3d end = player.getEyePos().add(direction.multiply(player.getBlockInteractionRange()));
+    public static HitResult entityBlockRayCast(BlockView world, LivingEntity user, double distance) {
+        Vec3d direction = Vec3d.fromPolar(user.getPitch(), user.getYaw());
+        Vec3d end = user.getEyePos().add(direction.multiply(distance));
         RaycastContext raycastContext = new RaycastContext(
-                player.getEyePos(),
+                user.getEyePos(),
                 end,
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE,
-                player
+                user
         );
-        HitResult hitResult = player.getWorld().raycast(raycastContext);
+        return world.raycast(raycastContext);
+    }
+
+    // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
+    public static CornerInfo getHoveredCorner(BlockView world, PlayerEntity player) {
+        HitResult hitResult = entityBlockRayCast(world, player, player.getBlockInteractionRange());
 
         if (!(hitResult instanceof BlockHitResult blockHitResult)) {
             return CornerInfo.EMPTY;

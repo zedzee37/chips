@@ -100,6 +100,26 @@ public class ChiselItem extends Item {
             currentUseTime -= reduction;
         }
 
+        if (user instanceof PlayerEntity player) {
+            HitResult hitResult = ChipsBlock.entityBlockRayCast(world, user, player.getBlockInteractionRange());
+
+            if (hitResult instanceof BlockHitResult blockHitResult) {
+                BlockState state = world.getBlockState(blockHitResult.getBlockPos());
+
+                if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+                    CornerInfo hoveredCorner = ChipsBlock.getClosestSlice(
+                            world, blockHitResult.getBlockPos(), blockHitResult.getPos()
+                    );
+
+                    if (hoveredCorner.exists()) {
+
+                    }
+                } else {
+
+                }
+            }
+        }
+
         return Math.max(MIN_USE_TIME, currentUseTime);
     }
 
