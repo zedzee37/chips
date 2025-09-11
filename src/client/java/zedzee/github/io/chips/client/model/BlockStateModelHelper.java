@@ -47,12 +47,15 @@ public class BlockStateModelHelper {
 
         sprites.values().forEach(spriteList -> {
             spriteList.forEach(chipsSprite -> {
-                if (chipsSprite.tintIndex() == -1) {
+                if (state.isTransparent()) {
+                    chipsSprite.setTransparent();
+                }
+
+                if (chipsSprite.getTintIndex() == -1) {
                     return;
                 }
 
-
-                int colorToMix = this.blockColors.getColor(this.state, blockView, pos, chipsSprite.tintIndex());
+                int colorToMix = this.blockColors.getColor(this.state, blockView, pos, chipsSprite.getTintIndex());
                 colorToMix = ColorHelper.withAlpha(255, colorToMix);
 
                 chipsSprite.mixColor(colorToMix);

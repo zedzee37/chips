@@ -7,7 +7,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Unit;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;

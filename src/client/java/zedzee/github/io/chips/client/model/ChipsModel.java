@@ -52,7 +52,7 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
 //            }
 
             sprites.forEach(sprite -> {
-                if (sprite.sprite() == null) {
+                if (sprite.getSprite() == null) {
                     return;
                 }
 
@@ -142,7 +142,7 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
             float toZ,
             boolean defaultUv
     ) {
-        Sprite actualSprite = sprite.sprite();
+        Sprite actualSprite = sprite.getSprite();
         emitter.spriteBake(actualSprite, MutableQuadView.BAKE_LOCK_UV);
 
         if (defaultUv) {
@@ -199,7 +199,12 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
 //        } else {
 //            emitter.spriteBake(info.particleSprite(), MutableQuadView.BAKE_LOCK_UV);
 //        }
-        emitter.renderLayer(BlockRenderLayer.CUTOUT_MIPPED);
+
+        if (sprite.isTransparent()) {
+            emitter.renderLayer(BlockRenderLayer.TRANSLUCENT);
+        } else {
+            emitter.renderLayer(BlockRenderLayer.CUTOUT_MIPPED);
+        }
 
 //        emitter.spriteBake(sprite.sprite(), MutableQuadView.BAKE_LOCK_UV);
 
@@ -211,11 +216,11 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
 //            emitter.color(-1, -1, -1, -1);
 //        }
 
-        if (sprite.tintIndex() != -1) {
-            emitter.tintIndex(sprite.tintIndex());
+        if (sprite.getTintIndex() != -1) {
+            emitter.tintIndex(sprite.getTintIndex());
         }
 
-        int[] colors = sprite.colors();
+        int[] colors = sprite.getColors();
         emitter.color(colors[0], colors[1], colors[2], colors[3]);
 
         emitter.emit();

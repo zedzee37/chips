@@ -5,7 +5,18 @@ import net.minecraft.util.math.ColorHelper;
 
 import java.util.Arrays;
 
-public record ChipsSprite(Sprite sprite, int tintIndex, int[] colors) {
+public class ChipsSprite {
+    private final Sprite sprite;
+    private final int tintIndex;
+    private final int[] colors;
+    private boolean transparent = false;
+
+    private ChipsSprite(Sprite sprite, int tintIndex, int[] colors) {
+        this.sprite = sprite;
+        this.tintIndex = tintIndex;
+        this.colors = colors;
+    }
+
     public ChipsSprite(Sprite sprite) {
         this(sprite, -1, getDefaultColors());
     }
@@ -20,6 +31,26 @@ public record ChipsSprite(Sprite sprite, int tintIndex, int[] colors) {
         for (int i = 0; i < colors.length; i++) {
             colors[i] = ColorHelper.mix(colors[i], color);
         }
+    }
+
+    public void setTransparent() {
+        this.transparent = true;
+    }
+
+    public boolean isTransparent() {
+        return this.transparent;
+    }
+
+    public int getTintIndex() {
+        return tintIndex;
+    }
+
+    public Sprite getSprite() {
+        return sprite;
+    }
+
+    public int[] getColors() {
+        return this.colors;
     }
 
     public static class Builder {
