@@ -11,17 +11,13 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.item.BrushItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.*;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -54,10 +50,12 @@ public class ChiselItem extends Item {
     private static final int ANIMATION_TIME = 16;
 
     private final int useTime;
+    private final ToolMaterial toolMaterial;
 
-    public ChiselItem(Settings settings, int useTime) {
+    public ChiselItem(Settings settings, int useTime, ToolMaterial toolMaterial) {
         super(settings);
         this.useTime = useTime;
+        this.toolMaterial = toolMaterial;
     }
 
     @Override
@@ -124,6 +122,15 @@ public class ChiselItem extends Item {
         VoxelShape shape = state.getOutlineShape(world, pos, shapeContext);
 
         return shape == VoxelShapes.fullCube();
+    }
+
+    private boolean canChiselBlock(Block block, ItemStack chiselStack) {
+        ToolMaterial requiredMaterial = getRequiredChiselToolMaterial(block);
+        if (requiredMaterial.equals(ToolMaterial.IRON)) {
+            return true;
+        }
+
+        return toolMaterial.equals(ToolMaterial.NETHERITE) || toolMaterial.equals(requiredMaterial);
     }
 
     @Override
@@ -282,5 +289,15 @@ public class ChiselItem extends Item {
         );
         itemEntity.setToDefaultPickupDelay();
         world.spawnEntity(itemEntity);
+    }
+
+    public static ToolMaterial getRequiredChiselToolMaterial(Block block) {
+        BlockState defaultState = block.getDefaultState();
+
+        if (defaultState.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
+            return ToolMaterial.DIAMOND;
+        }
+
+        return ToolMaterial.IRON;
     }
 }

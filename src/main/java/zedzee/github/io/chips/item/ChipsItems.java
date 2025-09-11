@@ -18,37 +18,31 @@ import java.util.function.Function;
 public class ChipsItems {
     public static final int DEFAULT_USE_TIME = 50;
 
-    public static final Item IRON_CHISEL = register(
+    public static final Item IRON_CHISEL = createChiselItem(
             "iron_chisel",
-            (settings) -> new ChiselItem(settings, DEFAULT_USE_TIME),
-            createChiselSettings(
-                    ToolMaterial.IRON
-            )
+            new Item.Settings(),
+            ToolMaterial.IRON,
+            DEFAULT_USE_TIME
     );
-    public static final Item DIAMOND_CHISEL = register(
+    public static final Item DIAMOND_CHISEL = createChiselItem(
             "diamond_chisel",
-            (settings) -> new ChiselItem(settings, DEFAULT_USE_TIME),
-            createChiselSettings(
-                    ToolMaterial.DIAMOND
-            )
+            new Item.Settings(),
+            ToolMaterial.DIAMOND,
+            DEFAULT_USE_TIME - 10
     );
-    public static final Item NETHERITE_CHISEl = register(
+    public static final Item NETHERITE_CHISEL = createChiselItem(
             "netherite_chisel",
-            (settings) -> new ChiselItem(settings, DEFAULT_USE_TIME),
-            createChiselSettings(
-                    ToolMaterial.NETHERITE
-            )
+            new Item.Settings(),
+            ToolMaterial.NETHERITE,
+            DEFAULT_USE_TIME - 5
     );
 
-    public static final Item CREATIVE_CHISEL_ITEM = register(
+    public static final Item CREATIVE_CHISEL = createChiselItem(
             "creative_chisel",
-            (settings) -> new ChiselItem(settings, ChiselItem.MIN_USE_TIME),
-            createChiselSettings(
-                    ToolMaterial.NETHERITE
-            ).component(
-                    DataComponentTypes.UNBREAKABLE,
-                    Unit.INSTANCE
-            )
+            new Item.Settings()
+                    .component(DataComponentTypes.UNBREAKABLE, Unit.INSTANCE),
+            ToolMaterial.NETHERITE,
+            ChiselItem.MIN_USE_TIME
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
@@ -75,15 +69,17 @@ public class ChipsItems {
                             Unit.INSTANCE)
     );
 
-    private static Item.Settings createChiselSettings(ToolMaterial material) {
-        return
-                new Item.Settings()
-                        .tool(material, BlockTags.AIR, 0.25f, 1.0f, 0.0f)
+    private static Item createChiselItem(String path, Item.Settings settings, ToolMaterial material, int useTime) {
+        return register(
+                path,
+                (itemSettings) -> new ChiselItem(itemSettings, useTime, material),
+                settings
                         .maxCount(1)
                         .component(
                                 ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                                 Unit.INSTANCE
-                        );
+                        )
+                );
     }
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {

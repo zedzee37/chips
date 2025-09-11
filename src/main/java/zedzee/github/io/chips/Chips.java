@@ -67,8 +67,8 @@ public class Chips implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(itemGroup -> {
             itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
             itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
-            itemGroup.add(ChipsItems.NETHERITE_CHISEl.getDefaultStack());
-            itemGroup.add(ChipsItems.CREATIVE_CHISEL_ITEM.getDefaultStack());
+            itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
+            itemGroup.add(ChipsItems.CREATIVE_CHISEL.getDefaultStack());
         });
 
         ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(itemGroup ->
