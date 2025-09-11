@@ -66,6 +66,15 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         }
     });
 
+    public ChipsBlock(Settings settings) {
+        super(settings);
+        setDefaultState(
+                getDefaultState()
+                        .with(WATERLOGGED, false)
+                        .with(LIGHT_LEVEL, 0)
+        );
+    }
+
     public static boolean hasCorner(int flags, int corner) {
         return (flags & createFlag(corner)) != 0;
     }
@@ -149,15 +158,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         }
 
         return CornerInfo.fromIndex(j);
-    }
-
-    public ChipsBlock(Settings settings) {
-        super(settings);
-        setDefaultState(
-                getDefaultState()
-                        .with(WATERLOGGED, false)
-                        .with(LIGHT_LEVEL, 0)
-        );
     }
 
     @Override
