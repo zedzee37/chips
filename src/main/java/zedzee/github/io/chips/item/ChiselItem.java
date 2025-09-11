@@ -104,37 +104,6 @@ public class ChiselItem extends Item {
             currentUseTime -= reduction;
         }
 
-        Block focusedBlockType = null;
-        if (user instanceof PlayerEntity player) {
-            HitResult hitResult = ChipsBlock.entityBlockRayCast(world, player, player.getBlockInteractionRange());
-
-            if (hitResult instanceof BlockHitResult blockHitResult) {
-                BlockPos blockPos = blockHitResult.getBlockPos();
-
-                BlockEntity be = world.getBlockEntity(blockPos);
-                if (be instanceof ChipsBlockEntity chipsBlockEntity) {
-                    CornerInfo hoveredCorner = ChipsBlock.getClosestSlice(world, blockPos, hitResult.getPos());
-
-                    if (hoveredCorner.exists()) {
-                        focusedBlockType = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
-                    }
-                } else {
-                    focusedBlockType = world.getBlockState(blockPos).getBlock();
-                }
-            }
-        }
-
-        if (focusedBlockType != null) {
-            ToolMaterial requiredMaterial = getRequiredChiselToolMaterial(focusedBlockType);
-
-            boolean isDiamondOrHigher = (
-                    toolMaterial.equals(ToolMaterial.DIAMOND) || toolMaterial.equals(ToolMaterial.NETHERITE)
-            );
-            if (!requiredMaterial.equals(ToolMaterial.IRON) && !isDiamondOrHigher) {
-                currentUseTime *= 5;
-            }
-        }
-
         return Math.max(MIN_USE_TIME, currentUseTime);
     }
 
@@ -157,15 +126,6 @@ public class ChiselItem extends Item {
         VoxelShape shape = state.getOutlineShape(world, pos, shapeContext);
 
         return shape == VoxelShapes.fullCube();
-    }
-
-    private boolean canChiselBlock(Block block, ItemStack chiselStack) {
-        ToolMaterial requiredMaterial = getRequiredChiselToolMaterial(block);
-        if (requiredMaterial.equals(ToolMaterial.IRON)) {
-            return true;
-        }
-
-        return toolMaterial.equals(ToolMaterial.NETHERITE) || toolMaterial.equals(requiredMaterial);
     }
 
     @Override
@@ -324,15 +284,5 @@ public class ChiselItem extends Item {
         );
         itemEntity.setToDefaultPickupDelay();
         world.spawnEntity(itemEntity);
-    }
-
-    public static ToolMaterial getRequiredChiselToolMaterial(Block block) {
-        BlockState defaultState = block.getDefaultState();
-
-        if (defaultState.isIn(BlockTags.NEEDS_DIAMOND_TOOL)) {
-            return ToolMaterial.DIAMOND;
-        }
-
-        return ToolMaterial.IRON;
     }
 }
