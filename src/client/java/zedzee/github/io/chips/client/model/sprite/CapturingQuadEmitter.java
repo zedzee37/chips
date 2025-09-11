@@ -111,7 +111,8 @@ public class CapturingQuadEmitter implements QuadEmitter {
 
     @Override
     public QuadEmitter tintIndex(int tintIndex) {
-        return null;
+        this.spriteBuilder.tintIndex(tintIndex);
+        return this;
     }
 
     @Override
