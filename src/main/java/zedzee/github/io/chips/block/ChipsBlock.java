@@ -31,7 +31,6 @@ import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.item.ChipsBlockItem;
 
-import javax.swing.*;
 import java.util.*;
 
 public class ChipsBlock extends BlockWithEntity implements Waterloggable {
@@ -170,18 +169,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return new ChipsBlockEntity(pos, state);
     }
 
-//    public static Optional<Integer> getChips(BlockPos pos, BlockView world) {
-//        return
-//                findBlockEntity(pos, world)
-//                        .map(ChipsBlockEntity::getChips);
-//    }
-//
-//    public static void setChips(BlockPos pos, BlockView world, int chips) {
-//        findBlockEntity(pos, world)
-//                .ifPresent(entity -> entity.setChips(chips));
-//
-//    }
-
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         VoxelShape shape = getCollisionShape(state, world, pos, context);
@@ -203,16 +190,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         }
         return shape;
     }
-
-//    @Override
-//    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-//        BlockEntity blockEntity = world.getBlockEntity(pos);
-//        if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-//            return getShape(chipsBlockEntity.getTotalChips());
-//        }
-//
-//        return VoxelShapes.empty();
-//    }
 
 
     @Override
@@ -260,11 +237,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public boolean hasSidedTransparency(BlockState state) {
         return true;
     }
-
-//    @Override
-//    protected boolean isTransparent(BlockState state) {
-//        return true;
-//    }
 
     @Override
     public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {

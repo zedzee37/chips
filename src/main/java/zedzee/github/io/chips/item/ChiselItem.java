@@ -1,10 +1,8 @@
 package zedzee.github.io.chips.item;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -21,8 +19,9 @@ import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -40,7 +39,6 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
@@ -50,7 +48,6 @@ import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class ChiselItem extends Item {
     public static final int MIN_USE_TIME = 3;
@@ -286,8 +283,4 @@ public class ChiselItem extends Item {
         itemEntity.setToDefaultPickupDelay();
         world.spawnEntity(itemEntity);
     }
-
-//    private static boolean canChisel(BlockState state, float hardness) {
-//        return state.contains(ChipsBlockHelpers.CHIPS) && hardness != -1;
-//    }
 }

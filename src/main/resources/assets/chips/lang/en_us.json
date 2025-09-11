@@ -1,7 +1,11 @@
 {
-  "item.chips.chisel": "Chisel",
+  "item.chips.iron_chisel": "Iron Chisel",
+  "item.chips.diamond_chisel": "Diamond Chisel",
+  "item.chips.netherite_chisel": "Netherite Chisel",
   "item.chips.creative_chisel": "Creative Chisel",
   "item.chips.chips_block": "Chips Block",
   "item.chips.chips_block.chip": "Chip",
-  "itemGroup.chips_item_group": "Chips"
+  "itemGroup.chips_item_group": "Chips",
+
+  "tag.item.chips.chisels": "Chisels"
 }

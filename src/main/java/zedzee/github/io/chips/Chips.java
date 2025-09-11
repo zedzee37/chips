@@ -13,6 +13,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.*;
@@ -62,6 +63,13 @@ public class Chips implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
 
         Registry.register(Registries.ITEM_GROUP, CHIPS_ITEM_GROUP_KEY, CHIPS_ITEM_GROUP);
+
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(itemGroup -> {
+            itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
+            itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
+            itemGroup.add(ChipsItems.NETHERITE_CHISEl.getDefaultStack());
+            itemGroup.add(ChipsItems.CREATIVE_CHISEL_ITEM.getDefaultStack());
+        });
 
         ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(itemGroup ->
             Registries.BLOCK.stream().forEach(block -> {

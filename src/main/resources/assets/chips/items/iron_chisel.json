@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "chips:item/chisel"
+    "model": "chips:item/iron_chisel"
   }
 }
