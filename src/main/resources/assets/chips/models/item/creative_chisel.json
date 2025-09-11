@@ -1,6 +1,0 @@
-{
-  "parent": "chips:item/chisel_hold",
-  "textures": {
-    "layer0": "chips:item/creative_chisel"
-  }
-}

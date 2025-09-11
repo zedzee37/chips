@@ -91,6 +91,10 @@ public class ChiselItem extends Item {
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+        if (user.isInCreativeMode()) {
+            return MIN_USE_TIME;
+        }
+
         int currentUseTime = useTime;
 
         World world = user.getWorld();

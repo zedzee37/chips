@@ -1,7 +1,6 @@
 package zedzee.github.io.chips.item;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
@@ -34,14 +33,6 @@ public class ChipsItems {
             new Item.Settings(),
             ToolMaterial.NETHERITE,
             DEFAULT_USE_TIME - 5
-    );
-
-    public static final Item CREATIVE_CHISEL = createChiselItem(
-            "creative_chisel",
-            new Item.Settings()
-                    .component(DataComponentTypes.UNBREAKABLE, Unit.INSTANCE),
-            ToolMaterial.NETHERITE,
-            ChiselItem.MIN_USE_TIME
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
