@@ -145,10 +145,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         setChips(block, newChips);
     }
 
-    public @Nullable Block getBlockAtCorner(int corner) {
+    public @Nullable Block getBlockAtCorner(CornerInfo cornerInfo) {
         for (Block key : blockMap.keySet()) {
             int chips = getChips(key);
-            if ((chips & corner) != 0) {
+            if ((chips & cornerInfo.shape()) != 0) {
                 return key;
             }
         }

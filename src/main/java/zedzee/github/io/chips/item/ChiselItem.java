@@ -42,6 +42,7 @@ import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
+import javax.tools.Tool;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,10 +73,13 @@ public class ChiselItem extends Item {
                 BlockEntity blockEntity = world.getBlockEntity(pos);
 
                 if (playerEntity.isSneaking() && isChipsBlock && blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-                    int hitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer()).shape();
-                    Block block = chipsBlockEntity.getBlockAtCorner(hitCorner);
-                    chipsBlockEntity.toggleDefaultUv(block);
-                    playerEntity.swingHand(context.getHand());
+                    CornerInfo hitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer());
+
+                    if (hitCorner.exists()) {
+                        Block block = chipsBlockEntity.getBlockAtCorner(hitCorner);
+                        chipsBlockEntity.toggleDefaultUv(block);
+                        playerEntity.swingHand(context.getHand());
+                    }
                 } else {
                     playerEntity.setCurrentHand(context.getHand());
                 }
@@ -98,6 +102,37 @@ public class ChiselItem extends Item {
             int level = EnchantmentHelper.getLevel(maybeEfficiencyEntry.get(), stack);
             int reduction = 5 * level;
             currentUseTime -= reduction;
+        }
+
+        Block focusedBlockType = null;
+        if (user instanceof PlayerEntity player) {
+            HitResult hitResult = ChipsBlock.entityBlockRayCast(world, player, player.getBlockInteractionRange());
+
+            if (hitResult instanceof BlockHitResult blockHitResult) {
+                BlockPos blockPos = blockHitResult.getBlockPos();
+
+                BlockEntity be = world.getBlockEntity(blockPos);
+                if (be instanceof ChipsBlockEntity chipsBlockEntity) {
+                    CornerInfo hoveredCorner = ChipsBlock.getClosestSlice(world, blockPos, hitResult.getPos());
+
+                    if (hoveredCorner.exists()) {
+                        focusedBlockType = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+                    }
+                } else {
+                    focusedBlockType = world.getBlockState(blockPos).getBlock();
+                }
+            }
+        }
+
+        if (focusedBlockType != null) {
+            ToolMaterial requiredMaterial = getRequiredChiselToolMaterial(focusedBlockType);
+
+            boolean isDiamondOrHigher = (
+                    toolMaterial.equals(ToolMaterial.DIAMOND) || toolMaterial.equals(ToolMaterial.NETHERITE)
+            );
+            if (!requiredMaterial.equals(ToolMaterial.IRON) && !isDiamondOrHigher) {
+                currentUseTime *= 5;
+            }
         }
 
         return Math.max(MIN_USE_TIME, currentUseTime);

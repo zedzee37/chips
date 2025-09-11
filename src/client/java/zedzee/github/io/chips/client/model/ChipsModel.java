@@ -203,13 +203,21 @@ public record ChipsModel(Function<RenderData, Map<VoxelShape, ChipsSpriteInfo>> 
 
 //        emitter.spriteBake(sprite.sprite(), MutableQuadView.BAKE_LOCK_UV);
 
+//        if (sprite.tintIndex() != -1) {
+//            emitter.tintIndex(sprite.tintIndex());
+//            int[] colors = sprite.colors();
+//            emitter.color(colors[0], colors[1], colors[2], colors[3]);
+//        } else {
+//            emitter.color(-1, -1, -1, -1);
+//        }
+
         if (sprite.tintIndex() != -1) {
             emitter.tintIndex(sprite.tintIndex());
-            int[] colors = sprite.colors();
-            emitter.color(colors[0], colors[1], colors[2], colors[3]);
-        } else {
-            emitter.color(-1, -1, -1, -1);
         }
+
+        int[] colors = sprite.colors();
+        emitter.color(colors[0], colors[1], colors[2], colors[3]);
+
         emitter.emit();
     }
 }
