@@ -176,17 +176,19 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             return;
         }
 
-        // calculate lighthing changes
-        int totalLuminance = 0;
-        for (Block curBlock : blockMap.keySet()) {
-            BlockState defaultState = curBlock.getDefaultState();
-            int luminance = defaultState.getLuminance();
-            totalLuminance += luminance / 8;
-        }
-        totalLuminance = Math.min(15, totalLuminance);
+        if (world.getBlockState(pos).contains(ChipsBlock.LIGHT_LEVEL)) {
+            float totalLuminance = 0;
+            for (Block curBlock : blockMap.keySet()) {
+                int corners = ChipsBlock.countCorners(getChips(curBlock));
+                BlockState defaultState = curBlock.getDefaultState();
+                int luminance = defaultState.getLuminance() * corners;
+                totalLuminance += luminance / 8.0f;
+            }
+            totalLuminance = Math.min(15, Math.round(totalLuminance));
 
-        Chips.LOGGER.info(String.valueOf(totalLuminance));
-        world.setBlockState(pos, world.getBlockState(pos).with(ChipsBlock.LIGHT_LEVEL, totalLuminance), Block.NOTIFY_ALL);
+            world.setBlockState(pos, world.getBlockState(pos).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
+        }
+        // calculate lighthing changes
 
         world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_LISTENERS);
 
