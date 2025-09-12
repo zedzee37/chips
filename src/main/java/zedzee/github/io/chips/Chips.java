@@ -66,19 +66,24 @@ public class Chips implements ModInitializer {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(itemGroup -> {
             itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
-            itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
-            itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
+//            itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
+//            itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(itemGroup ->
-            Registries.BLOCK.stream().forEach(block -> {
-                if (!ChipsBlock.canBeChipped(block)) {
-                    return;
-                }
+        ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(itemGroup -> {
+                    itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
+//                    itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
+//                    itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
 
-                ItemStack stack = ChipsBlockItem.getStack(block);
-                itemGroup.add(stack);
-            })
+                    Registries.BLOCK.stream().forEach(block -> {
+                        if (!ChipsBlock.canBeChipped(block)) {
+                            return;
+                        }
+
+                        ItemStack stack = ChipsBlockItem.getStack(block);
+                        itemGroup.add(stack);
+                    });
+                }
         );
 
         PlayerPickItemEvents.BLOCK.register(
