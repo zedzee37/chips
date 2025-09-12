@@ -3,7 +3,7 @@
   "id": "chips",
   "version": "${version}",
 
-  "name": "chips",
+  "name": "Chips",
   "description": "A simple mod that allows for a sub-grid of blocks for finer details in builds.",
   "authors": [
     "zedzee"

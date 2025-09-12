@@ -100,7 +100,7 @@ public class Chips implements ModInitializer {
                     }
 
                     CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
-                    if (hoveredCorner.exists()) {
+                    if (!hoveredCorner.exists()) {
                         return null;
                     }
 

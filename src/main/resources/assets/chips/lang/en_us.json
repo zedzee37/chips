@@ -5,6 +5,9 @@
   "item.chips.creative_chisel": "Creative Chisel",
   "item.chips.chips_block": "Chips Block",
   "item.chips.chips_block.chip": "Chip",
+
+  "block.chips.chips": "Chips Block",
+
   "itemGroup.chips_item_group": "Chips",
 
   "tag.item.chips.chisels": "Chisels"
