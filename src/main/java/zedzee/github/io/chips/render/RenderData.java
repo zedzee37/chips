@@ -9,3 +9,4 @@ public interface RenderData {
     void forEachBlock(Consumer<Block> consumer);
     boolean shouldUseDefaultUv(Block block);
 }
+    

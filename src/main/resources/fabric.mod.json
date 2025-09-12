@@ -4,8 +4,10 @@
   "version": "${version}",
 
   "name": "chips",
-  "description": "",
-  "authors": [],
+  "description": "A simple mod that allows for a sub-grid of blocks for finer details in builds.",
+  "authors": [
+    "zedzee"
+  ],
   "contact": {},
 
   "license": "GPL-3.0",
