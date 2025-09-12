@@ -6,6 +6,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Unit;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
@@ -69,6 +70,7 @@ public class ChipsItems {
                                 ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                                 Unit.INSTANCE
                         )
+                        .tool(material, BlockTags.AIR, 0.1f, 1.0f, 0.0f)
                 );
     }
 
