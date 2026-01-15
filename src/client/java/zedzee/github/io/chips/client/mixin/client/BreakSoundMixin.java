@@ -22,27 +22,27 @@ import java.util.Set;
 @Mixin(ClientPlayerInteractionManager.class)
 public class BreakSoundMixin {
     @Shadow @Final private MinecraftClient client;
-
-    @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;"))
-    public void playCorrectSound(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        assert client.world != null;
-
-        Set<BlockSoundGroup> soundGroups = ChipsBlock.getSoundGroups(client.world, pos);
-
-        soundGroups.forEach(soundGroup -> {
-            client
-                    .getSoundManager()
-                    .play(
-
-                            new PositionedSoundInstance(
-                                    soundGroup.getHitSound(),
-                                    SoundCategory.BLOCKS,
-                                    (soundGroup.getVolume() + 1.0F) / 8.0F,
-                                    soundGroup.getPitch() * 0.5F,
-                                    SoundInstance.createRandom(),
-                                    pos
-                            )
-                    );
-        });
-    }
+// todo: fix this
+//    @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;"))
+//    public void playCorrectSound(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+//        assert client.world != null;
+//
+//        Set<BlockSoundGroup> soundGroups = ChipsBlock.getSoundGroups(client.world, pos);
+//
+//        soundGroups.forEach(soundGroup -> {
+//            client
+//                    .getSoundManager()
+//                    .play(
+//
+//                            new PositionedSoundInstance(
+//                                    soundGroup.getHitSound(),
+//                                    SoundCategory.BLOCKS,
+//                                    (soundGroup.getVolume() + 1.0F) / 8.0F,
+//                                    soundGroup.getPitch() * 0.5F,
+//                                    SoundInstance.createRandom(),
+//                                    pos
+//                            )
+//                    );
+//        });
+//    }
 }

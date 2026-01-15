@@ -1,16 +1,10 @@
 package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.PlayerPickItemEvents;
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
@@ -19,13 +13,10 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.block.ChipsBlock;
-import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
-import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsBlockItem;
@@ -78,32 +69,33 @@ public class Chips implements ModInitializer {
                 }
         );
 
-        PlayerPickItemEvents.BLOCK.register(
-                (player, pos, state, requestIncludeData) -> {
-                    if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-                        return null;
-                    }
-
-                    World world = player.getWorld();
-                    BlockEntity be = world.getBlockEntity(pos);
-
-                    if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
-                        return null;
-                    }
-
-                    CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
-                    if (!hoveredCorner.exists()) {
-                        return null;
-                    }
-
-                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
-
-                    if (block == null) {
-                        return null;
-                    }
-
-                    return ChipsBlockItem.getStack(block);
-        });
+        // todo: fix this
+//        PlayerPickItemEvents.BLOCK.register(
+//                (player, pos, state, requestIncludeData) -> {
+//                    if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+//                        return null;
+//                    }
+//
+//                    World world = player.getWorld();
+//                    BlockEntity be = world.getBlockEntity(pos);
+//
+//                    if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
+//                        return null;
+//                    }
+//
+//                    CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
+//                    if (!hoveredCorner.exists()) {
+//                        return null;
+//                    }
+//
+//                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+//
+//                    if (block == null) {
+//                        return null;
+//                    }
+//
+//                    return ChipsBlockItem.getStack(block);
+//        });
 
     }
 

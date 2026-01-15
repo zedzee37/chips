@@ -59,46 +59,47 @@ public class ChipsBlockItem extends BlockItem {
         return stack;
     }
 
-    @Override
-    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
-        if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
-            MinecraftServer server = world.getServer();
-            ServerRecipeManager serverRecipeManager = server.getRecipeManager();
-
-            Block blockType = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
-
-            RegistryKey<Recipe<?>> recipeRegistryKey = getRecipeKey(blockType);
-            if (serverRecipeManager.get(recipeRegistryKey).isEmpty()) {
-                ArrayList<RecipeEntry<?>> recipeEntries = new ArrayList<>(serverRecipeManager.values());
-                recipeEntries.add(getRecipeEntry(recipeRegistryKey, blockType));
-                serverRecipeManager.preparedRecipes = PreparedRecipes.of(recipeEntries);
-            }
-        }
-
-        super.inventoryTick(stack, world, entity, slot);
-    }
+    //TODO: Fix this
+//    @Override
+//    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, @Nullable EquipmentSlot slot) {
+//        if (stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+//            MinecraftServer server = world.getServer();
+//            RecipeManager serverRecipeManager = server.getRecipeManager();
+//
+//            Block blockType = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT).block();
+//
+//            RegistryKey<Recipe<?>> recipeRegistryKey = getRecipeKey(blockType);
+//            if (serverRecipeManager.get(recipeRegistryKey.getRegistry()).isEmpty()) {
+//                ArrayList<RecipeEntry<?>> recipeEntries = new ArrayList<>(serverRecipeManager.values());
+//                recipeEntries.add(getRecipeEntry(recipeRegistryKey, blockType));
+//                serverRecipeManager.preparedRecipes = PreparedRecipes.of(recipeEntries);
+//            }
+//        }
+//
+//        super.inventoryTick(stack, world, entity, slot);
+//    }
 
     private RegistryKey<Recipe<?>> getRecipeKey(Block block) {
         Identifier identifier = Chips.identifier("chips_item_" + Registries.BLOCK.getId(block).getPath());
         return RegistryKey.of(RegistryKeys.RECIPE, identifier);
     }
-
-    private RecipeEntry<?> getRecipeEntry(RegistryKey<Recipe<?>> key, Block block) {
-        RawShapedRecipe recipe = new RawShapedRecipe(3, 3, getIngredients(block), Optional.empty());
-
-        return new RecipeEntry<CraftingRecipe>(
-                key,
-                new ShapedRecipe(
-                        "",
-                        CraftingRecipeCategory.MISC,
-                        recipe,
-                        block.asItem().getDefaultStack()
-                )
-        );
-    }
+// todo: fix this
+//    private RecipeEntry<?> getRecipeEntry(RegistryKey<Recipe<?>> key, Block block) {
+//        RawShapedRecipe recipe = new RawShapedRecipe(3, 3, getIngredients(block), Optional.empty());
+//
+//        return new RecipeEntry<CraftingRecipe>(
+//                key,
+//                new ShapedRecipe(
+//                        "",
+//                        CraftingRecipeCategory.MISC,
+//                        recipe,
+//                        block.asItem().getDefaultStack()
+//                )
+//        );
+//    }
 
     private List<Optional<Ingredient>> getIngredients(Block block) {
-        Ingredient baseIngredient = Ingredient.ofItem(ChipsItems.CHIPS_BLOCK_ITEM);
+        Ingredient baseIngredient = Ingredient.ofItems(ChipsItems.CHIPS_BLOCK_ITEM);
         ComponentChanges.Builder builder = ComponentChanges.builder();
         builder.add(new Component<>(ChipsComponents.BLOCK_COMPONENT_COMPONENT, new ChipsBlockItemComponent(block)));
 
@@ -106,7 +107,7 @@ public class ChipsBlockItem extends BlockItem {
                 new ComponentsIngredient(baseIngredient, builder.build())
                         .toVanilla()
         );
-        Optional<Ingredient> slimeBallIngredient = Optional.of(Ingredient.ofItem(Items.SLIME_BALL));
+        Optional<Ingredient> slimeBallIngredient = Optional.of(Ingredient.ofItems(Items.SLIME_BALL));
         ArrayList<Optional<Ingredient>> ingredients = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {

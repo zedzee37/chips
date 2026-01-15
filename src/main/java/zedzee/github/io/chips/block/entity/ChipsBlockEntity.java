@@ -13,8 +13,6 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
@@ -197,54 +195,55 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
         }
     }
+// todo: fix this abomination
 
-    @Override
-    protected void writeData(WriteView view) {
-        WriteView.ListAppender<Block> blockListAppender = view.getListAppender("blocks", Registries.BLOCK.getCodec());
-        WriteView.ListAppender<BlockData> mappedChipsListAppender = view.getListAppender(
-                "mappedChips", BlockData.CODEC
-        );
-
-        blockMap.forEach((block, chipMap) -> {
-            blockListAppender.add(block);
-            mappedChipsListAppender.add(chipMap);
-        });
-
-        super.writeData(view);
-    }
-
-    @Override
-    protected void readData(ReadView view) {
-        this.blockMap = new HashMap<>();
-
-        ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Registries.BLOCK.getCodec());
-        ReadView.TypedListReadView<BlockData> mappedChipsList = view.getTypedListView(
-                "mappedChips", BlockData.CODEC
-        );
-
-        this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(new HashMap<>());
-        sync();
-        super.readData(view);
-    }
-
-    private Optional<Map<Block, BlockData>> zipBlockMap(
-            ReadView.TypedListReadView<Block> blockList,
-            ReadView.TypedListReadView<BlockData> mappedChipsList) {
-        List<Block> blocks = blockList.stream().toList();
-        List<BlockData> mappedChips = mappedChipsList.stream().toList();
-
-        if (blocks.size() != mappedChips.size()) {
-            return Optional.empty();
-        }
-        Map<Block, BlockData> blockIntegerMap = IntStream.range(0, blocks.size())
-                .boxed()
-                .collect(Collectors.toMap(
-                        blocks::get,
-                        mappedChips::get
-                ));
-
-        return Optional.of(new HashMap<>(blockIntegerMap));
-    }
+//    @Override
+//    protected void writeData(WriteView view) {
+//        WriteView.ListAppender<Block> blockListAppender = view.getListAppender("blocks", Registries.BLOCK.getCodec());
+//        WriteView.ListAppender<BlockData> mappedChipsListAppender = view.getListAppender(
+//                "mappedChips", BlockData.CODEC
+//        );
+//
+//        blockMap.forEach((block, chipMap) -> {
+//            blockListAppender.add(block);
+//            mappedChipsListAppender.add(chipMap);
+//        });
+//
+//        super.writeData(view);
+//    }
+//
+//    @Override
+//    protected void readData(ReadView view) {
+//        this.blockMap = new HashMap<>();
+//
+//        ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Registries.BLOCK.getCodec());
+//        ReadView.TypedListReadView<BlockData> mappedChipsList = view.getTypedListView(
+//                "mappedChips", BlockData.CODEC
+//        );
+//
+//        this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(new HashMap<>());
+//        sync();
+//        super.readData(view);
+//    }
+//
+//    private Optional<Map<Block, BlockData>> zipBlockMap(
+//            ReadView.TypedListReadView<Block> blockList,
+//            ReadView.TypedListReadView<BlockData> mappedChipsList) {
+//        List<Block> blocks = blockList.stream().toList();
+//        List<BlockData> mappedChips = mappedChipsList.stream().toList();
+//
+//        if (blocks.size() != mappedChips.size()) {
+//            return Optional.empty();
+//        }
+//        Map<Block, BlockData> blockIntegerMap = IntStream.range(0, blocks.size())
+//                .boxed()
+//                .collect(Collectors.toMap(
+//                        blocks::get,
+//                        mappedChips::get
+//                ));
+//
+//        return Optional.of(new HashMap<>(blockIntegerMap));
+//    }
 
     public static class ChipsRenderData implements RenderData {
         private final Map<Block, BlockData> blockMap;

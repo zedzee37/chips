@@ -11,7 +11,7 @@ public record ChiselAnimationPayload(boolean play) implements CustomPayload {
     public static final Identifier IDENTIFIER = Chips.identifier("chisel");
     public static final CustomPayload.Id<ChiselAnimationPayload> ID = new CustomPayload.Id<>(IDENTIFIER);
     public static final PacketCodec<RegistryByteBuf, ChiselAnimationPayload> CODEC =
-            PacketCodec.tuple(PacketCodecs.BOOLEAN, ChiselAnimationPayload::play, ChiselAnimationPayload::new);
+            PacketCodec.tuple(PacketCodecs.BOOL, ChiselAnimationPayload::play, ChiselAnimationPayload::new);
 
     @Override
     public Id<? extends CustomPayload> getId() {

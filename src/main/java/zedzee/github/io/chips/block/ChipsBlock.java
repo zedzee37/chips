@@ -11,7 +11,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -29,7 +28,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.*;
-import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
@@ -199,27 +197,28 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return shape;
     }
 
+//todo: fix this
 
-    @Override
-    protected List<ItemStack> getDroppedStacks(BlockState state, LootWorldContext.Builder builder) {
-        BlockEntity blockEntity = builder.get(LootContextParameters.BLOCK_ENTITY);
-        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return List.of();
-        }
-
-        ArrayList<ItemStack> stacks = new ArrayList<>();
-        chipsBlockEntity.forEachKey(block -> {
-            int chips = chipsBlockEntity.getChips(block);
-
-            ItemStack stack = ChipsBlockItem.getStack(block);
-            int cornerCount = countCorners(chips);
-            stack.setCount(cornerCount);
-
-            stacks.add(stack);
-        });
-
-        return stacks;
-    }
+//    @Override
+//    protected List<ItemStack> getDroppedStacks(BlockState state, LootWorldContext.Builder builder) {
+//        BlockEntity blockEntity = builder.get(LootContextParameters.BLOCK_ENTITY);
+//        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+//            return List.of();
+//        }
+//
+//        ArrayList<ItemStack> stacks = new ArrayList<>();
+//        chipsBlockEntity.forEachKey(block -> {
+//            int chips = chipsBlockEntity.getChips(block);
+//
+//            ItemStack stack = ChipsBlockItem.getStack(block);
+//            int cornerCount = countCorners(chips);
+//            stack.setCount(cornerCount);
+//
+//            stacks.add(stack);
+//        });
+//
+//        return stacks;
+//    }
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
@@ -256,21 +255,23 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
-    @Override
-    public BlockState getStateForNeighborUpdate(BlockState state,
-                                                WorldView world,
-                                                ScheduledTickView tickView,
-                                                BlockPos pos,
-                                                Direction direction,
-                                                BlockPos neighborPos,
-                                                BlockState neighborState,
-                                                Random random) {
-        if (state.get(WATERLOGGED)) {
-            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
-        }
+    //todo: fix this
 
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
-    }
+//    @Override
+//    public BlockState getStateForNeighborUpdate(BlockState state,
+//                                                WorldView world,
+//                                                ScheduledTickView tickView,
+//                                                BlockPos pos,
+//                                                Direction direction,
+//                                                BlockPos neighborPos,
+//                                                BlockState neighborState,
+//                                                Random random) {
+//        if (state.get(WATERLOGGED)) {
+//            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+//        }
+//
+//        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+//    }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {

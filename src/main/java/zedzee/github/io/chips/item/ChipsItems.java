@@ -4,8 +4,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.item.ToolMaterials;
+import net.minecraft.registry.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.Unit;
 import zedzee.github.io.chips.Chips;
@@ -20,19 +20,19 @@ public class ChipsItems {
     public static final Item IRON_CHISEL = createChiselItem(
             "iron_chisel",
             new Item.Settings(),
-            ToolMaterial.IRON,
+            ToolMaterials.IRON,
             DEFAULT_USE_TIME
     );
     public static final Item DIAMOND_CHISEL = createChiselItem(
             "diamond_chisel",
             new Item.Settings(),
-            ToolMaterial.DIAMOND,
+            ToolMaterials.DIAMOND,
             DEFAULT_USE_TIME - 10
     );
     public static final Item NETHERITE_CHISEL = createChiselItem(
             "netherite_chisel",
             new Item.Settings(),
-            ToolMaterial.NETHERITE,
+            ToolMaterials.NETHERITE,
             DEFAULT_USE_TIME - 5
     );
 
@@ -70,13 +70,13 @@ public class ChipsItems {
                                 ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT,
                                 Unit.INSTANCE
                         )
-                        .tool(material, BlockTags.AIR, 0.1f, 1.0f, 0.0f)
                 );
     }
 
     private static Item register(String path, Function<Item.Settings, Item> factory, Item.Settings settings) {
         final RegistryKey<Item> registryKey = RegistryKey.of(RegistryKeys.ITEM, Chips.identifier(path));
-        return Items.register(registryKey, factory, settings);
+        Item item = factory.apply(settings);
+        return Items.register(registryKey, item);
     }
 
     public static void init() {}

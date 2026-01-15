@@ -8,11 +8,15 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsItems;
 
 public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
-    @Override
-    public void initialize(Context context) {
 
-        context.modifyBlockModelOnLoad().register((original, ctx) ->
-                ctx.state().isOf(ChipsBlocks.CHIPS_BLOCK)
+    private boolean itemIdIsItem(Identifier itemId, Item item) {
+        return itemId.equals(Registries.ITEM.getId(item));
+    }
+
+    @Override
+    public void onInitializeModelLoader(Context context) {
+        context.modifyModelAfterBake().register((original, ctx) ->
+                ctx.resourceId().equals()
                         ? new ChipsBlockModel()
                         : original
         );
@@ -21,10 +25,6 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
                 itemIdIsItem(ctx.itemId(), ChipsItems.CHIPS_BLOCK_ITEM) || itemIdIsItem(ctx.itemId(), ChipsItems.TEST_BLOCK_ITEM) ?
                         new ChipsItemModel() : original
         );
-    }
-
-    private boolean itemIdIsItem(Identifier itemId, Item item) {
-        return itemId.equals(Registries.ITEM.getId(item));
     }
 //    private boolean shouldRenderChipsModel(BlockState state) {
 //        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255 && state.get(ChipsBlockHelpers.CHIPS) != 0;

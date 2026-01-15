@@ -49,10 +49,10 @@ public class ChipsBlocks {
                                           AbstractBlock.Settings settings) {
         final Identifier identifier = Chips.identifier(path);
         final RegistryKey<Block> registryKey = RegistryKey.of(RegistryKeys.BLOCK, identifier);
+//
+//        settings.registryKey(registryKey);
 
-        settings.registryKey(registryKey);
-
-        return Blocks.register(registryKey, factory, settings);
+        return Blocks.register(registryKey, factory.apply(settings));
     }
 
     public static void init() {

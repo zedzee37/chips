@@ -7,6 +7,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -99,20 +100,21 @@ public class ChiselItem extends Item {
 
         World world = user.getWorld();
         DynamicRegistryManager registryManager = world.getRegistryManager();
+// TODO: implement this
 
-        Optional<RegistryEntry.Reference<Enchantment>> maybeEfficiencyEntry = registryManager.getOptionalEntry(Enchantments.EFFICIENCY);
-
-        if (maybeEfficiencyEntry.isPresent()) {
-            int level = EnchantmentHelper.getLevel(maybeEfficiencyEntry.get(), stack);
-            int reduction = 5 * level;
-            currentUseTime -= reduction;
-        }
+//        Optional<RegistryEntry.Reference<Enchantment>> maybeEfficiencyEntry = registryManager.getOptional(Enchantments.EFFICIENCY);
+//
+//        if (maybeEfficiencyEntry.isPresent()) {
+//            int level = EnchantmentHelper.getLevel(maybeEfficiencyEntry.get(), stack);
+//            int reduction = 5 * level;
+//            currentUseTime -= reduction;
+//        }
 
         return Math.max(MIN_USE_TIME, currentUseTime);
     }
 
     private HitResult getHitResult(PlayerEntity user) {
-        return ProjectileUtil.getCollision(user, EntityPredicates.CAN_HIT, user.getBlockInteractionRange());
+        return ProjectileUtil.getCollision(user, EntityPredicates.CAN_COLLIDE, user.getBlockInteractionRange());
     }
 
     private boolean canChisel(BlockView world, BlockPos pos, Entity user) {
@@ -179,7 +181,8 @@ public class ChiselItem extends Item {
                 world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
 
                 if (blockEntity != null) {
-                    blockEntity.onBlockReplaced(blockPos, state);
+                    // TODO: this
+//                    blockEntity.onBlockReplaced(blockPos, state);
                 }
 
                 blockEntity = world.getBlockEntity(blockPos);
@@ -208,7 +211,8 @@ public class ChiselItem extends Item {
             }
         }
 
-        stack.damage(1, player);
+        //todo: fix the slot
+        stack.damage(1, user, EquipmentSlot.MAINHAND);
 
         return ActionResult.SUCCESS;
     }
@@ -253,7 +257,7 @@ public class ChiselItem extends Item {
         Vec3d vec3d = hitResult.getPos();
 
         for(int k = 0; k < j; ++k) {
-            world.addParticleClient(blockStateParticleEffect, vec3d.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), vec3d.y, vec3d.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * (double)3.0F * world.getRandom().nextDouble(), (double)0.0F, dustParticlesOffset.zd() * (double)i * (double)3.0F * world.getRandom().nextDouble());
+            world.addParticle(blockStateParticleEffect, vec3d.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), vec3d.y, vec3d.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * (double)3.0F * world.getRandom().nextDouble(), (double)0.0F, dustParticlesOffset.zd() * (double)i * (double)3.0F * world.getRandom().nextDouble());
         }
     }
 
