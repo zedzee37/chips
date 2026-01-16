@@ -1,30 +1,37 @@
 package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import zedzee.github.io.chips.block.ChipsBlocks;
-import zedzee.github.io.chips.item.ChipsItems;
+import zedzee.github.io.chips.Chips;
+
 
 public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
+    public static final ModelIdentifier CHIPS_BLOCK_MODEL_ID = new ModelIdentifier(Chips.identifier("chips"), "");
 
-    private boolean itemIdIsItem(Identifier itemId, Item item) {
-        return itemId.equals(Registries.ITEM.getId(item));
-    }
+
+//    private boolean itemIdIsItem(Identifier itemId, Item item) {
+//        return itemId.equals(Registries.ITEM.getId(item));
+//    }
 
     @Override
     public void onInitializeModelLoader(Context context) {
-        context.modifyModelAfterBake().register((original, ctx) ->
-                ctx.resourceId().equals()
-                        ? new ChipsBlockModel()
-                        : original
-        );
+        context.modifyModelOnLoad().register((original, ctx) -> {
+            final ModelIdentifier modelId = ctx.topLevelId();
+
+            if (modelId != null && modelId.equals(CHIPS_BLOCK_MODEL_ID)) {
+                return new ChipsBlockModel();
+            }
+
+            return original;
+        });
 //
-        context.modifyItemModelBeforeBake().register((original, ctx) ->
-                itemIdIsItem(ctx.itemId(), ChipsItems.CHIPS_BLOCK_ITEM) || itemIdIsItem(ctx.itemId(), ChipsItems.TEST_BLOCK_ITEM) ?
-                        new ChipsItemModel() : original
-        );
+//        context.modifyItemModelBeforeBake().register((original, ctx) ->
+//                itemIdIsItem(ctx.itemId(), ChipsItems.CHIPS_BLOCK_ITEM) || itemIdIsItem(ctx.itemId(), ChipsItems.TEST_BLOCK_ITEM) ?
+//                        new ChipsItemModel() : original
+//        );
     }
 //    private boolean shouldRenderChipsModel(BlockState state) {
 //        return state.contains(ChipsBlockHelpers.CHIPS) && state.get(ChipsBlockHelpers.CHIPS) != 255 && state.get(ChipsBlockHelpers.CHIPS) != 0;
