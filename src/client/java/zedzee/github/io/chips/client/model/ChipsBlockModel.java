@@ -1,13 +1,19 @@
 package zedzee.github.io.chips.client.model;
 
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -15,6 +21,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.component.ChipsBlockItemComponent;
+import zedzee.github.io.chips.component.ChipsComponents;
+import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.render.RenderData;
 
 import java.util.*;
@@ -163,6 +172,18 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
     }
 
     @Override
+    public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
+        if (!stack.isOf(ChipsItems.CHIPS_BLOCK_ITEM) || stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
+            return;
+        }
+
+        ChipsBlockItemComponent blockItemComponent = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
+        assert blockItemComponent != null;
+        ChipsItemRenderData renderData = new ChipsItemRenderData(blockItemComponent.block());
+        emitModelQuads(renderData);
+    }
+
+    @Override
     public void emitBlockQuads(
             BlockRenderView blockView,
             BlockState state,
@@ -177,8 +198,18 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         }
 
         RenderData renderData = (RenderData)object;
+        assert renderData != null;
+        emitModelQuads(renderData);
+    }
+
+    private void emitModelQuads(RenderData renderData) {
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        assert renderer != null;
+        MeshBuilder builder = renderer.meshBuilder();
+        QuadEmitter emitter = builder.getEmitter();
+        BakeArgs bakeArgs = bakeArgsSupplier.get();
+
         renderData.forEachBlock(block -> {
-            BakeArgs bakeArgs = bakeArgsSupplier.get();
             UnbakedModel model = bakeArgs.baker().getOrLoadModel(Registries.BLOCK.getId(block));
             BakedModel blockModel = model.bake(bakeArgs.baker(), bakeArgs.textureGetter(), bakeArgs.modelBakeSettings());
 
@@ -186,18 +217,8 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 return;
             }
 
-            BlockState defaultState = block.getDefaultState();
-            Random random = randomSupplier.get();
-            Map<Direction, List<Sprite>> spriteMap = new HashMap<>();
             for (Direction direction : Direction.values()) {
-                List<BakedQuad> quads = blockModel.getQuads(defaultState, direction, random);
-                List<Sprite> sprites = new ArrayList<>();
 
-                for (BakedQuad quad : quads) {
-                    sprites.add(quad.getSprite());
-                }
-
-                spriteMap.put(direction, sprites);
             }
         });
     }
@@ -208,7 +229,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             Function<SpriteIdentifier, Sprite> textureGetter,
             ModelBakeSettings rotationContainer
     ) {
-        this.bakerSupplier = () -> baker;
+        this.bakeArgsSupplier = () -> new BakeArgs(baker, textureGetter, rotationContainer);
         return this;
     }
 
