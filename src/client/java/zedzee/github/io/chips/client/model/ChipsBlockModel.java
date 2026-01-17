@@ -11,6 +11,10 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -21,11 +25,13 @@ import net.minecraft.registry.Registries;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
@@ -35,6 +41,7 @@ import zedzee.github.io.chips.render.RenderData;
 import zedzee.github.io.chips.util.RandomSupplier;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -49,6 +56,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
     private Sprite fallbackParticleSprite;
     private RenderMaterial renderMaterialNormal;
     private RenderMaterial renderMaterialTranslucent;
+    private BlockColors blockColors;
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random) {
@@ -117,7 +125,9 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         ChipsBlockItemComponent blockItemComponent = stack.get(ChipsComponents.BLOCK_COMPONENT_COMPONENT);
         assert blockItemComponent != null;
         ChipsItemRenderData renderData = new ChipsItemRenderData(blockItemComponent.block());
-        emitModelQuads(context.getEmitter(), randomSupplier.get(), renderData);
+        emitModelQuads(context.getEmitter(), randomSupplier.get(), renderData, (state, tintIndex) -> {
+            return -1;
+        });
     }
 
     @Override
@@ -136,10 +146,22 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
 
         RenderData renderData = (RenderData)object;
         assert renderData != null;
-        emitModelQuads(context.getEmitter(), randomSupplier.get(), renderData);
+        emitModelQuads(
+                context.getEmitter(),
+                randomSupplier.get(),
+                renderData,
+                (blockState, tintIndex) -> this.blockColors.getColor(
+                        blockState, blockView, pos, tintIndex
+                )
+        );
     }
 
-    private void emitModelQuads(QuadEmitter emitter, Random random, RenderData renderData) {
+    private void emitModelQuads(
+            QuadEmitter emitter,
+            Random random,
+            RenderData renderData,
+            BiFunction<BlockState, Integer, Integer> blockColorSupplier
+    ) {
         final BakeArgs bakeArgs = bakeArgsSupplier.get();
 
         if (particleSpriteSupplier == null) {
@@ -187,10 +209,20 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                                 (float)maxZ,
                                 renderData.shouldUseDefaultUv(block)
                         );
+                        RenderLayer layer = RenderLayers.getBlockLayer(defaultState);
+                        emitter.material(layer.isTranslucent() ? renderMaterialTranslucent : renderMaterialNormal);
                         emitter.nominalFace(direction);
                         emitter.cullFace(null);
-                        emitter.colorIndex(quad.getColorIndex());
-                        emitter.color(-1, -1, -1, -1);
+
+                        if (quad.hasColor()) {
+                            int color = blockColorSupplier.apply(defaultState, quad.getColorIndex());
+                            color = ColorHelper.Argb.withAlpha(0xFF, color);
+
+                            emitter.colorIndex(quad.getColorIndex());
+                            emitter.color(color, color, color, color);
+                        } else {
+                            emitter.color(-1, -1, -1, -1);
+                        }
                         emitter.tag(0);
                         emitter.emit();
                     }
@@ -211,17 +243,19 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
 
         Renderer renderer = RendererAccess.INSTANCE.getRenderer();
         MaterialFinder finder = renderer.materialFinder();
-
-        renderMaterialNormal = finder
+        this.renderMaterialNormal = finder
                 .ambientOcclusion(TriState.TRUE)
                 .disableDiffuse(false)
                 .blendMode(BlendMode.CUTOUT_MIPPED)
                 .find();
-        renderMaterialTranslucent = finder
+        this.renderMaterialTranslucent = finder
                 .ambientOcclusion(TriState.TRUE)
                 .disableDiffuse(false)
                 .blendMode(BlendMode.TRANSLUCENT)
                 .find();
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        this.blockColors = client.getBlockColors();
 
         return this;
     }
@@ -294,57 +328,61 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             return;
         }
 
-        float minU = sprite.getMinU();
-        float maxU = sprite.getMaxU();
+        final float minU = sprite.getMinU();
+        final float maxU = sprite.getMaxU();
 
-        float minV = sprite.getMaxV();
-        float maxV = sprite.getMinV();
+        final float minV = sprite.getMaxV();
+        final float maxV = sprite.getMinV();
 
-        float x0 = MathHelper.lerp(fromX, minU, maxU);
-        float x1 = MathHelper.lerp(toX, minU, maxU);
+        // can just use fromX and toX because they will both be within 0-1 (same applies for z)
+        final float startXU = MathHelper.lerp(fromX, minU, maxU);
+        final float stopXU = MathHelper.lerp(toX, minU, maxU);
 
-        float height = Math.abs(toY - fromY);
-        float y0 = MathHelper.lerp(1 - height, minV, maxV);
+        final float height = Math.abs(toY - fromY);
+        final float startYV = MathHelper.lerp(1 - height, minV, maxV);
 
-        float z0 = MathHelper.lerp(fromZ, minU, maxU);
-        float z1 = MathHelper.lerp(toZ, minU, maxU);
+        final float startZU = MathHelper.lerp(fromZ, minU, maxU);
+        final float stopZU = MathHelper.lerp(toZ, minU, maxU);
+
+        final float startZV = MathHelper.lerp(fromZ, minV, maxV);
+        final float stopZV = MathHelper.lerp(toZ, minV, maxV);
 
         switch (direction) {
             case NORTH -> {
-                emitter.uv(0, x0, maxV);
-                emitter.uv(1, x1, maxV);
-                emitter.uv(2, x1, y0);
-                emitter.uv(3, x0, y0);
+                emitter.uv(0, startXU, maxV);
+                emitter.uv(1, stopXU, maxV);
+                emitter.uv(2, stopXU, startYV);
+                emitter.uv(3, startXU, startYV);
             }
             case SOUTH -> {
-                emitter.uv(3, x0, maxV);
-                emitter.uv(2, x1, maxV);
-                emitter.uv(1, x1, y0);
-                emitter.uv(0, x0, y0);
+                emitter.uv(3, startXU, maxV);
+                emitter.uv(2, stopXU, maxV);
+                emitter.uv(1, stopXU, startYV);
+                emitter.uv(0, startXU, startYV);
             }
             case EAST ->  {
-                emitter.uv(0, z0, y0);
-                emitter.uv(1, z0, maxV);
-                emitter.uv(2, z1, maxV);
-                emitter.uv(3, z1, y0);
+                emitter.uv(0, startZU, startYV);
+                emitter.uv(1, startZU, maxV);
+                emitter.uv(2, stopZU, maxV);
+                emitter.uv(3, stopZU, startYV);
             }
             case WEST -> {
-                emitter.uv(3, z0, y0);
-                emitter.uv(2, z0, maxV);
-                emitter.uv(1, z1, maxV);
-                emitter.uv(0, z1, y0);
+                emitter.uv(3, startZU, startYV);
+                emitter.uv(2, startZU, maxV);
+                emitter.uv(1, stopZU, maxV);
+                emitter.uv(0, stopZU, startYV);
             }
             case UP -> {
-                emitter.uv(0, x0, z1);
-                emitter.uv(1, x1, z1);
-                emitter.uv(2, x1, z0);
-                emitter.uv(3, x0, z0);
+                emitter.uv(0, startXU, startZV);
+                emitter.uv(1, stopXU, startZV);
+                emitter.uv(2, stopXU, stopZV);
+                emitter.uv(3, startXU, stopZV);
             }
             case DOWN -> {
-                emitter.uv(0, x0, z0);
-                emitter.uv(1, x1, z0);
-                emitter.uv(2, x1, z1);
-                emitter.uv(3, x0, z1);
+                emitter.uv(3, startXU, startZV);
+                emitter.uv(2, stopXU, startZV);
+                emitter.uv(1, stopXU, stopZV);
+                emitter.uv(0, startXU, stopZV);
             }
         }
     }
