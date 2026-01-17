@@ -256,9 +256,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             return blockMap.get(block).getChips();
         }
 
-        @Override
-        public void forEachBlock(Consumer<Block> consumer) {
-            blockMap.keySet().forEach(consumer);
+        public Set<Block> getBlocks() {
+            return blockMap.keySet();
         }
 
         @Override

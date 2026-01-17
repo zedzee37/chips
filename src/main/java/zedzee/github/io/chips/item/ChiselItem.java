@@ -248,17 +248,17 @@ public class ChiselItem extends Item {
 
     // blatantly stolen from BrushItem
     private void addHitParticles(World world, BlockHitResult hitResult, Block blockType, PlayerEntity player) {
-        double d = (double)3.0F;
-        int i = player.getMainArm() == Arm.RIGHT ? 1 : -1;
-        int j = world.getRandom().nextBetweenExclusive(7, 12);
-        BlockStateParticleEffect blockStateParticleEffect = new BlockStateParticleEffect(ParticleTypes.BLOCK, blockType.getDefaultState());
-        Direction direction = hitResult.getSide();
-        BrushItem.DustParticlesOffset dustParticlesOffset = BrushItem.DustParticlesOffset.fromSide(player.getRotationVec(0.0f), direction);
-        Vec3d vec3d = hitResult.getPos();
-
-        for(int k = 0; k < j; ++k) {
-            world.addParticle(blockStateParticleEffect, vec3d.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), vec3d.y, vec3d.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * (double)3.0F * world.getRandom().nextDouble(), (double)0.0F, dustParticlesOffset.zd() * (double)i * (double)3.0F * world.getRandom().nextDouble());
-        }
+//        double d = (double)3.0F;
+//        int i = player.getMainArm() == Arm.RIGHT ? 1 : -1;
+//        int j = world.getRandom().nextBetweenExclusive(7, 12);
+//        BlockStateParticleEffect blockStateParticleEffect = new BlockStateParticleEffect(ParticleTypes.BLOCK, blockType.getDefaultState());
+//        Direction direction = hitResult.getSide();
+//        BrushItem.DustParticlesOffset dustParticlesOffset = BrushItem.DustParticlesOffset.fromSide(player.getRotationVec(0.0f), direction);
+//        Vec3d vec3d = hitResult.getPos();
+//
+//        for(int k = 0; k < j; ++k) {
+//            world.addParticle(blockStateParticleEffect, vec3d.x - (double)(direction == Direction.WEST ? 1.0E-6F : 0.0F), vec3d.y, vec3d.z - (double)(direction == Direction.NORTH ? 1.0E-6F : 0.0F), dustParticlesOffset.xd() * (double)i * (double)3.0F * world.getRandom().nextDouble(), (double)0.0F, dustParticlesOffset.zd() * (double)i * (double)3.0F * world.getRandom().nextDouble());
+//        }
     }
 
     private void playHitSound(PlayerEntity player, Block block, World world, BlockPos pos) {

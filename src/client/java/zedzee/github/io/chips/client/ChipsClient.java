@@ -39,8 +39,6 @@ import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
-import java.lang.management.MemoryNotificationInfo;
-
 public class ChipsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {

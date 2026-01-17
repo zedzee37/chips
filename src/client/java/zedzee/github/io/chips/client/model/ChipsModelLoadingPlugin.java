@@ -2,14 +2,13 @@ package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import zedzee.github.io.chips.Chips;
 
 
 public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
-    public static final ModelIdentifier CHIPS_BLOCK_MODEL_ID = new ModelIdentifier(Chips.identifier("chips"), "");
+    public static final ModelIdentifier CHIPS_BLOCK_MODEL_ID = new ModelIdentifier(Chips.identifier("chips_block"), "");
+    public static final ModelIdentifier CHIPS_BLOCK_MODEL_INVENTORY_ID = new ModelIdentifier(Chips.identifier("chips_block"), "inventory");
 
 
 //    private boolean itemIdIsItem(Identifier itemId, Item item) {
@@ -21,7 +20,13 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
         context.modifyModelOnLoad().register((original, ctx) -> {
             final ModelIdentifier modelId = ctx.topLevelId();
 
-            if (modelId != null && modelId.equals(CHIPS_BLOCK_MODEL_ID)) {
+            if (modelId == null) return original;
+
+            final Identifier id = modelId.id();
+
+            if (id.getNamespace().equals(Chips.MOD_ID)
+                    && id.getPath().equals("chips_block")) {
+
                 return new ChipsBlockModel();
             }
 
