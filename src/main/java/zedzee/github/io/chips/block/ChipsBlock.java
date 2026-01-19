@@ -3,15 +3,11 @@ package zedzee.github.io.chips.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ToolMaterial;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
@@ -22,16 +18,12 @@ import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
-import zedzee.github.io.chips.component.ChipsComponents;
-import zedzee.github.io.chips.item.ChipsBlockItem;
 
 import java.util.*;
 
@@ -180,9 +172,23 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         VoxelShape shape = getCollisionShape(state, world, pos, context);
 
         BlockEntity be = world.getBlockEntity(pos);
+//        if (context instanceof EntityShapeContext entityShapeContext &&
+//                entityShapeContext.getEntity() instanceof PlayerEntity player &&
+//                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT) &&
+//                be instanceof ChipsBlockEntity chipsBlockEntity
+//        ) {
+//            int corner = getHoveredCorner(world, player).shape();
+//
+//            boolean hitOtherChipsBlock = !chipsBlockEntity.hasCorner(corner);
+//            if (corner == -1 || hitOtherChipsBlock) {
+//                return shape;
+//            }
+//
+//            return getShape(corner);
+//        }
+
         if (context instanceof EntityShapeContext entityShapeContext &&
                 entityShapeContext.getEntity() instanceof PlayerEntity player &&
-                player.getMainHandStack().contains(ChipsComponents.INDIVIDUAL_CHIPS_COMPONENT_COMPONENT) &&
                 be instanceof ChipsBlockEntity chipsBlockEntity
         ) {
             int corner = getHoveredCorner(world, player).shape();
@@ -287,6 +293,30 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     @Override
     protected BlockSoundGroup getSoundGroup(BlockState state) {
         return BlockSoundGroup.INTENTIONALLY_EMPTY;
+    }
+
+    @Override
+    protected void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    }
+
+    @Override
+    public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+        super.afterBreak(world, player, pos, state, blockEntity, tool);
+    }
+
+    @Override
+    protected float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
+            return super.calcBlockBreakingDelta(state, player, world, pos);
+        }
+
+        CornerInfo hoveredCorner = getHoveredCorner(world, player);
+
+        Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+        assert block != null;
+        BlockState defaultState = block.getDefaultState();
+        return defaultState.calcBlockBreakingDelta(player, world, pos);
     }
 
     @Override

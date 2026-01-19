@@ -359,8 +359,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float startZV = MathHelper.lerp(toZ, minV, maxV);
         final float stopZV = MathHelper.lerp(fromZ, minV, maxV);
 
-        Chips.LOGGER.info(startZV + " " + minV + " " + maxV + " " + fromZ);
-
         switch (direction) {
             case NORTH -> {
                 emitter.uv(0, startXU, startYV);

@@ -1,6 +1,7 @@
 package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -11,11 +12,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
@@ -23,6 +29,7 @@ import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
+import zedzee.github.io.chips.util.ChipsBlockBreakingProgress;
 
 public class Chips implements ModInitializer {
     public static final String MOD_ID = "chips";
@@ -68,6 +75,28 @@ public class Chips implements ModInitializer {
                     });
                 }
         );
+
+        PlayerBlockBreakEvents.BEFORE.register(((
+                world,
+                player,
+                pos,
+                state,
+                blockEntity
+        ) -> {
+            if (!state.isOf(ChipsBlocks.CHIPS_BLOCK))  {
+                return true;
+            }
+
+            MinecraftServer server = world.getServer();
+            if (server == null || !(player instanceof ServerPlayerEntity serverPlayer)) {
+                return true;
+            }
+
+            ServerPlayerInteractionManager manager = server.getPlayerInteractionManager(serverPlayer);
+            ChipsBlockBreakingProgress chipsBlockBreakingProgress = (ChipsBlockBreakingProgress) manager;
+            chipsBlockBreakingProgress.chips$setCorner(null);
+            return true;
+        }));
 
         // todo: fix this
 //        PlayerPickItemEvents.BLOCK.register(
