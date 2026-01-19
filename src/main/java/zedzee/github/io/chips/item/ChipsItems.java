@@ -37,7 +37,7 @@ public class ChipsItems {
     );
 
     public static final Item CHIPS_BLOCK_ITEM = register(
-            "chips_block",
+            "chips",
             ChipsBlockItem::new,
             new Item.Settings()
                     .component(

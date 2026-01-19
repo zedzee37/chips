@@ -10,7 +10,7 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 
 public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
     public static final ModelIdentifier CHIPS_BLOCK_MODEL_INVENTORY_ID = new ModelIdentifier(
-            Chips.identifier("chips_block"), "inventory"
+            Chips.identifier("chips"), "inventory"
     );
 
 
@@ -24,7 +24,7 @@ public class ChipsModelLoadingPlugin implements ModelLoadingPlugin {
             final ModelIdentifier modelId = ctx.topLevelId();
 
             if (modelId != null) {
-                Identifier id = modelId.id();
+                final Identifier id = modelId.id();
 
                 if (
                         id.equals(Registries.BLOCK.getId(ChipsBlocks.CHIPS_BLOCK)) ||
