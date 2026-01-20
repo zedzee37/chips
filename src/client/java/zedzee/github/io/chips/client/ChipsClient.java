@@ -34,7 +34,6 @@ public class ChipsClient implements ClientModInitializer {
 
 //        WorldRenderEvents.BLOCK_OUTLINE.register(
 //                (worldRenderContext, blockOutlineContext) -> {
-//        });
 
         ClientPlayNetworking.registerGlobalReceiver(ChiselAnimationPayload.ID, (payload, context) -> {
             ModifierLayer<IAnimation> animLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess

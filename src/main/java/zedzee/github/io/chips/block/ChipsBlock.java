@@ -1,5 +1,6 @@
 package zedzee.github.io.chips.block;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -8,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
@@ -293,10 +295,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     @Override
     protected BlockSoundGroup getSoundGroup(BlockState state) {
         return BlockSoundGroup.INTENTIONALLY_EMPTY;
-    }
-
-    @Override
-    protected void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
     }
 
     @Override

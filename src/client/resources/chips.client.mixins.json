@@ -4,7 +4,8 @@
   "package": "zedzee.github.io.chips.client.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "BreakSoundMixin"
+    "BreakSoundMixin",
+    "ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -13,5 +14,6 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "AbstractBlockMixin"
   ]
 }

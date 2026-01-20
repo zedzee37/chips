@@ -195,8 +195,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                     for (BakedQuad quad : quads) {
                         if (addSprites) {
                             this.particleSpriteSupplier.add(quad.getSprite());
-                            Chips.LOGGER.info("gug");
-
                         }
 
                         emitQuadPositions(
