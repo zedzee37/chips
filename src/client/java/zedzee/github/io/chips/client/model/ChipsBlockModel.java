@@ -175,13 +175,13 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
 
         final Set<Block> blocks = renderData.getBlocks();
         blocks.forEach(block -> {
-            final Identifier blockId = Registries.BLOCK.getId(block);
-            final Identifier modelId = blockId.withPath(path -> "block/" + path);
+            MinecraftClient client = MinecraftClient.getInstance();
+            BlockState state = block.getDefaultState();
 
-            final UnbakedModel model = bakeArgs.baker().getOrLoadModel(modelId);
-            final BakedModel blockModel = model.bake(bakeArgs.baker(), bakeArgs.textureGetter(), bakeArgs.modelBakeSettings());
+            BakedModel blockModel =
+                    client.getBlockRenderManager().getModel(state);
 
-            if (blockModel == null) {
+            if (blockModel == null || blockModel == client.getBakedModelManager().getMissingModel()) {
                 return;
             }
 
