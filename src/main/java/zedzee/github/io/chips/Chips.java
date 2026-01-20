@@ -73,56 +73,16 @@ public class Chips implements ModInitializer {
                 }
         );
 
-//        PlayerBlockBreakEvents.BEFORE.register(((
+//        PlayerBlockBreakEvents.BEFORE.register((
 //                world,
 //                player,
 //                pos,
 //                state,
-//                blockEntity
-//        ) -> {
-//            if (!state.isOf(ChipsBlocks.CHIPS_BLOCK))  {
-//                return true;
-//            }
-//
-//            MinecraftServer server = world.getServer();
-//            if (server == null || !(player instanceof ServerPlayerEntity serverPlayer)) {
-//                return true;
-//            }
-//
-//            ServerPlayerInteractionManager manager = server.getPlayerInteractionManager(serverPlayer);
-//            ChipsBlockBreakingProgress chipsBlockBreakingProgress = (ChipsBlockBreakingProgress) manager;
-//            chipsBlockBreakingProgress.chips$setCorner(null);
-//            return true;
-//        }));
-
-        // todo: fix this
-//        PlayerPickItemEvents.BLOCK.register(
-//                (player, pos, state, requestIncludeData) -> {
-//                    if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-//                        return null;
-//                    }
-//
-//                    World world = player.getWorld();
-//                    BlockEntity be = world.getBlockEntity(pos);
-//
-//                    if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
-//                        return null;
-//                    }
-//
-//                    CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
-//                    if (!hoveredCorner.exists()) {
-//                        return null;
-//                    }
-//
-//                    Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
-//
-//                    if (block == null) {
-//                        return null;
-//                    }
-//
-//                    return ChipsBlockItem.getStack(block);
+//                blockEntity) -> {
+//            if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) return true;
+//            return false;
 //        });
-
+//
     }
 
     public static Identifier identifier(String path) {

@@ -112,11 +112,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         setChips(block, newChips);
     }
 
-    public List<Block> removeChips(int chips) {
+    public List<Block> removeChips(CornerInfo cornerInfo) {
         List<Block> removedChips = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             int targetCorner = 1 << i;
-            if ((targetCorner & chips) == 0) {
+            if ((targetCorner & cornerInfo.shape()) == 0) {
                 continue;
             }
 
@@ -126,21 +126,25 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                     return;
                 }
 
-                removeChips(block, targetCorner);
+                removeChips(block, CornerInfo.fromShape(targetCorner));
                 removedChips.add(block);
             });
         }
         return removedChips;
     }
 
-    public void removeChips(Block block, int chips) {
+    public void removeChips(Block block, CornerInfo cornerInfo) {
         if (!blockMap.containsKey(block)) {
             return;
         }
 
         int currentChips = blockMap.get(block).getChips();
-        int newChips = currentChips & (~chips);
+        int newChips = currentChips & (~cornerInfo.shape());
         setChips(block, newChips);
+
+        if (getTotalChips() == 0) {
+            world.removeBlock(pos, false);
+        }
     }
 
     public @Nullable Block getBlockAtCorner(CornerInfo cornerInfo) {

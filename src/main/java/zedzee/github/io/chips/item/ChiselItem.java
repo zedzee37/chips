@@ -195,9 +195,9 @@ public class ChiselItem extends Item {
                 ServerPlayNetworking.send((ServerPlayerEntity) player, new ChipsBlockChangePayload(blockPos, block));
             }
         } else {
-            int corner = ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos()).shape();
+            CornerInfo corner = ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos());
 
-            if (corner == chipsBlockEntity.getTotalChips()) {
+            if (corner.shape() == chipsBlockEntity.getTotalChips()) {
                 chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(
                         player, blockType, world, hitResult.getPos(), blockPos
                 ));
