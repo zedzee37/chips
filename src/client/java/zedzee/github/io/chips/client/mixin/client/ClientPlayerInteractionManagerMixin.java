@@ -119,7 +119,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 broken = true;
             }
 
-            chipsBlockEntity.removeChips(hoveredCorner);
+//            chipsBlockEntity.removeChips(hoveredCorner);
 
             if (broken) blockState.getBlock().onBroken(client.world, pos, blockState);
 

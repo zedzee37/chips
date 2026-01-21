@@ -7,12 +7,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.Chips;
@@ -21,6 +25,7 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.render.RenderData;
 
+import javax.print.DocFlavor;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -28,6 +33,11 @@ import java.util.stream.IntStream;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     private Map<Block, BlockData> blockMap = new HashMap<>();
+
+    private final static String NBT_BLOCK_DATA_CHIPS_KEY = "chips";
+    private final static String NBT_BLOCK_DATA_DEFAULT_UV_KEY = "default_uv";
+    private final static String NBT_BLOCKS_KEY = "blocks";
+    private final static String NBT_BLOCK_DATA_KEY = "block_data";
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
@@ -130,6 +140,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                 removedChips.add(block);
             });
         }
+
+        sync();
         return removedChips;
     }
 
@@ -248,6 +260,51 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 //
 //        return Optional.of(new HashMap<>(blockIntegerMap));
 //    }
+
+    @Override
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        NbtList blockList = new NbtList();
+        NbtList blockElementList = new NbtList();
+
+        blockMap.forEach((block, blockData) -> {
+            blockList.add(NbtString.of(Registries.BLOCK.getId(block).toString()));
+
+            NbtCompound dataCompound = new NbtCompound();
+            dataCompound.putInt(NBT_BLOCK_DATA_CHIPS_KEY, blockData.getChips());
+            dataCompound.putBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY, blockData.shouldUseDefaultUv());
+            blockElementList.add(dataCompound);
+        });
+        nbt.put(NBT_BLOCKS_KEY, blockList);
+        nbt.put(NBT_BLOCK_DATA_KEY, blockElementList);
+        super.writeNbt(nbt, registryLookup);
+    }
+
+    @Override
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        if (!nbt.contains(NBT_BLOCKS_KEY) || !nbt.contains(NBT_BLOCK_DATA_KEY)) {
+            super.readNbt(nbt, registryLookup);
+            return;
+        }
+
+        NbtList blockList = nbt.getList(NBT_BLOCKS_KEY, NbtElement.STRING_TYPE);
+        NbtList blockDataList = nbt.getList(NBT_BLOCK_DATA_KEY, NbtElement.COMPOUND_TYPE);
+        assert blockList.size() == blockDataList.size();
+
+        blockMap.clear();
+        for (int i = 0; i < blockList.size(); i++) {
+            String id = blockList.getString(i);
+            Block block = Registries.BLOCK.get(Identifier.of(id));
+
+            NbtCompound compound = blockDataList.getCompound(i);
+            int chips = compound.getInt(NBT_BLOCK_DATA_CHIPS_KEY);
+            boolean shouldUseDefaultUv = compound.getBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY);
+            BlockData blockData = new BlockData(chips, shouldUseDefaultUv);
+
+            blockMap.put(block, blockData);
+        }
+
+        super.readNbt(nbt, registryLookup);
+    }
 
     public static class ChipsRenderData implements RenderData {
         private final Map<Block, BlockData> blockMap;
