@@ -105,7 +105,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     @Override
     public @Nullable Object getRenderData() {
-        return new ChipsRenderData(blockMap);
+        // it must use a copy to prevent mutation
+        return new ChipsRenderData(Map.copyOf(blockMap));
     }
 
     public boolean hasCorner(int corner) {
@@ -136,7 +137,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                     return;
                 }
 
-                removeChips(block, CornerInfo.fromShape(targetCorner));
+                removeChips(block, CornerInfo.fromShape(targetCorner), false);
                 removedChips.add(block);
             });
         }
@@ -145,7 +146,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return removedChips;
     }
 
-    public void removeChips(Block block, CornerInfo cornerInfo) {
+    public void removeChips(Block block, CornerInfo cornerInfo, boolean sync) {
         if (!blockMap.containsKey(block)) {
             return;
         }
@@ -156,6 +157,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         if (getTotalChips() == 0) {
             world.removeBlock(pos, false);
+        }
+
+        if (sync) {
+            sync();
         }
     }
 
@@ -190,6 +195,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             return;
         }
 
+        // calculate lighthing changes
         if (world.getBlockState(pos).contains(ChipsBlock.LIGHT_LEVEL)) {
             float totalLuminance = 0;
             for (Block curBlock : blockMap.keySet()) {
@@ -202,64 +208,15 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
             world.setBlockState(pos, world.getBlockState(pos).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
         }
-        // calculate lighthing changes
 
-        world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_LISTENERS);
-
+        markDirty();
         if (!world.isClient) {
-            markDirty();
-            ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
+            world.updateListeners(pos,
+                    getCachedState(),
+                    getCachedState(),
+                    Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
         }
     }
-// todo: fix this abomination
-
-//    @Override
-//    protected void writeData(WriteView view) {
-//        WriteView.ListAppender<Block> blockListAppender = view.getListAppender("blocks", Registries.BLOCK.getCodec());
-//        WriteView.ListAppender<BlockData> mappedChipsListAppender = view.getListAppender(
-//                "mappedChips", BlockData.CODEC
-//        );
-//
-//        blockMap.forEach((block, chipMap) -> {
-//            blockListAppender.add(block);
-//            mappedChipsListAppender.add(chipMap);
-//        });
-//
-//        super.writeData(view);
-//    }
-//
-//    @Override
-//    protected void readData(ReadView view) {
-//        this.blockMap = new HashMap<>();
-//
-//        ReadView.TypedListReadView<Block> blockList = view.getTypedListView("blocks", Registries.BLOCK.getCodec());
-//        ReadView.TypedListReadView<BlockData> mappedChipsList = view.getTypedListView(
-//                "mappedChips", BlockData.CODEC
-//        );
-//
-//        this.blockMap = zipBlockMap(blockList, mappedChipsList).orElse(new HashMap<>());
-//        sync();
-//        super.readData(view);
-//    }
-//
-//    private Optional<Map<Block, BlockData>> zipBlockMap(
-//            ReadView.TypedListReadView<Block> blockList,
-//            ReadView.TypedListReadView<BlockData> mappedChipsList) {
-//        List<Block> blocks = blockList.stream().toList();
-//        List<BlockData> mappedChips = mappedChipsList.stream().toList();
-//
-//        if (blocks.size() != mappedChips.size()) {
-//            return Optional.empty();
-//        }
-//        Map<Block, BlockData> blockIntegerMap = IntStream.range(0, blocks.size())
-//                .boxed()
-//                .collect(Collectors.toMap(
-//                        blocks::get,
-//                        mappedChips::get
-//                ));
-//
-//        return Optional.of(new HashMap<>(blockIntegerMap));
-//    }
 
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
