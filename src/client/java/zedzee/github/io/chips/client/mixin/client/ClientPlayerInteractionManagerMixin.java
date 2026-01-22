@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
@@ -119,7 +120,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 broken = true;
             }
 
-//            chipsBlockEntity.removeChips(hoveredCorner);
+            chipsBlockEntity.sync();
 
             if (broken) blockState.getBlock().onBroken(client.world, pos, blockState);
 

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -59,7 +60,12 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         blockMap.keySet().forEach(blockConsumer);
     }
 
+    // sets chips & syncs
     public void setChips(Block block, int chips) {
+        setChips(block, chips, true);
+    }
+
+    public void setChips(Block block, int chips, boolean sync) {
         if (this.blockMap.containsKey(block)) {
             BlockData data = this.blockMap.get(block);
             data.setChips(chips);
@@ -67,8 +73,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             this.blockMap.put(block, new BlockData(chips));
         }
 
-        markDirty();
-        sync();
+        if (sync) sync();
     }
 
     @Nullable
@@ -137,7 +142,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                     return;
                 }
 
-                removeChips(block, CornerInfo.fromShape(targetCorner), false);
+                removeChips(block, cornerInfo, false);
                 removedChips.add(block);
             });
         }
@@ -153,13 +158,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         int currentChips = blockMap.get(block).getChips();
         int newChips = currentChips & (~cornerInfo.shape());
-        setChips(block, newChips);
+        setChips(block, newChips, false);
 
         if (getTotalChips() == 0) {
             world.removeBlock(pos, false);
-        }
-
-        if (sync) {
+        } else if (sync) {
             sync();
         }
     }
@@ -191,12 +194,13 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public void sync() {
+        markDirty();
         if (world == null) {
             return;
         }
 
         // calculate lighthing changes
-        if (world.getBlockState(pos).contains(ChipsBlock.LIGHT_LEVEL)) {
+        if (world.getBlockState(getPos()).contains(ChipsBlock.LIGHT_LEVEL)) {
             float totalLuminance = 0;
             for (Block curBlock : blockMap.keySet()) {
                 int corners = ChipsBlock.countCorners(getChips(curBlock));
@@ -206,15 +210,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             }
             totalLuminance = Math.min(15, Math.round(totalLuminance));
 
-            world.setBlockState(pos, world.getBlockState(pos).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
+            world.setBlockState(getPos(), world.getBlockState(getPos()).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
         }
 
-        markDirty();
-        if (!world.isClient) {
-            world.updateListeners(pos,
-                    getCachedState(),
-                    getCachedState(),
-                    Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+        if (world instanceof ServerWorld serverWorld) {
+            serverWorld.getChunkManager().markForUpdate(this.getPos());
         }
     }
 

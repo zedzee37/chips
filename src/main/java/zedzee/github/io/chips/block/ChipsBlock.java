@@ -334,7 +334,6 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         return super.onBreak(world, pos, state, player);
     }
 
-
     public static Set<BlockSoundGroup> getSoundGroups(BlockView world, BlockPos pos) {
         BlockEntity be = world.getBlockEntity(pos);
         if (!(be instanceof ChipsBlockEntity chipsBlockEntity)) {
