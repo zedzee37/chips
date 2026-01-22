@@ -9,14 +9,15 @@ import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
@@ -120,6 +121,7 @@ public class ChipsClient implements ClientModInitializer {
 //
 //            stack.pop();
 //        });
+
     }
 
     private boolean shouldSwapHand(ClientPlayerEntity clientPlayer) {

@@ -183,11 +183,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return createNbt(registryLookup);
     }
 
-//    @Override
-//    public @Nullable Object getRenderData() {
-//        return blockMap;
-//    }
-
     @Override
     public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
@@ -195,11 +190,12 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public void sync() {
         markDirty();
-        if (world == null) {
-            return;
-        }
+        if (world == null) return;
+        calculateLighting();
+        world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_ALL_AND_REDRAW);
+    }
 
-        // calculate lighthing changes
+    private void calculateLighting() {
         if (world.getBlockState(getPos()).contains(ChipsBlock.LIGHT_LEVEL)) {
             float totalLuminance = 0;
             for (Block curBlock : blockMap.keySet()) {
@@ -211,10 +207,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             totalLuminance = Math.min(15, Math.round(totalLuminance));
 
             world.setBlockState(getPos(), world.getBlockState(getPos()).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
-        }
-
-        if (world instanceof ServerWorld serverWorld) {
-            serverWorld.getChunkManager().markForUpdate(this.getPos());
         }
     }
 
