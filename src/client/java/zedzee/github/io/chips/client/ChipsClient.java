@@ -15,9 +15,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
@@ -29,13 +27,13 @@ public class ChipsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ModelLoadingPlugin.register(new ChipsModelLoadingPlugin());
-        ChipsAnimations.init();
-//        ChiselingStationScreen.register();
-//        TestExtraModel.register();
-
-//        WorldRenderEvents.BLOCK_OUTLINE.register(
-//                (worldRenderContext, blockOutlineContext) -> {
-
+//        ChipsAnimations.init();
+////        ChiselingStationScreen.register();
+////        TestExtraModel.register();
+//
+////        WorldRenderEvents.BLOCK_OUTLINE.register(
+////                (worldRenderContext, blockOutlineContext) -> {
+//
         ClientPlayNetworking.registerGlobalReceiver(ChiselAnimationPayload.ID, (payload, context) -> {
             ModifierLayer<IAnimation> animLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
                     .getPlayerAssociatedData(context.player())

@@ -26,6 +26,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.*;

@@ -162,7 +162,9 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         if (getTotalChips() == 0) {
             world.removeBlock(pos, false);
-        } else if (sync) {
+        }
+
+        if (sync) {
             sync();
         }
     }

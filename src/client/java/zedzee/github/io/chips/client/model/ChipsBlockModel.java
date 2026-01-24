@@ -51,7 +51,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier.ofVanilla("block/dirt")
     );
 
-    private Supplier<BakeArgs> bakeArgsSupplier;
     private RandomSupplier<Sprite> particleSpriteSupplier;
     private Sprite fallbackParticleSprite;
     private RenderMaterial renderMaterialNormal;
@@ -162,8 +161,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             RenderData renderData,
             BlockColorProvider blockColorProvider
     ) {
-        final BakeArgs bakeArgs = bakeArgsSupplier.get();
-
         // janky but whatever
         boolean addSprites;
         if (this.particleSpriteSupplier == null) {
@@ -220,7 +217,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                         );
                         RenderLayer layer = RenderLayers.getBlockLayer(defaultState);
                         emitter.material(layer.isTranslucent() ? renderMaterialTranslucent : renderMaterialNormal);
-                        emitter.nominalFace(direction);
                         emitter.cullFace(null);
 
                         if (quad.hasColor()) {
@@ -247,7 +243,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             Function<SpriteIdentifier, Sprite> textureGetter,
             ModelBakeSettings rotationContainer
     ) {
-        this.bakeArgsSupplier = () -> new BakeArgs(baker, textureGetter, rotationContainer);
         this.fallbackParticleSprite = textureGetter.apply(FALLBACK_PARTICLE_SPRITE);
 
         Renderer renderer = RendererAccess.INSTANCE.getRenderer();
@@ -331,7 +326,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             float toZ,
             boolean defaultUv
     ) {
-        emitter.spriteBake(sprite, MutableQuadView.BAKE_NORMALIZED);
+        emitter.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
 
         if (defaultUv) {
             return;
@@ -351,36 +346,39 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float height = Math.abs(toY - fromY);
         final float stopYV = MathHelper.lerp(height, minV, maxV);
 
-        final float startZU = MathHelper.lerp(toZ, minU, maxU);
-        final float stopZU = MathHelper.lerp(fromZ, minU, maxU);
+        final float startYU = MathHelper.lerp(fromY, minU, maxU);
+        final float stopYU = MathHelper.lerp(toY, minU, maxU);
 
-        final float startZV = MathHelper.lerp(toZ, minV, maxV);
-        final float stopZV = MathHelper.lerp(fromZ, minV, maxV);
+        final float startZU = MathHelper.lerp(fromZ, minU, maxU);
+        final float stopZU = MathHelper.lerp(toZ, minU, maxU);
+
+        final float startZV = MathHelper.lerp(fromZ, minV, maxV);
+        final float stopZV = MathHelper.lerp(toZ, minV, maxV);
 
         switch (direction) {
             case NORTH -> {
-                emitter.uv(0, startXU, startYV);
-                emitter.uv(1, stopXU, startYV);
-                emitter.uv(2, stopXU, stopYV);
-                emitter.uv(3, startXU, stopYV);
+                emitter.uv(0, startXU, stopYV);
+                emitter.uv(1, stopXU, stopYV);
+                emitter.uv(2, stopXU, startYV);
+                emitter.uv(3, startXU, startYV);
             }
             case SOUTH -> {
-                emitter.uv(3, startXU, startYV);
-                emitter.uv(2, stopXU, startYV);
-                emitter.uv(1, stopXU, stopYV);
-                emitter.uv(0, startXU, stopYV);
+                emitter.uv(3, startXU, stopYV);
+                emitter.uv(2, stopXU, stopYV);
+                emitter.uv(1, stopXU, startYV);
+                emitter.uv(0, startXU, startYV);
             }
             case EAST ->  {
-                emitter.uv(0, startZU, stopYV);
-                emitter.uv(1, startZU, startYV);
-                emitter.uv(2, stopZU, startYV);
-                emitter.uv(3, stopZU, stopYV);
+                emitter.uv(0, startYU, startZV);
+                emitter.uv(1, stopYU, startZV);
+                emitter.uv(2, stopYU, stopZV);
+                emitter.uv(3, startYU, stopZV);
             }
             case WEST -> {
-                emitter.uv(3, startZU, stopYV);
-                emitter.uv(2, startZU, startYV);
-                emitter.uv(1, stopZU, startYV);
-                emitter.uv(0, stopZU, stopYV);
+                emitter.uv(3, startYU, startZV);
+                emitter.uv(2, stopYU, startZV);
+                emitter.uv(1, stopYU, stopZV);
+                emitter.uv(0, startYU, stopZV);
             }
             case UP -> {
                 emitter.uv(0, startXU, startZV);
@@ -396,6 +394,4 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             }
         }
     }
-
-    record BakeArgs(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings modelBakeSettings) {}
 }

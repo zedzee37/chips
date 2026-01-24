@@ -120,8 +120,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 broken = true;
             }
 
-            chipsBlockEntity.sync();
-
             if (broken) blockState.getBlock().onBroken(client.world, pos, blockState);
 
             cir.setReturnValue(false);
