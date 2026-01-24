@@ -275,42 +275,42 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             float toZ
     ) {
         switch (direction) {
-            case UP:
+            case UP -> {
                 emitter.pos(3, fromX, toY, fromZ);
                 emitter.pos(2, toX, toY, fromZ);
                 emitter.pos(1, toX, toY, toZ);
                 emitter.pos(0, fromX, toY, toZ);
-                break;
-            case DOWN:
+            }
+            case DOWN -> {
                 emitter.pos(0, fromX, fromY, fromZ);
                 emitter.pos(1, toX, fromY, fromZ);
                 emitter.pos(2, toX, fromY, toZ);
                 emitter.pos(3, fromX, fromY, toZ);
-                break;
-            case NORTH:
-                emitter.pos(3, fromX, fromY, fromZ);
-                emitter.pos(2, toX, fromY, fromZ);
-                emitter.pos(1, toX, toY, fromZ);
-                emitter.pos(0, fromX, toY, fromZ);
-                break;
-            case SOUTH:
-                emitter.pos(0, fromX, fromY, toZ);
-                emitter.pos(1, toX, fromY, toZ);
-                emitter.pos(2, toX, toY, toZ);
-                emitter.pos(3, fromX, toY, toZ);
-                break;
-            case EAST:
-                emitter.pos(3, toX, fromY, toZ);
-                emitter.pos(2, toX, toY, toZ);
-                emitter.pos(1, toX, toY, fromZ);
-                emitter.pos(0, toX, fromY, fromZ);
-                break;
-            case WEST:
-                emitter.pos(0, fromX, fromY, toZ);
-                emitter.pos(1, fromX, toY, toZ);
-                emitter.pos(2, fromX, toY, fromZ);
-                emitter.pos(3, fromX, fromY, fromZ);
-                break;
+            }
+            case NORTH -> {
+                emitter.pos(0, toX, toY, fromZ);
+                emitter.pos(1, toX, fromY, fromZ);
+                emitter.pos(2, fromX, fromY, fromZ);
+                emitter.pos(3, fromX, toY, fromZ);
+            }
+            case SOUTH -> {
+                emitter.pos(3, toX, toY, toZ);
+                emitter.pos(2, toX, fromY, toZ);
+                emitter.pos(1, fromX, fromY, toZ);
+                emitter.pos(0, fromX, toY, toZ);
+            }
+            case EAST -> {
+                emitter.pos(3, toX, toY, toZ);
+                emitter.pos(2, toX, toY, fromZ);
+                emitter.pos(1, toX, fromY, fromZ);
+                emitter.pos(0, toX, fromY, toZ);
+            }
+            case WEST -> {
+                emitter.pos(0, fromX, toY, toZ);
+                emitter.pos(1, fromX, toY, fromZ);
+                emitter.pos(2, fromX, fromY, fromZ);
+                emitter.pos(3, fromX, fromY, toZ);
+            }
         }
     }
 
@@ -326,8 +326,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             float toZ,
             boolean defaultUv
     ) {
-        emitter.spriteBake(sprite, MutableQuadView.BAKE_LOCK_UV);
-
         if (defaultUv) {
             return;
         }
@@ -338,59 +336,42 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float minV = sprite.getMinV();
         final float maxV = sprite.getMaxV();
 
-        // can just use fromX and toX because they will both be within 0-1 (same applies for z)
-        final float startXU = MathHelper.lerp(fromX, minU, maxU);
-        final float stopXU = MathHelper.lerp(toX, minU, maxU);
+        final float minXU = MathHelper.lerp(fromX, minU, maxU);
+        final float maxXU = MathHelper.lerp(toX, minU, maxU);
 
-        final float startYV = minV;
-        final float height = Math.abs(toY - fromY);
-        final float stopYV = MathHelper.lerp(height, minV, maxV);
+        final float minYV = MathHelper.lerp(fromY, minV, maxV);
+        final float maxYV = MathHelper.lerp(toY, minV, maxV);
 
-        final float startYU = MathHelper.lerp(fromY, minU, maxU);
-        final float stopYU = MathHelper.lerp(toY, minU, maxU);
+        final float minYU = MathHelper.lerp(fromY, minU, maxU);
+        final float maxYU = MathHelper.lerp(toY, minU, maxU);
 
-        final float startZU = MathHelper.lerp(fromZ, minU, maxU);
-        final float stopZU = MathHelper.lerp(toZ, minU, maxU);
-
-        final float startZV = MathHelper.lerp(fromZ, minV, maxV);
-        final float stopZV = MathHelper.lerp(toZ, minV, maxV);
+        final float minZV = MathHelper.lerp(fromZ, minV, maxV);
+        final float maxZV = MathHelper.lerp(toZ, minV, maxV);
 
         switch (direction) {
             case NORTH -> {
-                emitter.uv(0, startXU, stopYV);
-                emitter.uv(1, stopXU, stopYV);
-                emitter.uv(2, stopXU, startYV);
-                emitter.uv(3, startXU, startYV);
+                emitter.uv(0, minXU, minYV);
+                emitter.uv(1, minXU, maxYV);
+                emitter.uv(2, maxXU, maxYV);
+                emitter.uv(3, maxXU, minYV);
             }
             case SOUTH -> {
-                emitter.uv(3, startXU, stopYV);
-                emitter.uv(2, stopXU, stopYV);
-                emitter.uv(1, stopXU, startYV);
-                emitter.uv(0, startXU, startYV);
+                emitter.uv(3, minXU, minYV);
+                emitter.uv(2, minXU, maxYV);
+                emitter.uv(1, maxXU, maxYV);
+                emitter.uv(0, maxXU, minYV);
             }
-            case EAST ->  {
-                emitter.uv(0, startYU, startZV);
-                emitter.uv(1, stopYU, startZV);
-                emitter.uv(2, stopYU, stopZV);
-                emitter.uv(3, startYU, stopZV);
+            case EAST -> {
+                emitter.uv(0, maxYU, maxZV);
+                emitter.uv(1, maxYU, minZV);
+                emitter.uv(2, minYU, minZV);
+                emitter.uv(3, minYU, maxZV);
             }
             case WEST -> {
-                emitter.uv(3, startYU, startZV);
-                emitter.uv(2, stopYU, startZV);
-                emitter.uv(1, stopYU, stopZV);
-                emitter.uv(0, startYU, stopZV);
-            }
-            case UP -> {
-                emitter.uv(0, startXU, startZV);
-                emitter.uv(1, stopXU, startZV);
-                emitter.uv(2, stopXU, stopZV);
-                emitter.uv(3, startXU, stopZV);
-            }
-            case DOWN -> {
-                emitter.uv(3, startXU, startZV);
-                emitter.uv(2, stopXU, startZV);
-                emitter.uv(1, stopXU, stopZV);
-                emitter.uv(0, startXU, stopZV);
+                emitter.uv(3, maxYU, maxZV);
+                emitter.uv(2, maxYU, minZV);
+                emitter.uv(1, minYU, minZV);
+                emitter.uv(0, minYU, maxZV);
             }
         }
     }
