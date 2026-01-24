@@ -192,7 +192,9 @@ public class ChipsBlockItem extends BlockItem {
             }
         }
 
-        chipsBlockEntity.addChips(block, targetCorner);
+        if (!world.isClient()) {
+            chipsBlockEntity.addChips(block, targetCorner);
+        }
 
         playPlaceSound(world, player, block, pos);
         world.emitGameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Emitter.of(player, state));
