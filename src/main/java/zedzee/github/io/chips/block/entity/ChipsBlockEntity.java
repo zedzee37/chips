@@ -69,7 +69,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         if (this.blockMap.containsKey(block)) {
             BlockData data = this.blockMap.get(block);
             data.setChips(chips);
-        } else {
+        } else if (chips != 0) {
             this.blockMap.put(block, new BlockData(chips));
         }
 
@@ -130,6 +130,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public List<Block> removeChips(CornerInfo cornerInfo) {
         List<Block> removedChips = new ArrayList<>();
+        List<Block> destroyedChips = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             int targetCorner = 1 << i;
             if ((targetCorner & cornerInfo.shape()) == 0) {
@@ -142,23 +143,35 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
                     return;
                 }
 
-                removeChips(block, cornerInfo, false);
+                removeChips(block, cornerInfo, false, false);
+
+                if (getChips(block) == 0) {
+                    destroyedChips.add(block);
+                }
+
                 removedChips.add(block);
             });
         }
+
+        destroyedChips.forEach(block -> blockMap.remove(block));
 
         sync();
         return removedChips;
     }
 
-    public void removeChips(Block block, CornerInfo cornerInfo, boolean sync) {
+    public void removeChips(Block block, CornerInfo cornerInfo, boolean sync, boolean remove) {
         if (!blockMap.containsKey(block)) {
             return;
         }
 
         int currentChips = blockMap.get(block).getChips();
         int newChips = currentChips & (~cornerInfo.shape());
-        setChips(block, newChips, false);
+
+        if (newChips == 0 && remove) {
+            blockMap.remove(block);
+        } else {
+            setChips(block, newChips, false);
+        }
 
         if (getTotalChips() == 0) {
             world.removeBlock(pos, false);

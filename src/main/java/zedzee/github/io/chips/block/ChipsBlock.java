@@ -1,6 +1,5 @@
 package zedzee.github.io.chips.block;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -10,7 +9,6 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
@@ -26,7 +24,6 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.*;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 
 import java.util.*;
@@ -132,6 +129,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     }
 
     // WARNING: RETURNS THE CORNER INDEX, NOT THE SHAPE!! USE 1 << <return value> FOR THE SHAPE INDEX!!
+    @Nullable
     public static CornerInfo getClosestSlice(BlockView view, BlockPos pos, Vec3d hitPos) {
         hitPos = hitPos.subtract(Vec3d.of(pos));
 
@@ -140,25 +138,28 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
             return CornerInfo.EMPTY;
         }
 
-        int i = chipsBlockEntity.getTotalChips();
-        double d = Double.MAX_VALUE;
-        int j = -1;
+        int totalChips = chipsBlockEntity.getTotalChips();
+        double distance = Double.MAX_VALUE;
+        int currentIdx = -1;
 
         for (int k = 0; k < CORNER_SHAPES.length; k++) {
-            if (hasCorner(i, k)) {
+            if (hasCorner(totalChips, k)) {
                 VoxelShape voxelShape = CORNER_SHAPES[k];
                 Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
                 if (optional.isPresent()) {
                     double e = (optional.get()).squaredDistanceTo(hitPos);
-                    if (e < d) {
-                        d = e;
-                        j = k;
+                    if (e < distance) {
+                        distance = e;
+                        currentIdx = k;
                     }
                 }
             }
         }
 
-        return CornerInfo.fromIndex(j);
+        if (currentIdx == -1) {
+            return null;
+        }
+        return CornerInfo.fromIndex(currentIdx);
     }
 
     @Override

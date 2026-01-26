@@ -194,6 +194,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                             this.particleSpriteSupplier.add(quad.getSprite());
                         }
 
+                        emitter.nominalFace(direction);
                         emitQuadPositions(
                                 emitter,
                                 direction,
@@ -203,6 +204,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                                 (float)maxX,
                                 (float)maxY,
                                 (float)maxZ);
+
                         applySprite(
                                 emitter,
                                 quad.getSprite(),
@@ -300,16 +302,16 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 emitter.pos(0, fromX, toY, toZ);
             }
             case EAST -> {
-                emitter.pos(3, toX, toY, toZ);
-                emitter.pos(2, toX, toY, fromZ);
-                emitter.pos(1, toX, fromY, fromZ);
-                emitter.pos(0, toX, fromY, toZ);
+                emitter.pos(0, toX, toY, toZ);
+                emitter.pos(1, toX, fromY, toZ);
+                emitter.pos(2, toX, fromY, fromZ);
+                emitter.pos(3, toX, toY, fromZ);
             }
             case WEST -> {
-                emitter.pos(0, fromX, toY, toZ);
-                emitter.pos(1, fromX, toY, fromZ);
-                emitter.pos(2, fromX, fromY, fromZ);
-                emitter.pos(3, fromX, fromY, toZ);
+                emitter.pos(3, fromX, toY, toZ);
+                emitter.pos(2, fromX, fromY, toZ);
+                emitter.pos(1, fromX, fromY, fromZ);
+                emitter.pos(0, fromX, toY, fromZ);
             }
         }
     }
@@ -342,13 +344,25 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float minYV = MathHelper.lerp(fromY, minV, maxV);
         final float maxYV = MathHelper.lerp(toY, minV, maxV);
 
-        final float minYU = MathHelper.lerp(fromY, minU, maxU);
-        final float maxYU = MathHelper.lerp(toY, minU, maxU);
-
         final float minZV = MathHelper.lerp(fromZ, minV, maxV);
         final float maxZV = MathHelper.lerp(toZ, minV, maxV);
 
+        final float minZU = MathHelper.lerp(fromZ, minU, maxU);
+        final float maxZU = MathHelper.lerp(toZ, minU, maxU);
+
         switch (direction) {
+            case UP -> {
+                emitter.uv(3, minXU, minZV);
+                emitter.uv(2, maxXU, minZV);
+                emitter.uv(1, maxXU, maxZV);
+                emitter.uv(0, minXU, maxZV);
+            }
+            case DOWN -> {
+                emitter.uv(0, minXU, minZV);
+                emitter.uv(1, maxXU, minZV);
+                emitter.uv(2, maxXU, maxZV);
+                emitter.uv(3, minXU, maxZV);
+            }
             case NORTH -> {
                 emitter.uv(0, minXU, minYV);
                 emitter.uv(1, minXU, maxYV);
@@ -362,16 +376,16 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 emitter.uv(0, maxXU, minYV);
             }
             case EAST -> {
-                emitter.uv(0, maxYU, maxZV);
-                emitter.uv(1, maxYU, minZV);
-                emitter.uv(2, minYU, minZV);
-                emitter.uv(3, minYU, maxZV);
+                emitter.uv(0, maxZU, maxYV);
+                emitter.uv(1, minZU, maxYV);
+                emitter.uv(2, minZU, minYV);
+                emitter.uv(3, maxZU, minYV);
             }
             case WEST -> {
-                emitter.uv(3, maxYU, maxZV);
-                emitter.uv(2, maxYU, minZV);
-                emitter.uv(1, minYU, minZV);
-                emitter.uv(0, minYU, maxZV);
+                emitter.uv(3, maxZU, maxYV);
+                emitter.uv(2, minZU, maxYV);
+                emitter.uv(1, minZU, minYV);
+                emitter.uv(0, maxZU, minYV);
             }
         }
     }

@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
@@ -38,6 +39,12 @@ public class ServerPlayerInteractionManagerMixin {
         BlockState blockState = world.getBlockState(pos);
         if (blockState.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
+
+            if (hoveredCorner == null || !hoveredCorner.exists()) {
+                cir.setReturnValue(false);
+                return;
+            }
+
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
 
@@ -47,6 +54,7 @@ public class ServerPlayerInteractionManagerMixin {
                     pos,
                     player)) {
                 cir.setReturnValue(false);
+                cir.cancel();
             }
 
             boolean broken = false;
@@ -57,9 +65,22 @@ public class ServerPlayerInteractionManagerMixin {
 
             chipsBlockEntity.removeChips(hoveredCorner);
 
+            int ct = 0;
+            for (int i = 0; i < ChipsBlock.CORNER_SHAPES.length; i++) {
+                CornerInfo corner = CornerInfo.fromIndex(i);
+                if ((hoveredCorner.shape() & corner.shape()) != 0) {
+                    ct++;
+                }
+            }
+
+            if (ct > 1) {
+                Chips.LOGGER.info("idx: " + hoveredCorner.index());
+            }
+
             if (broken) blockState.getBlock().onBroken(world, pos, blockState);
 
             cir.setReturnValue(false);
+            cir.cancel();
         }
     }
 }

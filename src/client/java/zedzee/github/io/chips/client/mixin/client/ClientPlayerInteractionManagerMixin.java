@@ -6,6 +6,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +103,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     )
     public void chipChipsBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = client.world.getBlockState(pos);
-        if (blockState.isOf(ChipsBlocks.CHIPS_BLOCK)) {
+        if (blockState != null && blockState.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(client.world, client.player);
             BlockEntity blockEntity = client.world.getBlockEntity(pos);
             if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
@@ -112,6 +114,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                     pos,
                     this.client.player)) {
                 cir.setReturnValue(false);
+                cir.cancel();
             }
 
             boolean broken = false;
@@ -123,6 +126,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             if (broken) blockState.getBlock().onBroken(client.world, pos, blockState);
 
             cir.setReturnValue(false);
+            cir.cancel();
         }
     }
 }
