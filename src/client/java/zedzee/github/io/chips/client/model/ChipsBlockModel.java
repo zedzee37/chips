@@ -306,10 +306,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             float toZ,
             boolean defaultUv
     ) {
-        if (defaultUv) {
-            return;
-        }
-
         final float minU = sprite.getMinU();
         final float maxU = sprite.getMaxU();
 
@@ -319,8 +315,12 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float minXU = MathHelper.lerp(fromX, minU, maxU);
         final float maxXU = MathHelper.lerp(toX, minU, maxU);
 
-        final float minYV = minV;
-        final float maxYV = MathHelper.lerp(Math.abs(toY - fromY), minV, maxV);
+        float minYV = MathHelper.lerp(fromY, minV, maxV);
+        float maxYV = MathHelper.lerp(toY, minV, maxV);
+        if (!defaultUv) {
+            minYV = minV;
+            maxYV = MathHelper.lerp(Math.abs(toY - fromY), minV, maxV);
+        }
 
         final float minZV = MathHelper.lerp(fromZ, minV, maxV);
         final float maxZV = MathHelper.lerp(toZ, minV, maxV);
