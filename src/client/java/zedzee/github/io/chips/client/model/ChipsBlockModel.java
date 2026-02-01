@@ -3,7 +3,6 @@ package zedzee.github.io.chips.client.model;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.*;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
@@ -21,7 +20,6 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +30,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
@@ -41,7 +38,6 @@ import zedzee.github.io.chips.render.RenderData;
 import zedzee.github.io.chips.util.RandomSupplier;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -51,7 +47,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier.ofVanilla("block/dirt")
     );
 
-    private RandomSupplier<Sprite> particleSpriteSupplier;
     private Sprite fallbackParticleSprite;
     private RenderMaterial renderMaterialNormal;
     private RenderMaterial renderMaterialTranslucent;
@@ -89,12 +84,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
 
     @Override
     public Sprite getParticleSprite() {
-        if (this.particleSpriteSupplier == null) {
-            return this.fallbackParticleSprite;
-        }
-
-        Sprite randomSprite = particleSpriteSupplier.get();
-        return randomSprite == null ? this.fallbackParticleSprite : randomSprite;
+        return this.fallbackParticleSprite;
     }
 
     @Override
@@ -159,23 +149,13 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             QuadEmitter emitter,
             Random random,
             RenderData renderData,
-            BlockColorProvider blockColorProvider
-    ) {
-        // janky but whatever
-        boolean addSprites;
-        if (this.particleSpriteSupplier == null) {
-            this.particleSpriteSupplier = new RandomSupplier<>(random, new ArrayList<>());
-            addSprites = true;
-        } else {
-            addSprites = false;
-        }
-
+            BlockColorProvider blockColorProvider) {
         final Set<Block> blocks = renderData.getBlocks();
         blocks.forEach(block -> {
-            MinecraftClient client = MinecraftClient.getInstance();
-            BlockState state = block.getDefaultState();
+            final MinecraftClient client = MinecraftClient.getInstance();
+            final BlockState state = block.getDefaultState();
 
-            BakedModel blockModel =
+            final BakedModel blockModel =
                     client.getBlockRenderManager().getModel(state);
 
             if (blockModel == null || blockModel == client.getBakedModelManager().getMissingModel()) {
@@ -190,9 +170,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 for (Direction direction : Direction.values()) {
                     List<BakedQuad> quads = blockModel.getQuads(defaultState, direction, random);
                     for (BakedQuad quad : quads) {
-                        if (addSprites) {
-                            this.particleSpriteSupplier.add(quad.getSprite());
-                        }
+                        fallbackParticleSprite = quad.getSprite();
 
                         emitter.nominalFace(direction);
                         emitQuadPositions(
