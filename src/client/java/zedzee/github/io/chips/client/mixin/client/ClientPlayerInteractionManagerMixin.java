@@ -123,9 +123,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 broken = true;
             }
 
-            if (broken) blockState.getBlock().onBroken(client.world, pos, blockState);
+            if (broken) {
+                blockState.getBlock().onBroken(client.world, pos, blockState);
+                cir.setReturnValue(true);
+            } else {
+                cir.setReturnValue(false);
+            }
 
-            cir.setReturnValue(false);
             cir.cancel();
         }
     }

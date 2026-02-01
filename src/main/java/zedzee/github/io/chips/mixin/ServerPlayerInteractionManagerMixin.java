@@ -49,6 +49,10 @@ public class ServerPlayerInteractionManagerMixin {
             if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
 
             Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+            if (block == null) {
+                cir.setReturnValue(false);
+                return;
+            }
             if (!player.getMainHandStack().getItem().canMine(block.getDefaultState(),
                     world,
                     pos,
@@ -65,21 +69,13 @@ public class ServerPlayerInteractionManagerMixin {
 
             chipsBlockEntity.removeChips(hoveredCorner);
 
-            int ct = 0;
-            for (int i = 0; i < ChipsBlock.CORNER_SHAPES.length; i++) {
-                CornerInfo corner = CornerInfo.fromIndex(i);
-                if ((hoveredCorner.shape() & corner.shape()) != 0) {
-                    ct++;
-                }
+            if (broken) {
+                blockState.getBlock().onBroken(world, pos, blockState);
+                cir.setReturnValue(true);
+            } else {
+                cir.setReturnValue(false);
             }
 
-            if (ct > 1) {
-                Chips.LOGGER.info("idx: " + hoveredCorner.index());
-            }
-
-            if (broken) blockState.getBlock().onBroken(world, pos, blockState);
-
-            cir.setReturnValue(false);
             cir.cancel();
         }
     }

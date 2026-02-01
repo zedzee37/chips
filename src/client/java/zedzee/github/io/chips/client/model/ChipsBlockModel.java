@@ -341,8 +341,8 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float minXU = MathHelper.lerp(fromX, minU, maxU);
         final float maxXU = MathHelper.lerp(toX, minU, maxU);
 
-        final float minYV = MathHelper.lerp(fromY, minV, maxV);
-        final float maxYV = MathHelper.lerp(toY, minV, maxV);
+        final float minYV = minV;
+        final float maxYV = MathHelper.lerp(Math.abs(toY - fromY), minV, maxV);
 
         final float minZV = MathHelper.lerp(fromZ, minV, maxV);
         final float maxZV = MathHelper.lerp(toZ, minV, maxV);
@@ -376,17 +376,17 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 emitter.uv(0, maxXU, minYV);
             }
             case EAST -> {
-                emitter.uv(0, maxZU, maxYV);
-                emitter.uv(1, minZU, maxYV);
-                emitter.uv(2, minZU, minYV);
-                emitter.uv(3, maxZU, minYV);
+                emitter.uv(0, maxZU, minYV);
+                emitter.uv(1, maxZU, maxYV);
+                emitter.uv(2, minZU, maxYV);
+                emitter.uv(3, minZU, minYV);
             }
             case WEST -> {
-                emitter.uv(3, maxZU, maxYV);
-                emitter.uv(2, minZU, maxYV);
-                emitter.uv(1, minZU, minYV);
-                emitter.uv(0, maxZU, minYV);
-            }
+                emitter.uv(3, maxZU, minYV);
+                emitter.uv(2, maxZU, maxYV);
+                emitter.uv(1, minZU, maxYV);
+                emitter.uv(0, minZU, minYV);
+           }
         }
     }
 }
