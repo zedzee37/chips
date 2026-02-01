@@ -9,7 +9,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,12 +16,10 @@ import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.client.util.ChipsSpriteProvider;
 
 @Mixin(BlockDustParticle.class)
 public class ClientBlockDustParticleMixin {
-    @Shadow
-    protected void setSprite(Sprite sprite) {}
-
     @Inject(
             method = "<init>(Lnet/minecraft/client/world/ClientWorld;DDDDDDLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V",
             at = @At(
@@ -51,7 +48,11 @@ public class ClientBlockDustParticleMixin {
             final Block block = blockEntity.getBlockAtCorner(nearestCorner);
             if (block == null) return;
 
-            Sprite sprite = client.getBlockRenderManager().getModel(block.getDefaultState()).getParticleSprite();
+            BlockDustParticle blockDustParticle = (BlockDustParticle) (Object) this;
+            Sprite sprite = client.getBlockRenderManager().getModel(
+                    block.getDefaultState()
+            ).getParticleSprite();
+            blockDustParticle.setSprite(new ChipsSpriteProvider(sprite));
         }
     }
 }
