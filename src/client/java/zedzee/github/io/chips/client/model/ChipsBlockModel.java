@@ -306,6 +306,9 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             float toZ,
             boolean defaultUv
     ) {
+        // reminder for my dumb ass
+        // V goes top of the texture -> bottom of the texture, U goes left to right
+
         final float minU = sprite.getMinU();
         final float maxU = sprite.getMaxU();
 
@@ -315,11 +318,11 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         final float minXU = MathHelper.lerp(fromX, minU, maxU);
         final float maxXU = MathHelper.lerp(toX, minU, maxU);
 
-        float minYV = MathHelper.lerp(fromY, minV, maxV);
-        float maxYV = MathHelper.lerp(toY, minV, maxV);
+        float minYV = MathHelper.lerp(fromY, maxV, minV);
+        float maxYV = MathHelper.lerp(toY, maxV, minV);
         if (!defaultUv) {
-            minYV = minV;
-            maxYV = MathHelper.lerp(Math.abs(toY - fromY), minV, maxV);
+            minYV = MathHelper.lerp(Math.abs(toY - fromY), minV, maxV);
+            maxYV = minV;
         }
 
         final float minZV = MathHelper.lerp(fromZ, minV, maxV);
@@ -342,28 +345,28 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 emitter.uv(3, minXU, maxZV);
             }
             case NORTH -> {
-                emitter.uv(0, minXU, minYV);
-                emitter.uv(1, minXU, maxYV);
-                emitter.uv(2, maxXU, maxYV);
-                emitter.uv(3, maxXU, minYV);
+                emitter.uv(0, minXU, maxYV);
+                emitter.uv(1, minXU, minYV);
+                emitter.uv(2, maxXU, minYV);
+                emitter.uv(3, maxXU, maxYV);
             }
             case SOUTH -> {
-                emitter.uv(3, minXU, minYV);
-                emitter.uv(2, minXU, maxYV);
-                emitter.uv(1, maxXU, maxYV);
-                emitter.uv(0, maxXU, minYV);
+                emitter.uv(3, minXU, maxYV);
+                emitter.uv(2, minXU, minYV);
+                emitter.uv(1, maxXU, minYV);
+                emitter.uv(0, maxXU, maxYV);
             }
             case EAST -> {
-                emitter.uv(0, maxZU, minYV);
-                emitter.uv(1, maxZU, maxYV);
-                emitter.uv(2, minZU, maxYV);
-                emitter.uv(3, minZU, minYV);
+                emitter.uv(0, maxZU, maxYV);
+                emitter.uv(1, maxZU, minYV);
+                emitter.uv(2, minZU, minYV);
+                emitter.uv(3, minZU, maxYV);
             }
             case WEST -> {
-                emitter.uv(3, maxZU, minYV);
-                emitter.uv(2, maxZU, maxYV);
-                emitter.uv(1, minZU, maxYV);
-                emitter.uv(0, minZU, minYV);
+                emitter.uv(3, maxZU, maxYV);
+                emitter.uv(2, maxZU, minYV);
+                emitter.uv(1, minZU, minYV);
+                emitter.uv(0, minZU, maxYV);
            }
         }
     }
