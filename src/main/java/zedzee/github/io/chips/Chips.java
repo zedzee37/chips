@@ -51,6 +51,7 @@ public class Chips implements ModInitializer {
 
         PayloadTypeRegistry.playS2C().register(ChiselAnimationPayload.ID, ChiselAnimationPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(BlockChipppedPayload.ID, BlockChipppedPayload.PACKET_CODEC);
 
         Registry.register(Registries.ITEM_GROUP, CHIPS_ITEM_GROUP_KEY, CHIPS_ITEM_GROUP);
 

@@ -136,6 +136,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             }
 
             chipsBlockEntity.removeChips(hoveredCorner, false);
+            client.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL_AND_REDRAW);
             createChipsParticles(pos, hoveredCorner);
             ClientPlayNetworking.send(new BlockChipppedPayload(pos, hoveredCorner));
 

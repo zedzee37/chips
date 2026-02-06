@@ -21,6 +21,7 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
 import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
+import zedzee.github.io.chips.networking.BlockChipppedPayload;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
@@ -35,8 +36,6 @@ public class ChipsClient implements ClientModInitializer {
 ////        WorldRenderEvents.BLOCK_OUTLINE.register(
 ////                (worldRenderContext, blockOutlineContext) -> {
 //
-
-        PayloadTypeRegistry.playC2S().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
 
         ClientPlayNetworking.registerGlobalReceiver(ChiselAnimationPayload.ID, (payload, context) -> {
             ModifierLayer<IAnimation> animLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
