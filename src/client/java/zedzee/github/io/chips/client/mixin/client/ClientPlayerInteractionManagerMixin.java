@@ -39,6 +39,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     @Unique
     private static final double CHIPPED_PARTICLE_VELOCITY_MAX = 5.0;
 
+    @Unique
     @Nullable
     private CornerInfo cornerInfo = null;
 
