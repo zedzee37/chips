@@ -129,6 +129,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public List<Block> removeChips(CornerInfo cornerInfo) {
+        return removeChips(cornerInfo, true);
+    }
+
+    public List<Block> removeChips(CornerInfo cornerInfo, boolean sync) {
         List<Block> removedChips = new ArrayList<>();
         List<Block> destroyedChips = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -155,7 +159,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         destroyedChips.forEach(block -> blockMap.remove(block));
 
-        sync();
+        if (sync) sync();
         return removedChips;
     }
 

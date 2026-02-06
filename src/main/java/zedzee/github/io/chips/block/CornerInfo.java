@@ -1,9 +1,18 @@
 package zedzee.github.io.chips.block;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import zedzee.github.io.chips.Chips;
 
 // Standardize passing information about corners.
 public record CornerInfo(int index, int shape) {
+    public static final PacketCodec<ByteBuf, CornerInfo> PACKET_CODEC = PacketCodec.tuple(
+            PacketCodecs.INTEGER, CornerInfo::index,
+            PacketCodecs.INTEGER, CornerInfo::shape,
+            CornerInfo::new
+    );
+
     public static final CornerInfo EMPTY = new CornerInfo(-1, -1);
 
     public static CornerInfo fromShape(int shape) {

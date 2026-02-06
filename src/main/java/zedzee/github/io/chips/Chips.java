@@ -4,7 +4,10 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
@@ -13,14 +16,18 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
+import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.item.ChipsItems;
+import zedzee.github.io.chips.networking.BlockChipppedPayload;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
@@ -69,16 +76,17 @@ public class Chips implements ModInitializer {
                 }
         );
 
-//        PlayerBlockBreakEvents.BEFORE.register((
-//                world,
-//                player,
-//                pos,
-//                state,
-//                blockEntity) -> {
-//            if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) return true;
-//            return false;
-//        });
-//
+        ServerPlayNetworking.registerGlobalReceiver(BlockChipppedPayload.ID,
+                (payload, ctx) -> {
+                    final World world = ctx.player().getWorld();
+                    final BlockEntity maybeBlockEntity = world.getBlockEntity(payload.blockPos());
+
+                    if (!(maybeBlockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
+                        return;
+                    }
+
+                    chipsBlockEntity.removeChips(payload.cornerInfo(), false);
+                });
     }
 
     public static Identifier identifier(String path) {

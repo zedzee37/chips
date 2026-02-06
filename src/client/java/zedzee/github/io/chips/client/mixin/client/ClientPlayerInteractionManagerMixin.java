@@ -1,5 +1,6 @@
 package zedzee.github.io.chips.client.mixin.client;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -24,6 +25,7 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
+import zedzee.github.io.chips.networking.BlockChipppedPayload;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockBreakingProgress {
@@ -122,6 +124,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 blockState.getBlock().onBreak(client.world, pos, blockState, client.player);
                 broken = true;
             }
+
+            chipsBlockEntity.removeChips(hoveredCorner, false);
+            ClientPlayNetworking.send(new BlockChipppedPayload(pos, hoveredCorner));
 
             if (broken) {
                 blockState.getBlock().onBroken(client.world, pos, blockState);

@@ -11,6 +11,7 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Arm;
@@ -34,6 +35,9 @@ public class ChipsClient implements ClientModInitializer {
 ////        WorldRenderEvents.BLOCK_OUTLINE.register(
 ////                (worldRenderContext, blockOutlineContext) -> {
 //
+
+        PayloadTypeRegistry.playC2S().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
+
         ClientPlayNetworking.registerGlobalReceiver(ChiselAnimationPayload.ID, (payload, context) -> {
             ModifierLayer<IAnimation> animLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
                     .getPlayerAssociatedData(context.player())

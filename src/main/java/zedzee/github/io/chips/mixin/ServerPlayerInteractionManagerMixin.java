@@ -38,45 +38,46 @@ public class ServerPlayerInteractionManagerMixin {
     public void chipChipsBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = world.getBlockState(pos);
         if (blockState.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
-
-            if (hoveredCorner == null || !hoveredCorner.exists()) {
-                cir.setReturnValue(false);
-                return;
-            }
-
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
-
-            Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
-            if (block == null) {
-                cir.setReturnValue(false);
-                return;
-            }
-            if (!player.getMainHandStack().getItem().canMine(block.getDefaultState(),
-                    world,
-                    pos,
-                    player)) {
-                cir.setReturnValue(false);
-                cir.cancel();
-            }
-
-            boolean broken = false;
-            if ((chipsBlockEntity.getTotalChips() & ~hoveredCorner.shape()) == 0) {
-                blockState.getBlock().onBreak(world, pos, blockState, player);
-                broken = true;
-            }
-
-            chipsBlockEntity.removeChips(hoveredCorner);
-
-            if (broken) {
-                blockState.getBlock().onBroken(world, pos, blockState);
-                cir.setReturnValue(true);
-            } else {
-                cir.setReturnValue(false);
-            }
-
-            cir.cancel();
+            cir.setReturnValue(false);
+//            CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
+//
+//            if (hoveredCorner == null || !hoveredCorner.exists()) {
+//                cir.setReturnValue(false);
+//                return;
+//            }
+//
+//            BlockEntity blockEntity = world.getBlockEntity(pos);
+//            if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
+//
+//            Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+//            if (block == null) {
+//                cir.setReturnValue(false);
+//                return;
+//            }
+//            if (!player.getMainHandStack().getItem().canMine(block.getDefaultState(),
+//                    world,
+//                    pos,
+//                    player)) {
+//                cir.setReturnValue(false);
+//                cir.cancel();
+//            }
+//
+//            boolean broken = false;
+//            if ((chipsBlockEntity.getTotalChips() & ~hoveredCorner.shape()) == 0) {
+//                blockState.getBlock().onBreak(world, pos, blockState, player);
+//                broken = true;
+//            }
+//
+//            chipsBlockEntity.removeChips(hoveredCorner);
+//
+//            if (broken) {
+//                blockState.getBlock().onBroken(world, pos, blockState);
+//                cir.setReturnValue(true);
+//            } else {
+//                cir.setReturnValue(false);
+//            }
+//
+//            cir.cancel();
         }
     }
 }
