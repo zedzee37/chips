@@ -7,10 +7,14 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.particle.BlockDustParticle;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +23,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
@@ -30,6 +33,12 @@ import zedzee.github.io.chips.networking.BlockChipppedPayload;
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockBreakingProgress {
     @Unique
+    private static final int CHIPPED_PARTICLE_COUNT = 10;
+    @Unique
+    private static final double CHIPPED_PARTICLE_VELOCITY_MIN = 3.0;
+    @Unique
+    private static final double CHIPPED_PARTICLE_VELOCITY_MAX = 5.0;
+
     @Nullable
     private CornerInfo cornerInfo = null;
 
@@ -126,6 +135,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             }
 
             chipsBlockEntity.removeChips(hoveredCorner, false);
+            createChipsParticles(pos, hoveredCorner);
             ClientPlayNetworking.send(new BlockChipppedPayload(pos, hoveredCorner));
 
             if (broken) {
@@ -136,6 +146,42 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             }
 
             cir.cancel();
+        }
+    }
+
+    @Unique
+    private void createChipsParticles(BlockPos pos, CornerInfo cornerInfo) {
+        final Random random = client.player.getRandom();
+        final BlockState blockState = client.world.getBlockState(pos);
+
+        final VoxelShape cornerShape = ChipsBlock.getShape(cornerInfo.shape());
+        Vec3d midPoint = new Vec3d(
+                cornerShape.getMin(Direction.Axis.X) + cornerShape.getMax(Direction.Axis.X),
+                cornerShape.getMin(Direction.Axis.Y) + cornerShape.getMax(Direction.Axis.Y),
+                cornerShape.getMin(Direction.Axis.Z) + cornerShape.getMax(Direction.Axis.Z)
+        ).multiply(0.5);
+        midPoint = midPoint.add(Vec3d.of(pos));
+
+        for (int i = 0; i < CHIPPED_PARTICLE_COUNT; i++) {
+            final Vec3d direction = Vec3d.fromPolar(
+                    (float) (random.nextFloat() * (2 * Math.PI)),
+                    (float) (random.nextFloat() * (2 * Math.PI))
+            );
+            final double velocityMagnitude = (random.nextDouble() * CHIPPED_PARTICLE_VELOCITY_MAX) + CHIPPED_PARTICLE_VELOCITY_MIN;
+
+            final Vec3d velocity = direction.multiply(velocityMagnitude);
+
+            BlockDustParticle blockDustParticle = new BlockDustParticle(
+                    client.world,
+                    midPoint.getX(),
+                    midPoint.getY(),
+                    midPoint.getZ(),
+                    velocity.getX(),
+                    velocity.getY(),
+                    velocity.getZ(),
+                    blockState
+            );
+            client.particleManager.addParticle(blockDustParticle);
         }
     }
 }
