@@ -135,9 +135,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 broken = true;
             }
 
+            createChipsParticles(pos, hoveredCorner);
             chipsBlockEntity.removeChips(hoveredCorner, false);
             client.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL_AND_REDRAW);
-            createChipsParticles(pos, hoveredCorner);
             ClientPlayNetworking.send(new BlockChipppedPayload(pos, hoveredCorner));
 
             if (broken) {
@@ -166,8 +166,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
 
         for (int i = 0; i < CHIPPED_PARTICLE_COUNT; i++) {
             final Vec3d direction = Vec3d.fromPolar(
-                    (float) (random.nextFloat() * (2 * Math.PI)),
-                    (float) (random.nextFloat() * (2 * Math.PI))
+                    random.nextFloat() * 360,
+                    random.nextFloat() * 360
             );
             final double velocityMagnitude = (random.nextDouble() * CHIPPED_PARTICLE_VELOCITY_MAX) + CHIPPED_PARTICLE_VELOCITY_MIN;
 

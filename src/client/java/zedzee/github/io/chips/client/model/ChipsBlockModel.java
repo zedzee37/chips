@@ -127,13 +127,13 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             Supplier<Random> randomSupplier,
             RenderContext context
     ) {
-        Object object = blockView.getBlockEntityRenderData(pos);
+        final Object object = blockView.getBlockEntityRenderData(pos);
 
         if (object != null && !(object instanceof RenderData)) {
             return;
         }
 
-        RenderData renderData = (RenderData)object;
+        final RenderData renderData = (RenderData)object;
         assert renderData != null;
         emitModelQuads(
                 context.getEmitter(),
@@ -225,8 +225,8 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
     ) {
         this.fallbackParticleSprite = textureGetter.apply(FALLBACK_PARTICLE_SPRITE);
 
-        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
-        MaterialFinder finder = renderer.materialFinder();
+        final Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        final MaterialFinder finder = renderer.materialFinder();
         this.renderMaterialNormal = finder
                 .ambientOcclusion(TriState.TRUE)
                 .disableDiffuse(false)
@@ -238,7 +238,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 .blendMode(BlendMode.TRANSLUCENT)
                 .find();
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        final MinecraftClient client = MinecraftClient.getInstance();
         this.blockColors = client.getBlockColors();
 
         return this;
@@ -345,16 +345,16 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 emitter.uv(3, minXU, maxZV);
             }
             case NORTH -> {
-                emitter.uv(0, minXU, maxYV);
-                emitter.uv(1, minXU, minYV);
-                emitter.uv(2, maxXU, minYV);
-                emitter.uv(3, maxXU, maxYV);
+                emitter.uv(0, maxXU, maxYV);
+                emitter.uv(1, maxXU, minYV);
+                emitter.uv(2, minXU, minYV);
+                emitter.uv(3, minXU, maxYV);
             }
             case SOUTH -> {
-                emitter.uv(3, minXU, maxYV);
-                emitter.uv(2, minXU, minYV);
-                emitter.uv(1, maxXU, minYV);
-                emitter.uv(0, maxXU, maxYV);
+                emitter.uv(3, maxXU, maxYV);
+                emitter.uv(2, maxXU, minYV);
+                emitter.uv(1, minXU, minYV);
+                emitter.uv(0, minXU, maxYV);
             }
             case EAST -> {
                 emitter.uv(0, maxZU, maxYV);
