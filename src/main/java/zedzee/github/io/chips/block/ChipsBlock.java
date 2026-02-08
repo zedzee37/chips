@@ -331,7 +331,15 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         Set<BlockSoundGroup> soundGroups = getSoundGroups(world, pos);
 
         soundGroups.forEach(soundGroup ->
-                world.playSound(player, pos, soundGroup.getBreakSound(), SoundCategory.BLOCKS));
+                world.playSoundAtBlockCenter(
+                        pos,
+                        soundGroup.getBreakSound(),
+                        SoundCategory.BLOCKS,
+                        (soundGroup.getVolume() + 1.0F) / 2.0F,
+                        soundGroup.getPitch() * 0.8F,
+                        false
+                )
+        );
 
         return super.onBreak(world, pos, state, player);
     }

@@ -165,6 +165,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
         midPoint = midPoint.add(Vec3d.of(pos));
 
         for (int i = 0; i < CHIPPED_PARTICLE_COUNT; i++) {
+            // why tf is this degrees and not radians, mojang fix please
             final Vec3d direction = Vec3d.fromPolar(
                     random.nextFloat() * 360,
                     random.nextFloat() * 360
