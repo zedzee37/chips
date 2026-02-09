@@ -16,7 +16,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +28,8 @@ import java.util.function.Consumer;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     private Map<Block, BlockData> blockMap = new HashMap<>();
-    private final BlockMetaData[] chipMap;
+    private final BlockState[] chipMap;
+    private final Map<Block, BlockMetaData> blockMetaDataMap;
 
     private final static String NBT_BLOCK_DATA_CHIPS_KEY = "chips";
     private final static String NBT_BLOCK_DATA_DEFAULT_UV_KEY = "default_uv";
@@ -38,64 +38,77 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
-        chipMap = new BlockMetaData[ChipsBlock.CORNER_SHAPES.length];
-        Arrays.fill(chipMap, BlockMetaData.EMPTY);
+        chipMap = new BlockState[ChipsBlock.CORNER_SHAPES.length];
+        Arrays.fill(chipMap, Blocks.AIR.getDefaultState());
+        blockMetaDataMap = new HashMap<>();
     }
 
     public int getTotalChips() {
         int total = 0;
-        for (BlockData value : blockMap.values()) {
-            total |= value.getChips();
+        for (int i = 0; i < chipMap.length; i++) {
+            if (cornerExists(CornerInfo.fromIndex(i))) {
+                total |= 1 << i;
+            }
         }
         return total;
     }
 
-    public int getChips(Block block) {
-        return this.blockMap.get(block).getChips();
+    public CornerInfo getChips(Block block) {
+        int shape = 0;
+        for (int i = 0; i < chipMap.length; i++) {
+            if (getCornerState(CornerInfo.fromIndex(i)).isOf(block)) {
+                shape |= i << 1;
+            }
+        }
+        return CornerInfo.fromShape(shape);
     }
 
     public void forEachKey(Consumer<Block> blockConsumer) {
-        blockMap.keySet().forEach(blockConsumer);
+        for (BlockState blockState : chipMap) {
+            if (!blockState.isOf(Blocks.AIR)) {
+                blockConsumer.accept(blockState.getBlock());
+            }
+        }
     }
 
     // sets chips & syncs
-    public void setChips(Block block, int chips) {
-        setChips(block, chips, true);
+    public void setChips(Block block, CornerInfo cornerInfo) {
+        setChips(block, cornerInfo, true);
     }
 
-    public void setChips(Block block, int chips, boolean sync) {
-        if (this.blockMap.containsKey(block)) {
-            BlockData data = this.blockMap.get(block);
-            data.setChips(chips);
-        } else if (chips != 0) {
-            this.blockMap.put(block, new BlockData(chips));
-        }
+    public void setChips(Block block, CornerInfo cornerInfo, boolean sync) {
+        chipMap[cornerInfo.index()] = block.getDefaultState();
+        blockMetaDataMap.putIfAbsent(block, new BlockMetaData(false));
 
         if (sync) sync();
     }
 
     @Nullable
     public Block firstBlockWithCorner(CornerInfo corner) {
-        for (Block block : blockMap.keySet()) {
-            int chips = this.getChips(block);
-            if ((chips & corner.shape()) != 0) {
-                return block;
-            }
+        if (corner.exists() && cornerExists(corner)) {
+            return getCornerState(corner).getBlock();
         }
         return null;
     }
 
     public boolean hasBlock(Block block) {
-        return blockMap.containsKey(block);
+        for (BlockState state : chipMap) {
+            if (state.isOf(block)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void toggleDefaultUv(Block block) {
-        if (!this.blockMap.containsKey(block)) {
+        if (!blockMetaDataMap.containsKey(block)) {
             return;
         }
 
-        BlockData data = this.blockMap.get(block);
-        data.setDefaultUv(!data.shouldUseDefaultUv());
+        BlockMetaData metaData = blockMetaDataMap.getOrDefault(block, new BlockMetaData(false));
+        metaData.toggleDefaultUv();
+        blockMetaDataMap.put(block, metaData);
+
         this.markDirty();
         sync();
     }
@@ -116,14 +129,9 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return (getTotalChips() & corner) != 0;
     }
 
-    public void addChips(Block block, int chips) {
-        int currentChips = 0;
-        if (blockMap.containsKey(block)) {
-            currentChips = blockMap.get(block).getChips();
-        }
-
-        int newChips = currentChips | chips;
-        setChips(block, newChips);
+    public void addChips(Block block, CornerInfo cornerInfo) {
+        setState(cornerInfo, block.getDefaultState());
+        blockMetaDataMap.putIfAbsent(block, new BlockMetaData(false));
     }
 
     public List<Block> removeChips(CornerInfo cornerInfo) {
@@ -185,11 +193,8 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public @Nullable Block getBlockAtCorner(CornerInfo cornerInfo) {
-        for (Block key : blockMap.keySet()) {
-            int chips = getChips(key);
-            if ((chips & cornerInfo.shape()) != 0) {
-                return key;
-            }
+        if (cornerExists(cornerInfo)) {
+            return chipMap[cornerInfo.index()].getBlock();
         }
 
         return null;
@@ -225,6 +230,18 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
             world.setBlockState(getPos(), world.getBlockState(getPos()).with(ChipsBlock.LIGHT_LEVEL, (int)totalLuminance), Block.NOTIFY_ALL);
         }
+    }
+
+    public boolean cornerExists(CornerInfo cornerInfo) {
+        return !getCornerState(cornerInfo).isOf(Blocks.AIR);
+    }
+
+    public BlockState getCornerState(CornerInfo cornerInfo) {
+        return chipMap[cornerInfo.index()];
+    }
+
+    public void setState(CornerInfo corner, BlockState state) {
+        chipMap[corner.index()] = state;
     }
 
     @Override
@@ -331,35 +348,11 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         }
     }
 
-    public static class BlockMetaData {
-        public static final BlockMetaData EMPTY = new BlockMetaData(Blocks.AIR.getDefaultState());
-
-        private BlockState state;
+    public class BlockMetaData {
         private boolean defaultUv;
 
-        public BlockMetaData(BlockState state) {
-            this(state, false);
-        }
-
-        public BlockMetaData(BlockState state, boolean defaultUv) {
-            this.state = state;
+        public BlockMetaData(boolean defaultUv) {
             this.defaultUv = defaultUv;
-        }
-
-        public boolean isEmpty() {
-            return this.state.isOf(Blocks.AIR);
-        }
-
-        public BlockState getState() {
-            return this.state;
-        }
-
-        public <T extends Comparable<T>> BlockState with(Property<T> property, T value) {
-            return this.state.with(property, value);
-        }
-
-        public void setState(BlockState state) {
-            this.state = state;
         }
 
         public boolean hasDefaultUv() {
@@ -371,7 +364,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         }
 
         public void toggleDefaultUv() {
-            this.setDefaultUv(!hasDefaultUv());
+            setDefaultUv(!hasDefaultUv());
         }
     }
 }
