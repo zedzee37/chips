@@ -36,4 +36,8 @@ public record CornerInfo(int index, int shape) {
     public CornerInfo union(CornerInfo other) {
         return CornerInfo.fromShape(this.shape() | other.shape());
     }
+
+    public boolean hasShape(CornerInfo corner) {
+        return (shape() | corner.shape()) == shape();
+    }
 }

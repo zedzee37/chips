@@ -45,7 +45,7 @@ public class ClientBlockDustParticleMixin {
 
             final ChipsBlockEntity blockEntity = (ChipsBlockEntity) world.getBlockEntity(blockPos);
             assert blockEntity != null;
-            final Block block = blockEntity.getBlockAtCorner(nearestCorner);
+            final Block block = blockEntity.getStateAtCorner(nearestCorner);
             if (block == null) return;
 
             BlockDustParticle blockDustParticle = (BlockDustParticle) (Object) this;

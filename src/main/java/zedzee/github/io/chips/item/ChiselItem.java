@@ -3,9 +3,6 @@ package zedzee.github.io.chips.item;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
@@ -13,21 +10,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.*;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Arm;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
@@ -43,9 +34,7 @@ import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
-import javax.tools.Tool;
 import java.util.List;
-import java.util.Optional;
 
 public class ChiselItem extends Item {
     public static final int MIN_USE_TIME = 3;
@@ -77,7 +66,7 @@ public class ChiselItem extends Item {
                     CornerInfo hitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer());
 
                     if (hitCorner.exists()) {
-                        Block block = chipsBlockEntity.getBlockAtCorner(hitCorner);
+                        Block block = chipsBlockEntity.getStateAtCorner(hitCorner);
                         chipsBlockEntity.toggleDefaultUv(block);
                         playerEntity.swingHand(context.getHand());
                     }

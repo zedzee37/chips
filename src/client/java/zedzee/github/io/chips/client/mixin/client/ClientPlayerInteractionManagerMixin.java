@@ -8,8 +8,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.particle.BlockDustParticle;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -120,7 +118,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             BlockEntity blockEntity = client.world.getBlockEntity(pos);
             if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
 
-            Block block = chipsBlockEntity.getBlockAtCorner(hoveredCorner);
+            Block block = chipsBlockEntity.getStateAtCorner(hoveredCorner);
             if (!this.client.player.getMainHandStack().getItem().canMine(block.getDefaultState(),
                     client.world,
                     pos,
