@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     private Map<Block, BlockData> blockMap = new HashMap<>();
-    private final BlockState[] chipMap;
     private final Map<Block, BlockMetaData> blockMetaDataMap;
 
     private final static String NBT_BLOCK_DATA_CHIPS_KEY = "chips";
@@ -38,29 +37,22 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
-        chipMap = new BlockState[ChipsBlock.CORNER_SHAPES.length];
-        Arrays.fill(chipMap, Blocks.AIR.getDefaultState());
         blockMetaDataMap = new HashMap<>();
     }
 
-    public int getTotalChips() {
-        int total = 0;
-        for (int i = 0; i < chipMap.length; i++) {
-            if (cornerExists(CornerInfo.fromIndex(i))) {
-                total |= 1 << i;
-            }
+    public CornerInfo getTotalChips() {
+        CornerInfo total = CornerInfo.fromShape(0);
+        for (Block block : blockMetaDataMap.keySet()) {
+            total = total.union(blockMetaDataMap.get(block).getTotalChips());
         }
         return total;
     }
 
     public CornerInfo getChips(Block block) {
-        int shape = 0;
-        for (int i = 0; i < chipMap.length; i++) {
-            if (getCornerState(CornerInfo.fromIndex(i)).isOf(block)) {
-                shape |= i << 1;
-            }
+        if (blockMetaDataMap.containsKey(block)) {
+            return blockMetaDataMap.get(block).getTotalChips();
         }
-        return CornerInfo.fromShape(shape);
+        return CornerInfo.EMPTY;
     }
 
     public void forEachKey(Consumer<Block> blockConsumer) {
@@ -348,11 +340,13 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         }
     }
 
-    public class BlockMetaData {
+    public static class BlockMetaData {
+        private final Map<BlockState, Byte> blockStateMap;
         private boolean defaultUv;
 
         public BlockMetaData(boolean defaultUv) {
             this.defaultUv = defaultUv;
+            this.blockStateMap = new HashMap<>();
         }
 
         public boolean hasDefaultUv() {
@@ -365,6 +359,14 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         public void toggleDefaultUv() {
             setDefaultUv(!hasDefaultUv());
+        }
+
+        public CornerInfo getTotalChips() {
+            int total = 0;
+            for (Byte shape : blockStateMap.values()) {
+                total |= shape;
+            }
+            return CornerInfo.fromShape(total);
         }
     }
 }
