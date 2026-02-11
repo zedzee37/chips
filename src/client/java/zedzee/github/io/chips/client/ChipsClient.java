@@ -18,6 +18,7 @@ import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.animation.ChipsAnimations;
 import zedzee.github.io.chips.client.model.ChipsModelLoadingPlugin;
@@ -73,7 +74,7 @@ public class ChipsClient implements ClientModInitializer {
 
             BlockEntity be = world.getBlockEntity(payload.pos());
             if (be instanceof ChipsBlockEntity chipsBlockEntity) {
-                chipsBlockEntity.addChips(payload.block(), 255);
+                chipsBlockEntity.addChips(payload.state(), CornerInfo.fromShape(255));
             }
         });
 

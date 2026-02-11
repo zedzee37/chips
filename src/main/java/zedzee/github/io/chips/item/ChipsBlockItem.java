@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
@@ -176,7 +177,7 @@ public class ChipsBlockItem extends BlockItem {
             return ActionResult.FAIL;
         }
 
-        int targetCorner = getTargetCorner(absHitPos.subtract(Vec3d.of(pos)));
+        CornerInfo targetCorner = getTargetCorner(absHitPos.subtract(Vec3d.of(pos)));
         if (chipsBlockEntity.hasCorner(targetCorner)) {
             absHitPos = absHitPos.subtract(new Vec3d(EPSILON, EPSILON, EPSILON));
             targetCorner = getTargetCorner(absHitPos.subtract(Vec3d.of(pos)));
@@ -186,19 +187,19 @@ public class ChipsBlockItem extends BlockItem {
             }
         }
 
+        BlockState blockState = block.getDefaultState();
         if (!world.isClient()) {
-            chipsBlockEntity.addChips(block, targetCorner);
+            chipsBlockEntity.addChips(blockState, targetCorner);
         }
 
-        playPlaceSound(world, player, block, pos);
+        playPlaceSound(world, player, blockState, pos);
         world.emitGameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Emitter.of(player, state));
         stack.decrementUnlessCreative(1, player);
 
         return ActionResult.SUCCESS;
     }
 
-    private void playPlaceSound(World world, PlayerEntity playerEntity, Block blockType, BlockPos blockPos) {
-        BlockState state = blockType.getDefaultState();
+    private void playPlaceSound(World world, PlayerEntity playerEntity, BlockState state, BlockPos blockPos) {
         BlockSoundGroup blockSoundGroup = state.getSoundGroup();
         world.playSound(
                 playerEntity,
@@ -210,7 +211,7 @@ public class ChipsBlockItem extends BlockItem {
         );
     }
 
-    public int getTargetCorner(Vec3d relHitPos) {
+    public CornerInfo getTargetCorner(Vec3d relHitPos) {
         int currentCorner = 255;
 
         if (relHitPos.getX() >= 0.5f) {
@@ -247,7 +248,7 @@ public class ChipsBlockItem extends BlockItem {
             currentCorner &= ~(16 | 32 | 64 | 128);
         }
 
-        return currentCorner;
+        return CornerInfo.fromShape(currentCorner);
     }
 
     @Override

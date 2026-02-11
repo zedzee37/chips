@@ -3,6 +3,7 @@ package zedzee.github.io.chips.networking;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +15,7 @@ public record ChipsBlockChangePayload(BlockPos pos, BlockState state) implements
     public static final PacketCodec<RegistryByteBuf, ChipsBlockChangePayload> CODEC =
             PacketCodec.tuple(
                     BlockPos.PACKET_CODEC, ChipsBlockChangePayload::pos,
-                    BlockState.CODEC, ChipsBlockChangePayload::state,
+                    PacketCodecs.codec(BlockState.CODEC), ChipsBlockChangePayload::state,
                     ChipsBlockChangePayload::new);
 
     @Override
