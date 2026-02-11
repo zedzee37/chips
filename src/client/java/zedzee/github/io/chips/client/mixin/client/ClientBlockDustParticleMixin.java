@@ -45,12 +45,12 @@ public class ClientBlockDustParticleMixin {
 
             final ChipsBlockEntity blockEntity = (ChipsBlockEntity) world.getBlockEntity(blockPos);
             assert blockEntity != null;
-            final Block block = blockEntity.getStateAtCorner(nearestCorner);
-            if (block == null) return;
+            final BlockState blockState = blockEntity.getStateAtCorner(nearestCorner);
+            if (blockState == null) return;
 
             BlockDustParticle blockDustParticle = (BlockDustParticle) (Object) this;
             Sprite sprite = client.getBlockRenderManager().getModel(
-                    block.getDefaultState()
+                    blockState
             ).getParticleSprite();
             blockDustParticle.setSprite(new ChipsSpriteProvider(sprite));
         }

@@ -118,8 +118,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             BlockEntity blockEntity = client.world.getBlockEntity(pos);
             if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return;
 
-            Block block = chipsBlockEntity.getStateAtCorner(hoveredCorner);
-            if (!this.client.player.getMainHandStack().getItem().canMine(block.getDefaultState(),
+            BlockState state = chipsBlockEntity.getStateAtCorner(hoveredCorner);
+            if (!this.client.player.getMainHandStack().getItem().canMine(state,
                     client.world,
                     pos,
                     this.client.player)) {
@@ -128,7 +128,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             }
 
             boolean broken = false;
-            if ((chipsBlockEntity.getTotalChips() & ~hoveredCorner.shape()) == 0) {
+            if (chipsBlockEntity.getTotalChips().removeShape(cornerInfo).isEmpty()) {
                 blockState.getBlock().onBreak(client.world, pos, blockState, client.player);
                 broken = true;
             }
