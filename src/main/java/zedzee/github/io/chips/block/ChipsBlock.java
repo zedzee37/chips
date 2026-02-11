@@ -321,8 +321,12 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         CornerInfo hoveredCorner = getHoveredCorner(world, player);
 
         BlockState blockState = chipsBlockEntity.getStateAtCorner(hoveredCorner);
-        assert blockState != null;
-        return blockState.calcBlockBreakingDelta(player, world, pos);
+
+        if (blockState == null) {
+            return 0;
+        }
+
+        return blockState.calcBlockBreakingDelta(player, world, pos) * 8;
     }
 
     @Override
