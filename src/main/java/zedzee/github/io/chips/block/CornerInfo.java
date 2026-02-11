@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
-import zedzee.github.io.chips.Chips;
 
 // Standardize passing information about corners.
 public record CornerInfo(int index, int shape) {
@@ -23,12 +22,7 @@ public record CornerInfo(int index, int shape) {
     public static final CornerInfo EMPTY = new CornerInfo(-1, -1);
 
     public static CornerInfo fromShape(int shape) {
-        int index = Integer.numberOfLeadingZeros(shape);
-
-        if ((1 << index) != shape) {
-            Chips.LOGGER.warn("Non corner shape passed.");
-        }
-
+        int index = Integer.numberOfTrailingZeros(shape);
         return new CornerInfo(index, shape);
     }
 
@@ -41,7 +35,7 @@ public record CornerInfo(int index, int shape) {
     }
 
     public boolean isEmpty() {
-        return index == 0 || shape == 0;
+        return shape == 0;
     }
 
     public CornerInfo union(CornerInfo other) {
@@ -49,7 +43,7 @@ public record CornerInfo(int index, int shape) {
     }
 
     public CornerInfo removeShape(CornerInfo shape) {
-        return CornerInfo.fromShape(this.shape & ~shape.shape());
+        return CornerInfo.fromShape(this.shape() & ~shape.shape());
     }
 
     public boolean hasShape(CornerInfo corner) {

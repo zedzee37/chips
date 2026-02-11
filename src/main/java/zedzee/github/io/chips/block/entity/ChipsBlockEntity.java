@@ -325,7 +325,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         }
 
         public ChipData() {
-            this(CornerInfo.fromIndex(0));
+            this(CornerInfo.fromShape(0));
         }
 
         public boolean hasDefaultUv() {

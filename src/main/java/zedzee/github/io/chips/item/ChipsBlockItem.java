@@ -212,43 +212,13 @@ public class ChipsBlockItem extends BlockItem {
     }
 
     public CornerInfo getTargetCorner(Vec3d relHitPos) {
-        int currentCorner = 255;
+        int index = 0;
 
-        if (relHitPos.getX() >= 0.5f) {
-            currentCorner &= ~1;
-            currentCorner &= ~(1 << 2);
+        if (relHitPos.getX() >= 0.5f) index |= 1;
+        if (relHitPos.getZ() >= 0.5f) index |= 2;
+        if (relHitPos.getY() >= 0.5f) index |= 4;
 
-            currentCorner &= ~(1 << 4);
-            currentCorner &= ~(1 << 6);
-        } else {
-            currentCorner &= ~(1 << 1);
-            currentCorner &= ~(1 << 3);
-
-            currentCorner &= ~(1 << 5);
-            currentCorner &= ~(1 << 7);
-        }
-
-        if (relHitPos.getZ() >= 0.5f) {
-            currentCorner &= ~1;
-            currentCorner &= ~2;
-
-            currentCorner &= ~(1 << 4);
-            currentCorner &= ~(1 << 5);
-        } else {
-            currentCorner &= ~4;
-            currentCorner &= ~8;
-
-            currentCorner &= ~(1 << 6);
-            currentCorner &= ~(1 << 7);
-        }
-
-        if (relHitPos.getY() >= 0.5f) {
-            currentCorner &= ~(1 | 2 | 4 | 8);
-        } else {
-            currentCorner &= ~(16 | 32 | 64 | 128);
-        }
-
-        return CornerInfo.fromShape(currentCorner);
+        return CornerInfo.fromIndex(index);
     }
 
     @Override
