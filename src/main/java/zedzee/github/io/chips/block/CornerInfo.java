@@ -33,8 +33,16 @@ public record CornerInfo(int index, int shape) {
         return index != -1 && shape != -1;
     }
 
+    public boolean isEmpty() {
+        return index == 0 || shape == 0;
+    }
+
     public CornerInfo union(CornerInfo other) {
         return CornerInfo.fromShape(this.shape() | other.shape());
+    }
+
+    public CornerInfo removeShape(CornerInfo shape) {
+        return CornerInfo.fromShape(this.shape & ~shape.shape());
     }
 
     public boolean hasShape(CornerInfo corner) {
