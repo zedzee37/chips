@@ -59,4 +59,13 @@ public record CornerInfo(int index, int shape) {
     public boolean isFull() {
         return this.shape() == 255;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof CornerInfo otherCorner)) {
+            return false;
+        }
+
+        return this.shape() == otherCorner.shape();
+    }
 }

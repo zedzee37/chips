@@ -277,18 +277,18 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     public record ChipsBlockRenderData(Map<BlockState, ChipData> stateMap) implements RenderData {
         @Override
-        public int getChips(Block block) {
-            return 0;
+        public Set<BlockState> getStates() {
+            return stateMap.keySet();
         }
 
         @Override
-        public Set<Block> getBlocks() {
-            return Set.of();
+        public CornerInfo getChips(BlockState state) {
+            return stateMap.get(state).getShape();
         }
 
         @Override
-        public boolean shouldUseDefaultUv(Block block) {
-            return false;
+        public boolean shouldUseDefaultUv(BlockState state) {
+            return stateMap.get(state).hasDefaultUv();
         }
     }
 

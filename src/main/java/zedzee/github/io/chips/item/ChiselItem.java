@@ -66,8 +66,8 @@ public class ChiselItem extends Item {
                     CornerInfo hitCorner = ChipsBlock.getHoveredCorner(world, context.getPlayer());
 
                     if (hitCorner.exists()) {
-                        Block block = chipsBlockEntity.getStateAtCorner(hitCorner);
-                        chipsBlockEntity.toggleDefaultUv(block);
+                        BlockState state = chipsBlockEntity.getStateAtCorner(hitCorner);
+                        chipsBlockEntity.toggleDefaultUv(state);
                         playerEntity.swingHand(context.getHand());
                     }
                 } else {
@@ -152,9 +152,16 @@ public class ChiselItem extends Item {
         }
 
         if ((remainingUseTicks % ANIMATION_TIME) == 0 && remainingUseTicks != 0) {
-            Block hoveredBlock = getHoveredBlock(world, blockPos, blockHitResult);
-            if (hoveredBlock != null) {
-                playHitSound(player, hoveredBlock, world, blockPos); addHitParticles(world, blockHitResult, hoveredBlock, player);
+            BlockState hoveredState = getHoveredBlock(world, blockPos, blockHitResult);
+            if (hoveredState != null) {
+                playHitSound(player,
+                        hoveredState,
+                        world,
+                        blockPos);
+                addHitParticles(world,
+                        blockHitResult,
+                        hoveredState,
+                        player);
             }
         }
 
@@ -166,7 +173,6 @@ public class ChiselItem extends Item {
         if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
             if (!world.isClient()) {
                 BlockState state = world.getBlockState(blockPos);
-                Block block = state.getBlock();
                 world.setBlockState(blockPos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
 
                 if (blockEntity != null) {
@@ -180,22 +186,25 @@ public class ChiselItem extends Item {
                     return ActionResult.FAIL;
                 }
 
-                chipsBlockEntity.addChips(block, 255);
-                ServerPlayNetworking.send((ServerPlayerEntity) player, new ChipsBlockChangePayload(blockPos, block));
+                chipsBlockEntity.addChips(state, CornerInfo.fromShape(255));
+                ServerPlayNetworking.send(
+                        (ServerPlayerEntity) player,
+                        new ChipsBlockChangePayload(blockPos, state)
+                );
             }
         } else {
             CornerInfo corner = ChipsBlock.getClosestSlice(world, blockPos, blockHitResult.getPos());
 
-            if (corner.shape() == chipsBlockEntity.getTotalChips()) {
-                chipsBlockEntity.forEachKey(blockType -> destroyChipEffects(
-                        player, blockType, world, hitResult.getPos(), blockPos
+            if (corner.equals(chipsBlockEntity.getTotalChips())) {
+                chipsBlockEntity.forEachKey(state -> destroyChipEffects(
+                        player, state, world, hitResult.getPos(), blockPos
                 ));
 
                 world.breakBlock(blockPos, false);
             } else {
-                List<Block> removedCorners = chipsBlockEntity.removeChips(corner);
-                removedCorners.forEach(blockType -> destroyChipEffects(
-                        player, blockType, world, hitResult.getPos(), blockPos
+                List<BlockState> removedCorners = chipsBlockEntity.removeChips(corner);
+                removedCorners.forEach(state -> destroyChipEffects(
+                        player, state, world, hitResult.getPos(), blockPos
                 ));
             }
         }
@@ -206,10 +215,10 @@ public class ChiselItem extends Item {
         return ActionResult.SUCCESS;
     }
 
-    private @Nullable Block getHoveredBlock(World world, BlockPos pos, BlockHitResult hitResult) {
+    private @Nullable BlockState getHoveredBlock(World world, BlockPos pos, BlockHitResult hitResult) {
         BlockState state = world.getBlockState(pos);
         if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return state.getBlock();
+            return state;
         }
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -221,8 +230,7 @@ public class ChiselItem extends Item {
         return chipsBlockEntity.firstBlockWithCorner(corner);
     }
 
-    private void playBreakSound(PlayerEntity player, Block block, World world, BlockPos pos) {
-        BlockState state = block.getDefaultState();
+    private void playBreakSound(PlayerEntity player, BlockState state, World world, BlockPos pos) {
         BlockSoundGroup blockSoundGroup = state.getSoundGroup();
         world.playSound(
                 player,
@@ -236,7 +244,10 @@ public class ChiselItem extends Item {
     }
 
     // blatantly stolen from BrushItem
-    private void addHitParticles(World world, BlockHitResult hitResult, Block blockType, PlayerEntity player) {
+    private void addHitParticles(World world,
+                                 BlockHitResult hitResult,
+                                 BlockState state,
+                                 PlayerEntity player) {
 //        double d = (double)3.0F;
 //        int i = player.getMainArm() == Arm.RIGHT ? 1 : -1;
 //        int j = world.getRandom().nextBetweenExclusive(7, 12);
@@ -250,8 +261,7 @@ public class ChiselItem extends Item {
 //        }
     }
 
-    private void playHitSound(PlayerEntity player, Block block, World world, BlockPos pos) {
-        BlockState state = block.getDefaultState();
+    private void playHitSound(PlayerEntity player, BlockState state, World world, BlockPos pos) {
         BlockSoundGroup blockSoundGroup = state.getSoundGroup();
         world.playSound(
                 player,
@@ -263,9 +273,9 @@ public class ChiselItem extends Item {
         );
     }
 
-    private void destroyChipEffects(PlayerEntity player, Block block, World world, Vec3d pos, BlockPos blockPos) {
-        playBreakSound(player, block, world, blockPos);
-        dropStack(world, ChipsBlockItem.getStack(block), pos);
+    private void destroyChipEffects(PlayerEntity player, BlockState state, World world, Vec3d pos, BlockPos blockPos) {
+        playBreakSound(player, state, world, blockPos);
+        dropStack(world, ChipsBlockItem.getStack(state.getBlock()), pos);
     }
 
     private void dropStack(World world, ItemStack stack, Vec3d pos) {

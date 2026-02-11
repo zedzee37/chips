@@ -1,13 +1,13 @@
 package zedzee.github.io.chips.render;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import zedzee.github.io.chips.block.CornerInfo;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 public interface RenderData {
-    int getChips(Block block);
-    Set<Block> getBlocks();
-    boolean shouldUseDefaultUv(Block block);
+    Set<BlockState> getStates();
+    CornerInfo getChips(BlockState state);
+    boolean shouldUseDefaultUv(BlockState state);
 }
     

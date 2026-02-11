@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.block.BlockColors;
@@ -31,11 +30,11 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.component.ChipsBlockItemComponent;
 import zedzee.github.io.chips.component.ChipsComponents;
 import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.render.RenderData;
-import zedzee.github.io.chips.util.RandomSupplier;
 
 import java.util.*;
 import java.util.function.Function;
@@ -150,10 +149,9 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             Random random,
             RenderData renderData,
             BlockColorProvider blockColorProvider) {
-        final Set<Block> blocks = renderData.getBlocks();
-        blocks.forEach(block -> {
+        final Set<BlockState> states = renderData.getStates();
+        states.forEach(state -> {
             final MinecraftClient client = MinecraftClient.getInstance();
-            final BlockState state = block.getDefaultState();
 
             final BakedModel blockModel =
                     client.getBlockRenderManager().getModel(state);
@@ -162,13 +160,12 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                 return;
             }
 
-            final int chips = renderData.getChips(block);
-            final VoxelShape shape = ChipsBlock.getShape(chips);
+            final CornerInfo chips = renderData.getChips(state);
+            final VoxelShape shape = ChipsBlock.getShape(chips.shape());
 
-            final BlockState defaultState = block.getDefaultState();
             shape.forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {
                 for (Direction direction : Direction.values()) {
-                    List<BakedQuad> quads = blockModel.getQuads(defaultState, direction, random);
+                    List<BakedQuad> quads = blockModel.getQuads(state, direction, random);
                     for (BakedQuad quad : quads) {
                         fallbackParticleSprite = quad.getSprite();
 
@@ -193,14 +190,14 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
                                 (float)maxX,
                                 (float)maxY,
                                 (float)maxZ,
-                                renderData.shouldUseDefaultUv(block)
+                                renderData.shouldUseDefaultUv(state)
                         );
-                        RenderLayer layer = RenderLayers.getBlockLayer(defaultState);
+                        RenderLayer layer = RenderLayers.getBlockLayer(state);
                         emitter.material(layer.isTranslucent() ? renderMaterialTranslucent : renderMaterialNormal);
                         emitter.cullFace(null);
 
                         if (quad.hasColor()) {
-                            int color = blockColorProvider.getColor(defaultState, quad.getColorIndex());
+                            int color = blockColorProvider.getColor(state, quad.getColorIndex());
                             color = ColorHelper.Argb.withAlpha(0xFF, color);
 
                             emitter.colorIndex(quad.getColorIndex());
