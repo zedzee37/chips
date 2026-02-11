@@ -25,8 +25,6 @@ import java.util.function.Consumer;
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
     private final Map<BlockState, ChipData> stateMap = new HashMap<>();
 
-    private final static String NBT_BLOCK_DATA_CHIPS_KEY = "chips";
-    private final static String NBT_BLOCK_DATA_DEFAULT_UV_KEY = "default_uv";
     private final static String NBT_BLOCKS_KEY = "blocks";
     private final static String NBT_BLOCK_DATA_KEY = "block_data";
 
