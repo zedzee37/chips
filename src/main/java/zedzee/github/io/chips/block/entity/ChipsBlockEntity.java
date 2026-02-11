@@ -27,6 +27,9 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
     private final static String NBT_BLOCKS_KEY = "blocks";
     private final static String NBT_BLOCK_DATA_KEY = "block_data";
+    // this should NEVER change
+    private final static String NBT_VERSION_KEY = "version";
+    private final static SaveVersion[] VERSIONS = SaveVersion.values();
 
     public ChipsBlockEntity(BlockPos pos, BlockState state) {
         super(ChipsBlockEntities.CHIPS_BLOCK_ENTITY, pos, state);
@@ -236,16 +239,27 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         });
         nbt.put(NBT_BLOCKS_KEY, blockStateList);
         nbt.put(NBT_BLOCK_DATA_KEY, blockElementList);
+        nbt.putInt(NBT_VERSION_KEY, SaveVersion.ONE_BLOCK_STATES.ordinal());
         super.writeNbt(nbt, registryLookup);
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        if (!nbt.contains(NBT_BLOCKS_KEY) || !nbt.contains(NBT_BLOCK_DATA_KEY)) {
+        if (!nbt.contains(NBT_BLOCKS_KEY) || !nbt.contains(NBT_BLOCK_DATA_KEY) || !nbt.contains(NBT_VERSION_KEY)) {
             super.readNbt(nbt, registryLookup);
             return;
         }
 
+        SaveVersion version = VERSIONS[nbt.getInt(NBT_VERSION_KEY)];
+
+        switch (version) {
+            case ONE_BLOCK_STATES -> readVersionOne(nbt);
+        }
+
+        super.readNbt(nbt, registryLookup);
+    }
+
+    private void readVersionOne(NbtCompound nbt) {
         NbtList blockList = nbt.getList(NBT_BLOCKS_KEY, NbtElement.COMPOUND_TYPE);
         NbtList blockDataList = nbt.getList(NBT_BLOCK_DATA_KEY, NbtElement.COMPOUND_TYPE);
         assert blockList.size() == blockDataList.size();
@@ -271,8 +285,6 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
             stateMap.put(state, data);
         }
-
-        super.readNbt(nbt, registryLookup);
     }
 
     public record ChipsBlockRenderData(Map<BlockState, ChipData> stateMap) implements RenderData {
@@ -339,5 +351,9 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         public void union(CornerInfo otherShape) {
             this.shape = shape.union(otherShape);
         }
+    }
+
+    private enum SaveVersion {
+        ONE_BLOCK_STATES,
     }
 }
