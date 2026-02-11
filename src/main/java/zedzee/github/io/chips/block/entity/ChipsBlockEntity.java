@@ -6,16 +6,13 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockSetType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.*;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
@@ -26,7 +23,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEntity {
-    private Map<Block, BlockData> blockMap = new HashMap<>();
     private final Map<BlockState, ChipData> stateMap = new HashMap<>();
 
     private final static String NBT_BLOCK_DATA_CHIPS_KEY = "chips";
@@ -104,7 +100,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     @Override
     public @Nullable Object getRenderData() {
         // it must use a copy to prevent mutation
-        return new ChipsRenderData(Map.copyOf(blockMap));
+        return new ChipsBlockRenderData(Map.copyOf(stateMap));
     }
 
     public boolean hasCorner(CornerInfo corner) {
@@ -256,7 +252,7 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         NbtList blockDataList = nbt.getList(NBT_BLOCK_DATA_KEY, NbtElement.COMPOUND_TYPE);
         assert blockList.size() == blockDataList.size();
 
-        blockMap.clear();
+        stateMap.clear();
         for (int i = 0; i < blockList.size(); i++) {
             NbtElement element = blockList.get(i);
             DataResult<Pair<BlockState, NbtElement>> maybeState = BlockState.CODEC.decode(NbtOps.INSTANCE, element);
@@ -335,6 +331,23 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         public int getChips() {
             return this.chips;
+        }
+    }
+
+    public record ChipsBlockRenderData(Map<BlockState, ChipData> stateMap) implements RenderData {
+        @Override
+        public int getChips(Block block) {
+            return 0;
+        }
+
+        @Override
+        public Set<Block> getBlocks() {
+            return Set.of();
+        }
+
+        @Override
+        public boolean shouldUseDefaultUv(Block block) {
+            return false;
         }
     }
 
