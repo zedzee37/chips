@@ -1,15 +1,15 @@
 package zedzee.github.io.chips.block.entity;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.*;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -224,11 +224,20 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         NbtList blockElementList = new NbtList();
 
         stateMap.forEach((state, blockData) -> {
-            blockStateList.add(NbtString.of(Registries.BLOCK.getId(block).toString()));
+            DataResult<NbtElement> maybeResult = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, state);
+
+            if (!maybeResult.hasResultOrPartial() && maybeResult.result().isEmpty()) {
+                return;
+            }
+
+            NbtElement encodedState = maybeResult.result().get();
+            blockStateList.add(encodedState);
+
+            ChipData data = stateMap.get(state);
 
             NbtCompound dataCompound = new NbtCompound();
-            dataCompound.putInt(NBT_BLOCK_DATA_CHIPS_KEY, blockData.getChips());
-            dataCompound.putBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY, blockData.shouldUseDefaultUv());
+            dataCompound.putInt(NBT_BLOCK_DATA_CHIPS_KEY, data.getShape().shape());
+            dataCompound.putBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY, data.hasDefaultUv());
             blockElementList.add(dataCompound);
         });
         nbt.put(NBT_BLOCKS_KEY, blockStateList);
@@ -243,21 +252,28 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             return;
         }
 
-        NbtList blockList = nbt.getList(NBT_BLOCKS_KEY, NbtElement.STRING_TYPE);
+        NbtList blockList = nbt.getList(NBT_BLOCKS_KEY, NbtElement.COMPOUND_TYPE);
         NbtList blockDataList = nbt.getList(NBT_BLOCK_DATA_KEY, NbtElement.COMPOUND_TYPE);
         assert blockList.size() == blockDataList.size();
 
         blockMap.clear();
         for (int i = 0; i < blockList.size(); i++) {
-            String id = blockList.getString(i);
-            Block block = Registries.BLOCK.get(Identifier.of(id));
+            NbtElement element = blockList.get(i);
+            DataResult<Pair<BlockState, NbtElement>> maybeState = BlockState.CODEC.decode(NbtOps.INSTANCE, element);
+
+            if (!maybeState.hasResultOrPartial() || maybeState.result().isEmpty()) {
+                return;
+            }
+
+            Pair<BlockState, NbtElement> statePair = maybeState.getOrThrow();
+            BlockState state = statePair.getFirst();
 
             NbtCompound compound = blockDataList.getCompound(i);
-            int chips = compound.getInt(NBT_BLOCK_DATA_CHIPS_KEY);
+            int shape = compound.getInt(NBT_BLOCK_DATA_CHIPS_KEY);
             boolean shouldUseDefaultUv = compound.getBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY);
-            BlockData blockData = new BlockData(chips, shouldUseDefaultUv);
+            ChipData data = new ChipData(CornerInfo.fromShape(shape), shouldUseDefaultUv);
 
-            blockMap.put(block, blockData);
+            stateMap.put(state, data);
         }
 
         super.readNbt(nbt, registryLookup);
@@ -326,9 +342,13 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         private CornerInfo shape;
         private boolean defaultUv;
 
-        public ChipData(CornerInfo shape) {
+        public ChipData(CornerInfo shape, boolean defaultUv) {
             this.shape = shape;
-            this.defaultUv = false;
+            this.defaultUv = defaultUv;
+        }
+
+        public ChipData(CornerInfo shape) {
+            this(shape, false);
         }
 
         public ChipData() {

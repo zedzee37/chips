@@ -99,7 +99,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     public boolean isFull(BlockPos pos, BlockView world) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-            return chipsBlockEntity.getTotalChips() == 255;
+            return chipsBlockEntity.getTotalChips().isFull();
         }
         return true;
     }
@@ -138,12 +138,12 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
             return CornerInfo.EMPTY;
         }
 
-        int totalChips = chipsBlockEntity.getTotalChips();
+        CornerInfo totalChips = chipsBlockEntity.getTotalChips();
         double distance = Double.MAX_VALUE;
         int currentIdx = -1;
 
         for (int k = 0; k < CORNER_SHAPES.length; k++) {
-            if (hasCorner(totalChips, k)) {
+            if (hasCorner(totalChips.shape(), k)) {
                 VoxelShape voxelShape = CORNER_SHAPES[k];
                 Optional<Vec3d> optional = voxelShape.getClosestPointTo(hitPos);
                 if (optional.isPresent()) {
@@ -196,14 +196,14 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
                 entityShapeContext.getEntity() instanceof PlayerEntity player &&
                 be instanceof ChipsBlockEntity chipsBlockEntity
         ) {
-            int corner = getHoveredCorner(world, player).shape();
+            CornerInfo corner = getHoveredCorner(world, player);
 
             boolean hitOtherChipsBlock = !chipsBlockEntity.hasCorner(corner);
-            if (corner == -1 || hitOtherChipsBlock) {
+            if (!corner.exists() || hitOtherChipsBlock) {
                 return shape;
             }
 
-            return getShape(corner);
+            return getShape(corner.shape());
         }
         return shape;
     }
@@ -241,7 +241,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof ChipsBlockEntity chipsBlockEntity) {
-            return getShape(chipsBlockEntity.getTotalChips());
+            return getShape(chipsBlockEntity.getTotalChips().shape());
 
         }
 
@@ -320,10 +320,9 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
 
         CornerInfo hoveredCorner = getHoveredCorner(world, player);
 
-        Block block = chipsBlockEntity.getStateAtCorner(hoveredCorner);
-        assert block != null;
-        BlockState defaultState = block.getDefaultState();
-        return defaultState.calcBlockBreakingDelta(player, world, pos);
+        BlockState blockState = chipsBlockEntity.getStateAtCorner(hoveredCorner);
+        assert blockState != null;
+        return blockState.calcBlockBreakingDelta(player, world, pos);
     }
 
     @Override
@@ -353,7 +352,7 @@ public class ChipsBlock extends BlockWithEntity implements Waterloggable {
         Set<BlockSoundGroup> groups = new HashSet<>();
 
         chipsBlockEntity.forEachKey(block ->
-                groups.add(block.getDefaultState().getSoundGroup()));
+                groups.add(block.getSoundGroup()));
 
         return groups;
     }

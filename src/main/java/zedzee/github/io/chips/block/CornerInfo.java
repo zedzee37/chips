@@ -48,4 +48,8 @@ public record CornerInfo(int index, int shape) {
     public boolean hasShape(CornerInfo corner) {
         return (shape() | corner.shape()) == shape();
     }
+
+    public boolean isFull() {
+        return this.shape() == 255;
+    }
 }
