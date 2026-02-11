@@ -1,5 +1,7 @@
 package zedzee.github.io.chips.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -11,6 +13,11 @@ public record CornerInfo(int index, int shape) {
             PacketCodecs.INTEGER, CornerInfo::index,
             PacketCodecs.INTEGER, CornerInfo::shape,
             CornerInfo::new
+    );
+    public static final Codec<CornerInfo> CODEC = RecordCodecBuilder.create(
+            builder -> builder.group(
+                    Codec.INT.fieldOf("shape").forGetter(CornerInfo::shape)
+            ).apply(builder, CornerInfo::fromShape)
     );
 
     public static final CornerInfo EMPTY = new CornerInfo(-1, -1);

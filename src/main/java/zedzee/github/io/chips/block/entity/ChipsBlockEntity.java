@@ -221,20 +221,20 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
 
         stateMap.forEach((state, blockData) -> {
             DataResult<NbtElement> maybeResult = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, state);
-
             if (!maybeResult.hasResultOrPartial() && maybeResult.result().isEmpty()) {
                 return;
             }
-
             NbtElement encodedState = maybeResult.result().get();
-            blockStateList.add(encodedState);
 
             ChipData data = stateMap.get(state);
 
-            NbtCompound dataCompound = new NbtCompound();
-            dataCompound.putInt(NBT_BLOCK_DATA_CHIPS_KEY, data.getShape().shape());
-            dataCompound.putBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY, data.hasDefaultUv());
-            blockElementList.add(dataCompound);
+            DataResult<NbtElement> maybeDataResult = ChipData.CODEC.encodeStart(NbtOps.INSTANCE, data);
+            if (!maybeDataResult.hasResultOrPartial() && maybeDataResult.result().isEmpty()) {
+                return;
+            }
+            NbtElement encodedData = maybeDataResult.getOrThrow();
+            blockStateList.add(encodedState);
+            blockElementList.add(encodedData);
         });
         nbt.put(NBT_BLOCKS_KEY, blockStateList);
         nbt.put(NBT_BLOCK_DATA_KEY, blockElementList);
@@ -265,73 +265,16 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
             BlockState state = statePair.getFirst();
 
             NbtCompound compound = blockDataList.getCompound(i);
-            int shape = compound.getInt(NBT_BLOCK_DATA_CHIPS_KEY);
-            boolean shouldUseDefaultUv = compound.getBoolean(NBT_BLOCK_DATA_DEFAULT_UV_KEY);
-            ChipData data = new ChipData(CornerInfo.fromShape(shape), shouldUseDefaultUv);
+            DataResult<Pair<ChipData, NbtElement>> maybeData = ChipData.CODEC.decode(NbtOps.INSTANCE, compound);
+            if (!maybeData.hasResultOrPartial() || maybeData.result().isEmpty()) {
+                return;
+            }
+            ChipData data = maybeData.getOrThrow().getFirst();
 
             stateMap.put(state, data);
         }
 
         super.readNbt(nbt, registryLookup);
-    }
-
-    public static class ChipsRenderData implements RenderData {
-        private final Map<Block, BlockData> blockMap;
-
-        public ChipsRenderData(Map<Block, BlockData> blockMap) {
-            this.blockMap = blockMap;
-        }
-
-        public int getChips(Block block) {
-            return blockMap.get(block).getChips();
-        }
-
-        public Set<Block> getBlocks() {
-            return blockMap.keySet();
-        }
-
-        @Override
-        public boolean shouldUseDefaultUv(Block block) {
-            return blockMap.get(block).shouldUseDefaultUv();
-        }
-    }
-
-    public static class BlockData {
-        public static final Codec<BlockData> CODEC = RecordCodecBuilder.create(
-                builder -> builder.group(
-                        Codec.INT.fieldOf("chips_value").forGetter(BlockData::getChips),
-                        Codec.BOOL.fieldOf("should_use_default_uv").forGetter(BlockData::shouldUseDefaultUv)
-                ).apply(builder, BlockData::new)
-        );
-
-        private int chips;
-        private boolean defaultUv;
-
-        private BlockData(int chips, boolean defaultUv) {
-            this.chips = chips;
-            this.defaultUv = defaultUv;
-        }
-
-        public BlockData(int chips) {
-            this.chips = chips;
-            this.defaultUv = false;
-        }
-
-        public void setDefaultUv(boolean to) {
-            this.defaultUv = to;
-        }
-
-        public boolean shouldUseDefaultUv() {
-            return this.defaultUv;
-        }
-
-        public void setChips(int chips) {
-            this.chips = chips;
-        }
-
-        public int getChips() {
-            return this.chips;
-        }
     }
 
     public record ChipsBlockRenderData(Map<BlockState, ChipData> stateMap) implements RenderData {
@@ -352,6 +295,13 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
     }
 
     public static class ChipData {
+        public static Codec<ChipData> CODEC = RecordCodecBuilder.create(
+                builder -> builder.group(
+                        CornerInfo.CODEC.fieldOf("shape").forGetter(ChipData::getShape),
+                        Codec.BOOL.fieldOf("default_uv").forGetter(ChipData::hasDefaultUv)
+                ).apply(builder, ChipData::new)
+        );
+
         private CornerInfo shape;
         private boolean defaultUv;
 
