@@ -16,6 +16,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -145,16 +146,17 @@ public class ChipsBlockItem extends BlockItem {
         // im not sorry
         Predicate<BlockPos> canReplace = blockPos -> world.getBlockState(blockPos).canReplace(context);
         if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            ActionResult result = tryPlaceAt(world, flooredPos, hitPos, blockType, context.getPlayer(), stack, canReplace);
+            ActionResult result = tryPlaceAt(context, world, flooredPos, hitPos, blockType, context.getPlayer(), stack, canReplace);
             if (result == ActionResult.SUCCESS) {
                 return ActionResult.SUCCESS;
             }
         }
 
-        return tryPlaceAt(world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack, canReplace);
+        return tryPlaceAt(context, world, context.getBlockPos(), hitPos, blockType, context.getPlayer(), stack, canReplace);
     }
 
     private ActionResult tryPlaceAt(
+            ItemPlacementContext context,
             World world,
             BlockPos pos,
             Vec3d absHitPos,
@@ -194,6 +196,11 @@ public class ChipsBlockItem extends BlockItem {
         }
 
         BlockState blockState = block.getDefaultState();
+
+        if (blockState.contains(Properties.AXIS)) {
+            blockState = blockState.with(Properties.AXIS, context.getSide().getAxis());
+        }
+
         if (!world.isClient()) {
             chipsBlockEntity.addChips(blockState, targetCorner);
         }
