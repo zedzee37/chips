@@ -4,6 +4,7 @@ import net.fabricmc.fabric.impl.recipe.ingredient.builtin.ComponentsIngredient;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.Component;
 import net.minecraft.component.ComponentChanges;
@@ -185,6 +186,11 @@ public class ChipsBlockItem extends BlockItem {
             if (chipsBlockEntity.hasCorner(targetCorner)) {
                 return ActionResult.FAIL;
             }
+        }
+
+        ShapeContext shapeContext = player == null ? ShapeContext.absent() : ShapeContext.of(player);
+        if (!world.canPlace(state, pos, shapeContext)) {
+            return ActionResult.FAIL;
         }
 
         BlockState blockState = block.getDefaultState();
