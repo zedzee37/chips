@@ -57,10 +57,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     @Shadow
     public abstract boolean attackBlock(BlockPos pos, Direction direction);
 
-    @Shadow
-    @Final
-    private ClientPlayNetworkHandler networkHandler;
-
     @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
     public void cancelBlockBreakingOnChipChange(BlockPos pos,
                            Direction direction,
