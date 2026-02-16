@@ -241,7 +241,7 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         return this;
     }
 
-    private void emitQuadPositions(
+    public static void emitQuadPositions(
             QuadEmitter emitter,
             Direction direction,
             float fromX,
