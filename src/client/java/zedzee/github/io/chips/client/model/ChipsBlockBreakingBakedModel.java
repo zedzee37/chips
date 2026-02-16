@@ -2,29 +2,39 @@ package zedzee.github.io.chips.client.model;
 
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.material.ShadeMode;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.CornerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 // this kinda sucks but whatever
 public class ChipsBlockBreakingBakedModel implements BakedModel, FabricBakedModel {
+    private static RenderMaterial renderMaterial;
+
     private final Mesh mesh;
 
     public ChipsBlockBreakingBakedModel(CornerInfo corner) {
@@ -38,6 +48,16 @@ public class ChipsBlockBreakingBakedModel implements BakedModel, FabricBakedMode
         MeshBuilder meshBuilder = renderer.meshBuilder();
         QuadEmitter emitter = meshBuilder.getEmitter();
 
+        if (renderMaterial == null) {
+            MaterialFinder finder = renderer.materialFinder();
+            renderMaterial = finder
+                    .ambientOcclusion(TriState.TRUE)
+                    .disableDiffuse(false)
+                    .shadeMode(ShadeMode.VANILLA)
+                    .blendMode(BlendMode.TRANSLUCENT)
+                    .find();
+        }
+
         for (Direction direction : Direction.values()) {
             ChipsBlockModel.emitQuadPositions(
                     emitter,
@@ -48,9 +68,13 @@ public class ChipsBlockBreakingBakedModel implements BakedModel, FabricBakedMode
                     (float)max.x,
                     (float)max.y,
                     (float)max.z);
-            emitter.color(-1, -1, -1, -1);
+            // this does nothing
+            int color = ColorHelper.Argb.getArgb(0, 255, 255, 255);
+            emitter.color(color, color, color, color);
             setUv(emitter);
+            emitter.material(renderMaterial);
             emitter.cullFace(null);
+            emitter.nominalFace(direction);
             emitter.emit();
         }
 
@@ -73,14 +97,17 @@ public class ChipsBlockBreakingBakedModel implements BakedModel, FabricBakedMode
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random) {
-        List<BakedQuad> quadList = new ArrayList<>(4);
-        this.mesh.forEach(quad -> quadList.add(quad.toBakedQuad(null)));
-        return quadList;
+        return List.of();
+    }
+
+    @Override
+    public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+        mesh.outputTo(context.getEmitter());
     }
 
     @Override
     public boolean useAmbientOcclusion() {
-        return false;
+        return true;
     }
 
     @Override
@@ -90,6 +117,11 @@ public class ChipsBlockBreakingBakedModel implements BakedModel, FabricBakedMode
 
     @Override
     public boolean isSideLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isVanillaAdapter() {
         return false;
     }
 

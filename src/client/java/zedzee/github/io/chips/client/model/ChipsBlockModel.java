@@ -105,6 +105,33 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
     public void setParents(Function<Identifier, UnbakedModel> modelLoader) {}
 
     @Override
+    public @Nullable BakedModel bake(
+            Baker baker,
+            Function<SpriteIdentifier, Sprite> textureGetter,
+            ModelBakeSettings rotationContainer
+    ) {
+        this.fallbackParticleSprite = textureGetter.apply(FALLBACK_PARTICLE_SPRITE);
+
+        final Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        final MaterialFinder finder = renderer.materialFinder();
+        this.renderMaterialNormal = finder
+                .ambientOcclusion(TriState.TRUE)
+                .disableDiffuse(false)
+                .blendMode(BlendMode.CUTOUT_MIPPED)
+                .find();
+        this.renderMaterialTranslucent = finder
+                .ambientOcclusion(TriState.TRUE)
+                .disableDiffuse(false)
+                .blendMode(BlendMode.TRANSLUCENT)
+                .find();
+
+        final MinecraftClient client = MinecraftClient.getInstance();
+        this.blockColors = client.getBlockColors();
+
+        return this;
+    }
+
+    @Override
     public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
         if (!stack.isOf(ChipsItems.CHIPS_BLOCK_ITEM) || !stack.contains(ChipsComponents.BLOCK_COMPONENT_COMPONENT)) {
             return;
@@ -212,33 +239,6 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
             });
 
         });
-    }
-
-    @Override
-    public @Nullable BakedModel bake(
-            Baker baker,
-            Function<SpriteIdentifier, Sprite> textureGetter,
-            ModelBakeSettings rotationContainer
-    ) {
-        this.fallbackParticleSprite = textureGetter.apply(FALLBACK_PARTICLE_SPRITE);
-
-        final Renderer renderer = RendererAccess.INSTANCE.getRenderer();
-        final MaterialFinder finder = renderer.materialFinder();
-        this.renderMaterialNormal = finder
-                .ambientOcclusion(TriState.TRUE)
-                .disableDiffuse(false)
-                .blendMode(BlendMode.CUTOUT_MIPPED)
-                .find();
-        this.renderMaterialTranslucent = finder
-                .ambientOcclusion(TriState.TRUE)
-                .disableDiffuse(false)
-                .blendMode(BlendMode.TRANSLUCENT)
-                .find();
-
-        final MinecraftClient client = MinecraftClient.getInstance();
-        this.blockColors = client.getBlockColors();
-
-        return this;
     }
 
     public static void emitQuadPositions(

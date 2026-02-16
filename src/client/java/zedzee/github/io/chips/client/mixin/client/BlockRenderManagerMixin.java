@@ -79,13 +79,12 @@ public class BlockRenderManagerMixin {
                 worldRenderer.bufferBuilders
                         .getEffectVertexConsumers()
                         .getBuffer(CHIPS_DESTRUCTION_LAYERS.get(
-                                stageGetter.getStageToRender() % CHIPS_DESTRUCTION_LAYERS.size()
+                                9 % CHIPS_DESTRUCTION_LAYERS.size()
                         )),
                 entry,
                 1.0F
         );
 
-//        BakedModel bakedModel = this.models.getModel(state);
         ChipsBlockBreakingProgress progress = (ChipsBlockBreakingProgress)client.interactionManager;
         CornerInfo shape = progress.chips$getCorner();
         if (shape == null) {
