@@ -94,12 +94,12 @@ public class Chips implements ModInitializer {
 
                     final List<BlockState> removedChips = chipsBlockEntity.removeChips(payload.cornerInfo(), false);
 
+                    // i hate this
                     if (payload.shouldDrop()) {
                         final Box shape = ChipsBlock.getShape(payload.cornerInfo().shape()).getBoundingBox();
                         final Vec3d avgPos = shape.getMinPos().lerp(shape.getMaxPos(), 0.5);
                         final Vec3d dropPos = avgPos.add(Vec3d.of(payload.blockPos()));
 
-                        // i hate this
                         removedChips.forEach(state -> {
                                     if (ctx.player().canHarvest(state)) {
                                         ChiselItem.dropStack(

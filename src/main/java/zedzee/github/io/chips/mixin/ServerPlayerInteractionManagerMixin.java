@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
@@ -38,7 +39,11 @@ public class ServerPlayerInteractionManagerMixin {
     public void chipChipsBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = world.getBlockState(pos);
         if (blockState.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            cir.setReturnValue(false);
+            ItemStack stack = this.player.getMainHandStack();
+
+            // to damage it
+            stack.postMine(world, blockState, pos, player);
+            cir.setReturnValue(true);
 //            CornerInfo hoveredCorner = ChipsBlock.getHoveredCorner(world, player);
 //
 //            if (hoveredCorner == null || !hoveredCorner.exists()) {
