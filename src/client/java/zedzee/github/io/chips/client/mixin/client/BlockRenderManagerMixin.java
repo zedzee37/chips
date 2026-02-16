@@ -21,6 +21,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlocks;
+import zedzee.github.io.chips.block.CornerInfo;
+import zedzee.github.io.chips.client.model.ChipsBlockBreakingBakedModel;
+import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
 
 import java.util.List;
 
@@ -77,7 +80,16 @@ public class BlockRenderManagerMixin {
                 1.0F
         );
 
-        BakedModel bakedModel = this.models.getModel(state);
+//        BakedModel bakedModel = this.models.getModel(state);
+        ChipsBlockBreakingProgress progress = (ChipsBlockBreakingProgress)client.interactionManager;
+        CornerInfo shape = progress.chips$getCorner();
+        if (shape == null) {
+            ci.cancel();
+            return;
+        }
+
+        BakedModel bakedModel = new ChipsBlockBreakingBakedModel(shape);
+
         long l = state.getRenderingSeed(pos);
         blockModelRenderer.render(world,
                 bakedModel,
