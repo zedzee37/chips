@@ -25,7 +25,7 @@ import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
-import zedzee.github.io.chips.networking.BlockChipppedPayload;
+import zedzee.github.io.chips.networking.BlockChippedPayload;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockBreakingProgress {
@@ -131,7 +131,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             createChipsParticles(pos, hoveredCorner);
             chipsBlockEntity.removeChips(hoveredCorner, false);
             client.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL_AND_REDRAW);
-            ClientPlayNetworking.send(new BlockChipppedPayload(pos, hoveredCorner));
+
+            boolean shouldDrop = !client.player.isCreative();
+            ClientPlayNetworking.send(new BlockChippedPayload(pos, hoveredCorner, shouldDrop));
 
             if (broken) {
                 blockState.getBlock().onBroken(client.world, pos, blockState);

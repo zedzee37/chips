@@ -278,7 +278,7 @@ public class ChiselItem extends Item {
         dropStack(world, ChipsBlockItem.getStack(state.getBlock()), pos);
     }
 
-    private void dropStack(World world, ItemStack stack, Vec3d pos) {
+    public static void dropStack(World world, ItemStack stack, Vec3d pos) {
         Random random = world.getRandom();
 
         ItemEntity itemEntity = new ItemEntity(
