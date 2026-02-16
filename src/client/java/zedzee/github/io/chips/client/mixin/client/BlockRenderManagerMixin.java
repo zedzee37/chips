@@ -46,10 +46,6 @@ public class BlockRenderManagerMixin {
 
     @Shadow
     @Final
-    private BlockModels models;
-
-    @Shadow
-    @Final
     private Random random;
 
     @Inject(method = "renderDamage",
@@ -79,10 +75,11 @@ public class BlockRenderManagerMixin {
                 worldRenderer.bufferBuilders
                         .getEffectVertexConsumers()
                         .getBuffer(CHIPS_DESTRUCTION_LAYERS.get(
-                                9 % CHIPS_DESTRUCTION_LAYERS.size()
+                                stageGetter.getStageToRender() % CHIPS_DESTRUCTION_LAYERS.size()
                         )),
                 entry,
-                1.0F
+                // 2.0f because the texture is 8x8, hardcoded because im too cool to dynamically get this
+                2.0f
         );
 
         ChipsBlockBreakingProgress progress = (ChipsBlockBreakingProgress)client.interactionManager;
