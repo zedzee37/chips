@@ -8,7 +8,8 @@
     "BreakSoundMixin",
     "ClientBlockDustParticleMixin",
     "ClientPlayerInteractionManagerMixin",
-    "ClientPlayNetworkHandlerMixin"
+    "ClientPlayNetworkHandlerMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
