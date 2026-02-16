@@ -41,7 +41,6 @@ public class ChipsBlockBreakingBakedModel implements BakedModel {
 
             int[] vertices = populateVertices(minPos, maxPos, direction);
 
-
         }
 
         return quadList;
@@ -51,25 +50,45 @@ public class ChipsBlockBreakingBakedModel implements BakedModel {
         // 12 for each x, y, z
         int[] vertices = new int[4 * 3];
 
+        Vec3d tmp = minPos;
         switch (direction) {
             case SOUTH:
+                minPos = maxPos;
+                maxPos = tmp;
             case NORTH:
+                addVertex(vertices, 0, maxPos.getX(), maxPos.getY(), minPos.getZ());
+                addVertex(vertices, 1, maxPos.getX(), minPos.getY(), minPos.getZ());
+                addVertex(vertices, 2, minPos.getX(), maxPos.getY(), minPos.getZ());
+                addVertex(vertices, 3, minPos.getX(), minPos.getY(), minPos.getZ());
                 break;
             case WEST:
+                minPos = maxPos;
+                maxPos = tmp;
             case EAST:
+                addVertex(vertices, 0, maxPos.getX(), maxPos.getY(), maxPos.getZ());
+                addVertex(vertices, 1, maxPos.getX(), minPos.getY(), maxPos.getZ());
+                addVertex(vertices, 2, maxPos.getX(), minPos.getY(), minPos.getZ());
+                addVertex(vertices, 3, maxPos.getX(), maxPos.getY(), minPos.getZ());
                 break;
-            case DOWN:
             case UP:
+                minPos = maxPos;
+                maxPos = tmp;
+            case DOWN:
+                addVertex(vertices, 0, minPos.getX(), minPos.getY(), minPos.getZ());
+                addVertex(vertices, 1, maxPos.getX(), minPos.getY(), minPos.getZ());
+                addVertex(vertices, 2, maxPos.getX(), minPos.getY(), maxPos.getZ());
+                addVertex(vertices, 3, minPos.getX(), minPos.getY(), maxPos.getZ());
                 break;
         }
 
         return vertices;
     }
 
-    public void addVertex(int[] vertices, int startPos, Vec3d vertex) {
-        vertices[startPos] = (int)vertex.x;
-        vertices[startPos + 1] = (int)vertex.y;
-        vertices[startPos + 2] = (int)vertex.z;
+    public void addVertex(int[] vertices, int startPos, double x, double y, double z) {
+        startPos = startPos * 3;
+        vertices[startPos] = (int)x;
+        vertices[startPos + 1] = (int)y;
+        vertices[startPos + 2] = (int)z;
     }
 
     @Override
