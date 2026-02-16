@@ -23,18 +23,20 @@ import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.client.model.ChipsBlockBreakingBakedModel;
+import zedzee.github.io.chips.client.util.BlockBreakStageGetter;
 import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Mixin(BlockRenderManager.class)
 public class BlockRenderManagerMixin {
     @Unique
-    private static final List<Identifier> CHIPS_DESTRUCTION_STAGE_TEXTURES = List.of(
-            Chips.identifier("textures/block/chiseling_station.png")
-    );
+    private static final List<Identifier> CHIPS_DESTRUCTION_STAGES = IntStream.range(0, 10)
+            .mapToObj(stage -> Chips.identifier("textures/block/block_destroy_stage_" + stage + ".png"))
+            .toList();
     @Unique
-    private static final List<RenderLayer> CHIPS_DESTRUCTION_LAYERS = CHIPS_DESTRUCTION_STAGE_TEXTURES.stream()
+    private static final List<RenderLayer> CHIPS_DESTRUCTION_LAYERS = CHIPS_DESTRUCTION_STAGES.stream()
             .map(RenderLayer::getBlockBreaking)
             .toList();
 
@@ -70,12 +72,15 @@ public class BlockRenderManagerMixin {
         assert client != null;
 
         WorldRenderer worldRenderer = client.worldRenderer;
+        BlockBreakStageGetter stageGetter = (BlockBreakStageGetter)worldRenderer;
 
         MatrixStack.Entry entry = matrices.peek();
         VertexConsumer consumer = new OverlayVertexConsumer(
                 worldRenderer.bufferBuilders
                         .getEffectVertexConsumers()
-                        .getBuffer(CHIPS_DESTRUCTION_LAYERS.get(0)),
+                        .getBuffer(CHIPS_DESTRUCTION_LAYERS.get(
+                                stageGetter.getStageToRender() % CHIPS_DESTRUCTION_LAYERS.size()
+                        )),
                 entry,
                 1.0F
         );

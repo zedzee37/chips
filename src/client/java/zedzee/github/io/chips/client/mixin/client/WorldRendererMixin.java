@@ -25,14 +25,14 @@ import java.util.SortedSet;
 public class WorldRendererMixin implements BlockBreakStageGetter {
     @Unique private int stage = 0;
 
-    // this sucks
+//    // this sucks
 //    @Inject(
 //            method = "render",
 //            at = @At(value = "INVOKE",
 //                    target = "Lnet/minecraft/client/render/block/BlockRenderManager;renderDamage(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;)V",
 //                    shift = At.Shift.BEFORE
 //            ),
-//            locals = LocalCapture.CAPTURE_FAILSOFT
+//            locals = LocalCapture.CAPTURE_FAILHARD
 //    )
 //    public void getProgressStage(RenderTickCounter tickCounter,
 //                                 boolean renderBlockOutline,
@@ -43,30 +43,29 @@ public class WorldRendererMixin implements BlockBreakStageGetter {
 //                                 Matrix4f matrix4f2,
 //                                 CallbackInfo ci,
 //                                 TickManager tickManager,
-//                                 Float f,
+//                                 float f,
 //                                 Profiler profiler,
 //                                 Vec3d vec3d,
-//                                 Double d,
-//                                 Double e,
-//                                 Double g,
-//                                 Boolean bl,
+//                                 double d,
+//                                 double e,
+//                                 double g,
+//                                 boolean bl,
 //                                 Frustum frustum,
-//                                 Float h,
-//                                 Boolean bl2,
+//                                 float h,
+//                                 boolean bl2,
 //                                 Matrix4fStack matrix4fStack,
-//                                 Boolean bl3,
+//                                 boolean bl3,
 //                                 MatrixStack stack,
 //                                 VertexConsumerProvider.Immediate immediate,
 //                                 Long2ObjectMap.Entry<SortedSet<BlockBreakingInfo>> entry,
 //                                 BlockPos pos,
-//                                 Double l,
-//                                 Double m,
-//                                 Double n,
+//                                 double l,
+//                                 double m,
+//                                 double n,
 //                                 SortedSet<BlockBreakingInfo> blockBreakingInfos,
-//                                 Integer o) {
-    public void getProgressStage(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci, int o) {
-        this.stage = o;
-    }
+//                                 int o) {
+//        this.stage = o;
+//    }
 
     @Override
     public int getStageToRender() {
