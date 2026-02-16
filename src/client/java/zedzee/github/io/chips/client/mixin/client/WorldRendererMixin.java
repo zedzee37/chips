@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.client.util.BlockBreakStageGetter;
 
 @Mixin(WorldRenderer.class)
