@@ -7,6 +7,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.particle.BlockDustParticle;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -131,7 +133,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             createChipsParticles(pos, hoveredCorner);
             chipsBlockEntity.removeChips(hoveredCorner, false);
             client.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL_AND_REDRAW);
-
             boolean shouldDrop = !client.player.isCreative();
             ClientPlayNetworking.send(new BlockChippedPayload(pos, hoveredCorner, shouldDrop));
 

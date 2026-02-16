@@ -15,6 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -94,24 +97,35 @@ public class Chips implements ModInitializer {
 
                     final List<BlockState> removedChips = chipsBlockEntity.removeChips(payload.cornerInfo(), false);
 
-                    // i hate this
-                    if (payload.shouldDrop()) {
-                        final Box shape = ChipsBlock.getShape(payload.cornerInfo().shape()).getBoundingBox();
-                        final Vec3d avgPos = shape.getMinPos().lerp(shape.getMaxPos(), 0.5);
-                        final Vec3d dropPos = avgPos.add(Vec3d.of(payload.blockPos()));
+                    final Box shape = ChipsBlock.getShape(payload.cornerInfo().shape()).getBoundingBox();
+                    final Vec3d avgPos = shape.getMinPos().lerp(shape.getMaxPos(), 0.5);
+                    final Vec3d dropPos = avgPos.add(Vec3d.of(payload.blockPos()));
+                    for (BlockState state : removedChips) {
+                        BlockSoundGroup blockSoundGroup = state.getSoundGroup();
 
-                        removedChips.forEach(state -> {
-                                    if (ctx.player().canHarvest(state)) {
-                                        ChiselItem.dropStack(
-                                                world,
-                                                ChipsBlockItem.getStack(state.getBlock()),
-                                                dropPos
-                                        );
-                                    }
-                                }
-                        );
+                        ServerWorld serverWorld = (ServerWorld)world;
+                        serverWorld
+                                .playSound(
+                                        dropPos.getX(),
+                                        dropPos.getY(),
+                                        dropPos.getZ(),
+                                        blockSoundGroup.getBreakSound(),
+                                        SoundCategory.BLOCKS,
+                                        (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                                        blockSoundGroup.getPitch() * 0.8F,
+                                        false
+                                );
+
+                        if (ctx.player().canHarvest(state)) {
+                            ChiselItem.dropStack(
+                                    world,
+                                    ChipsBlockItem.getStack(state.getBlock()),
+                                    dropPos
+                            );
+                        }
                     }
-                });
+                }
+        );
     }
 
     public static Identifier identifier(String path) {

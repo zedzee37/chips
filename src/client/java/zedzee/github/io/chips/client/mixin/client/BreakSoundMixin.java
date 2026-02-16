@@ -28,7 +28,17 @@ public class BreakSoundMixin {
         assert client.world != null;
 
         final ChipsBlockBreakingProgress progress = (ChipsBlockBreakingProgress)client.interactionManager;
+
+        if (progress == null) {
+            return;
+        }
+
         final CornerInfo corner = progress.chips$getCorner();
+
+        if (corner == null) {
+            return;
+        }
+
         final BlockEntity blockEntity = client.world.getBlockEntity(pos);
 
         if (!(blockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
@@ -36,6 +46,11 @@ public class BreakSoundMixin {
         }
 
         final BlockState targetState = chipsBlockEntity.getStateAtCorner(corner);
+
+        if (targetState == null) {
+            return;
+        }
+
         final BlockSoundGroup soundGroup = targetState.getSoundGroup();
         client
                 .getSoundManager()
