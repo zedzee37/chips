@@ -184,6 +184,10 @@ public class ChipsBlockEntity extends BlockEntity implements RenderDataBlockEnti
         return null;
     }
 
+    public boolean isEmpty() {
+        return getTotalChips().shape() == 0;
+    }
+
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
         return createNbt(registryLookup);

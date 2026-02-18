@@ -21,6 +21,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -88,8 +89,9 @@ public class Chips implements ModInitializer {
 
         ServerPlayNetworking.registerGlobalReceiver(BlockChippedPayload.ID,
                 (payload, ctx) -> {
+                    final BlockPos blockPos = payload.blockPos();
                     final World world = ctx.player().getWorld();
-                    final BlockEntity maybeBlockEntity = world.getBlockEntity(payload.blockPos());
+                    final BlockEntity maybeBlockEntity = world.getBlockEntity(blockPos);
 
                     if (!(maybeBlockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
                         return;
@@ -103,18 +105,23 @@ public class Chips implements ModInitializer {
                     for (BlockState state : removedChips) {
                         BlockSoundGroup blockSoundGroup = state.getSoundGroup();
 
-                        ServerWorld serverWorld = (ServerWorld)world;
-                        serverWorld
-                                .playSound(
-                                        dropPos.getX(),
-                                        dropPos.getY(),
-                                        dropPos.getZ(),
-                                        blockSoundGroup.getBreakSound(),
-                                        SoundCategory.BLOCKS,
-                                        (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
-                                        blockSoundGroup.getPitch() * 0.8F,
-                                        false
-                                );
+                        if (!chipsBlockEntity.isEmpty()) {
+                            /**
+                             * play the sound & send to surrounding players.
+                             * @see ServerWorld
+                             */
+                            world
+                                    .playSound(
+                                            null,
+                                            blockPos.getX(),
+                                            blockPos.getY(),
+                                            blockPos.getZ(),
+                                            blockSoundGroup.getBreakSound(),
+                                            SoundCategory.BLOCKS,
+                                            (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                                            blockSoundGroup.getPitch() * 0.8F
+                                    );
+                        }
 
                         if (ctx.player().canHarvest(state)) {
                             ChiselItem.dropStack(
