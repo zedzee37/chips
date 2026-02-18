@@ -113,6 +113,10 @@ public class ChipsBlockModel implements UnbakedModel, BakedModel, FabricBakedMod
         this.fallbackParticleSprite = textureGetter.apply(FALLBACK_PARTICLE_SPRITE);
 
         final Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        if (renderer == null) {
+            return null;
+        }
+
         final MaterialFinder finder = renderer.materialFinder();
         this.renderMaterialNormal = finder
                 .ambientOcclusion(TriState.TRUE)
