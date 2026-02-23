@@ -11,11 +11,21 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.item.Items;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
+import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
@@ -25,15 +35,15 @@ import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
 public class ChipsClient implements ClientModInitializer {
+    private final float ANIMATION_SPEED = 0.2f;
+    private float progress = 0.0f;
+
     @Override
     public void onInitializeClient() {
         ModelLoadingPlugin.register(new ChipsModelLoadingPlugin());
 //        ChipsAnimations.init();
 ////        ChiselingStationScreen.register();
 ////        TestExtraModel.register();
-//
-////        WorldRenderEvents.BLOCK_OUTLINE.register(
-////                (worldRenderContext, blockOutlineContext) -> {
 //
 
         ClientPlayNetworking.registerGlobalReceiver(ChiselAnimationPayload.ID, (payload, context) -> {
@@ -65,6 +75,60 @@ public class ChipsClient implements ClientModInitializer {
                 animLayer.setAnimation(new KeyframeAnimationPlayer(builder.build()));
             }
         });
+
+        WorldRenderEvents.BLOCK_OUTLINE.register(
+                ((worldRenderContext, blockOutlineContext) -> {
+                    MinecraftClient client = MinecraftClient.getInstance();
+                    if (client.player == null) {
+                        return true;
+                    }
+
+                    boolean hasMace =
+                            client.player.getOffHandStack().isOf(Items.MACE) ||
+                                    client.player.getMainHandStack().isOf(Items.MACE);
+
+                    if (blockOutlineContext.blockState().isOf(ChipsBlocks.CHIPS_BLOCK) || !hasMace) {
+                        return true;
+                    }
+
+                    BlockPos pos = blockOutlineContext.blockPos();
+                    VoxelShape outlineShape = blockOutlineContext.blockState().getOutlineShape(
+                            worldRenderContext.world(),
+                            pos,
+                            ShapeContext.of(blockOutlineContext.entity())
+                    );
+
+                    if (!outlineShape.equals(VoxelShapes.fullCube())) {
+                        return true;
+                    }
+
+                    float tickDelta = worldRenderContext.tickCounter().getTickDelta(false);
+                    progress += (tickDelta / 20.0f) * ANIMATION_SPEED;
+                    float anim = MathHelper.sin(progress);
+
+                    for (int i = 0; i < ChipsBlock.CORNER_SHAPES.length; i++) {
+                        VoxelShape cornerShape = ChipsBlock.CORNER_SHAPES[i];
+                        WorldRenderer.drawCuboidShapeOutline(
+                                worldRenderContext.matrixStack(),
+                                blockOutlineContext.vertexConsumer(),
+                                cornerShape,
+                                pos.getX() - blockOutlineContext.cameraX(),
+                                pos.getY() - blockOutlineContext.cameraY(),
+                                pos.getZ() - blockOutlineContext.cameraZ(),
+                                anim,
+                                anim,
+                                anim,
+                                0.4F
+                        );
+                    }
+
+                    if (progress >= MathHelper.PI) {
+                        progress = 0.0f;
+                    }
+
+                    return false;
+                })
+        );
 
         ClientPlayNetworking.registerGlobalReceiver(ChipsBlockChangePayload.ID, (payload, context) -> {
             World world = context.player().getWorld();
