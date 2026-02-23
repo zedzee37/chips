@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -28,6 +29,7 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zedzee.github.io.chips.block.ChipsBlock;
+import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntities;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.component.ChipsComponents;
@@ -36,6 +38,7 @@ import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.item.ChipsItems;
 import zedzee.github.io.chips.item.ChiselItem;
 import zedzee.github.io.chips.networking.BlockChippedPayload;
+import zedzee.github.io.chips.networking.BlockSplitPayload;
 import zedzee.github.io.chips.networking.ChipsBlockChangePayload;
 import zedzee.github.io.chips.networking.ChiselAnimationPayload;
 
@@ -62,6 +65,7 @@ public class Chips implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ChiselAnimationPayload.ID, ChiselAnimationPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ChipsBlockChangePayload.ID, ChipsBlockChangePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(BlockChippedPayload.ID, BlockChippedPayload.PACKET_CODEC);
+        PayloadTypeRegistry.playC2S().register(BlockSplitPayload.ID, BlockSplitPayload.PACKET_CODEC);
 
         Registry.register(Registries.ITEM_GROUP, CHIPS_ITEM_GROUP_KEY, CHIPS_ITEM_GROUP);
 
@@ -87,52 +91,66 @@ public class Chips implements ModInitializer {
                 }
         );
 
-        ServerPlayNetworking.registerGlobalReceiver(BlockChippedPayload.ID,
-                (payload, ctx) -> {
-                    final BlockPos blockPos = payload.blockPos();
-                    final World world = ctx.player().getWorld();
-                    final BlockEntity maybeBlockEntity = world.getBlockEntity(blockPos);
+        ServerPlayNetworking.registerGlobalReceiver(BlockChippedPayload.ID, Chips::blockChipped);
+        ServerPlayNetworking.registerGlobalReceiver(BlockSplitPayload.ID, Chips::splitBlock);
+    }
 
-                    if (!(maybeBlockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
-                        return;
-                    }
+    private static void blockChipped(BlockChippedPayload payload, ServerPlayNetworking.Context ctx) {
+        final BlockPos blockPos = payload.blockPos();
+        final World world = ctx.player().getWorld();
+        final BlockEntity maybeBlockEntity = world.getBlockEntity(blockPos);
 
-                    final List<BlockState> removedChips = chipsBlockEntity.removeChips(payload.cornerInfo(), false);
+        if (!(maybeBlockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
+            return;
+        }
 
-                    final Box shape = ChipsBlock.getShape(payload.cornerInfo().shape()).getBoundingBox();
-                    final Vec3d avgPos = shape.getMinPos().lerp(shape.getMaxPos(), 0.5);
-                    final Vec3d dropPos = avgPos.add(Vec3d.of(payload.blockPos()));
-                    for (BlockState state : removedChips) {
-                        BlockSoundGroup blockSoundGroup = state.getSoundGroup();
+        final List<BlockState> removedChips = chipsBlockEntity.removeChips(payload.cornerInfo(), false);
 
-                        if (!chipsBlockEntity.isEmpty()) {
-                            /**
-                             * play the sound & send to surrounding players.
-                             * @see ServerWorld
-                             */
-                            world
-                                    .playSound(
-                                            null,
-                                            blockPos.getX(),
-                                            blockPos.getY(),
-                                            blockPos.getZ(),
-                                            blockSoundGroup.getBreakSound(),
-                                            SoundCategory.BLOCKS,
-                                            (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
-                                            blockSoundGroup.getPitch() * 0.8F
-                                    );
-                        }
+        final Box shape = ChipsBlock.getShape(payload.cornerInfo().shape()).getBoundingBox();
+        final Vec3d avgPos = shape.getMinPos().lerp(shape.getMaxPos(), 0.5);
+        final Vec3d dropPos = avgPos.add(Vec3d.of(payload.blockPos()));
+        for (BlockState state : removedChips) {
+            BlockSoundGroup blockSoundGroup = state.getSoundGroup();
 
-                        if (ctx.player().canHarvest(state)) {
-                            ChiselItem.dropStack(
-                                    world,
-                                    ChipsBlockItem.getStack(state.getBlock()),
-                                    dropPos
-                            );
-                        }
-                    }
-                }
-        );
+            if (!chipsBlockEntity.isEmpty()) {
+                /**
+                 * play the sound & send to surrounding players.
+                 * @see ServerWorld
+                 */
+                world
+                        .playSound(
+                                null,
+                                blockPos.getX(),
+                                blockPos.getY(),
+                                blockPos.getZ(),
+                                blockSoundGroup.getBreakSound(),
+                                SoundCategory.BLOCKS,
+                                (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                                blockSoundGroup.getPitch() * 0.8F
+                        );
+            }
+
+            if (ctx.player().canHarvest(state)) {
+                ChiselItem.dropStack(
+                        world,
+                        ChipsBlockItem.getStack(state.getBlock()),
+                        dropPos
+                );
+            }
+        }
+    }
+
+    private static void splitBlock(BlockSplitPayload payload, ServerPlayNetworking.Context context) {
+        final World world = context.player().getWorld();
+        final BlockState state = world.getBlockState(payload.pos());
+
+        world.setBlockState(payload.pos(), ChipsBlocks.CHIPS_BLOCK.getDefaultState());
+        final BlockEntity blockEntity = world.getBlockEntity(payload.pos());
+        if (!(blockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
+            return;
+        }
+
+        chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);
     }
 
     public static Identifier identifier(String path) {

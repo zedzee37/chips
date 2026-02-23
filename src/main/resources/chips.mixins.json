@@ -6,7 +6,6 @@
   "mixins": [
     "EntityStepSoundMixin",
     "LivingEntityFallSoundMixin",
-    "MaceChipMixin",
     "ServerPlayerInteractionManagerMixin"
   ],
   "injectors": {

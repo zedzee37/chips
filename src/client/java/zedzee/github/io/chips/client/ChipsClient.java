@@ -115,10 +115,10 @@ public class ChipsClient implements ClientModInitializer {
                                 pos.getX() - blockOutlineContext.cameraX(),
                                 pos.getY() - blockOutlineContext.cameraY(),
                                 pos.getZ() - blockOutlineContext.cameraZ(),
-                                anim,
-                                anim,
-                                anim,
-                                0.4F
+                                1.0f,
+                                1.0f,
+                                1.0f,
+                                Math.clamp(anim, 0.3f, 0.6f)
                         );
                     }
 
