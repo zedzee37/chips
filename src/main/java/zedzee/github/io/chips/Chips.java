@@ -150,6 +150,7 @@ public class Chips implements ModInitializer {
             return;
         }
 
+        context.player().resetLastAttackedTicks();
         chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);
     }
 

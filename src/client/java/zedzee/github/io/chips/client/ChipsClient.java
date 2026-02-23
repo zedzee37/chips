@@ -17,6 +17,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
@@ -83,10 +84,7 @@ public class ChipsClient implements ClientModInitializer {
                         return true;
                     }
 
-                    boolean hasMace =
-                            client.player.getOffHandStack().isOf(Items.MACE) ||
-                                    client.player.getMainHandStack().isOf(Items.MACE);
-
+                    boolean hasMace = client.player.getMainHandStack().isOf(Items.MACE) && splittingOffCooldown();
                     if (blockOutlineContext.blockState().isOf(ChipsBlocks.CHIPS_BLOCK) || !hasMace) {
                         return true;
                     }
@@ -191,5 +189,11 @@ public class ChipsClient implements ClientModInitializer {
     private boolean shouldSwapHand(ClientPlayerEntity clientPlayer) {
         return (clientPlayer.getMainArm() == Arm.LEFT && clientPlayer.getActiveHand() == Hand.MAIN_HAND) ||
                 (clientPlayer.getMainArm() == Arm.RIGHT && clientPlayer.getActiveHand() == Hand.OFF_HAND);
+    }
+
+    public static boolean splittingOffCooldown() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        assert client.player != null;
+        return client.player.getAttackCooldownProgress(0.5f) == 1.0f;
     }
 }

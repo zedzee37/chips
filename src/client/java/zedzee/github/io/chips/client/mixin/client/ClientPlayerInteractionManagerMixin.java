@@ -9,15 +9,12 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.particle.BlockDustParticle;
 import net.minecraft.item.Items;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,10 +23,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import zedzee.github.io.chips.Chips;
 import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.client.ChipsClient;
 import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
 import zedzee.github.io.chips.networking.BlockChippedPayload;
 import zedzee.github.io.chips.networking.BlockSplitPayload;
@@ -63,20 +62,22 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     @Shadow
     public abstract boolean attackBlock(BlockPos pos, Direction direction);
 
-    @Shadow
-    @Final
-    private ClientPlayNetworkHandler networkHandler;
-
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     public void maceBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         assert client.world != null;
         BlockState state = client.world.getBlockState(pos);
-        if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return;
-        }
 
         assert client.player != null;
         if (!client.player.getMainHandStack().isOf(Items.MACE)) {
+            return;
+        }
+
+        if (!ChipsClient.splittingOffCooldown()) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
             return;
         }
 
@@ -90,6 +91,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
         chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);
         ClientPlayNetworking.send(new BlockSplitPayload(pos));
 
+        client.player.swingHand(Hand.MAIN_HAND);
+        client.player.resetLastAttackedTicks();
         cir.setReturnValue(true);
     }
 
