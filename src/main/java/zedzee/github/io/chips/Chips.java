@@ -2,28 +2,25 @@ package zedzee.github.io.chips;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -75,30 +72,24 @@ public class Chips implements ModInitializer {
 
         Registry.register(Registries.ITEM_GROUP, CHIPS_ITEM_GROUP_KEY, CHIPS_ITEM_GROUP);
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(itemGroup -> {
-            itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
-//            itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
-//            itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
-        });
+        ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(Chips::modifyItemGroups);
+        ServerPlayNetworking.registerGlobalReceiver(BlockChippedPayload.ID, Chips::blockChipped);
+        ServerPlayNetworking.registerGlobalReceiver(BlockSplitPayload.ID, Chips::splitBlock);
+    }
 
-        ItemGroupEvents.modifyEntriesEvent(CHIPS_ITEM_GROUP_KEY).register(itemGroup -> {
-                    itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
+    private static void modifyItemGroups(FabricItemGroupEntries itemGroup) {
+        itemGroup.add(ChipsItems.IRON_CHISEL.getDefaultStack());
 //                    itemGroup.add(ChipsItems.DIAMOND_CHISEL.getDefaultStack());
 //                    itemGroup.add(ChipsItems.NETHERITE_CHISEL.getDefaultStack());
 
-                    Registries.BLOCK.stream().forEach(block -> {
-                        if (!ChipsBlock.canBeChipped(block)) {
-                            return;
-                        }
+        Registries.BLOCK.stream().forEach(block -> {
+            if (!ChipsBlock.canBeChipped(block)) {
+                return;
+            }
 
-                        ItemStack stack = ChipsBlockItem.getStack(block);
-                        itemGroup.add(stack);
-                    });
-                }
-        );
-
-        ServerPlayNetworking.registerGlobalReceiver(BlockChippedPayload.ID, Chips::blockChipped);
-        ServerPlayNetworking.registerGlobalReceiver(BlockSplitPayload.ID, Chips::splitBlock);
+            ItemStack stack = ChipsBlockItem.getStack(block);
+            itemGroup.add(stack);
+        });
     }
 
     private static void blockChipped(BlockChippedPayload payload, ServerPlayNetworking.Context ctx) {
