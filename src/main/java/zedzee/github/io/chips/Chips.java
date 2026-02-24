@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
@@ -51,7 +52,10 @@ public class Chips implements ModInitializer {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final RegistryKey<ItemGroup> CHIPS_ITEM_GROUP_KEY = RegistryKey.of(Registries.ITEM_GROUP.getKey(), Identifier.of(MOD_ID, "chips_item_group"));
+    public static final RegistryKey<ItemGroup> CHIPS_ITEM_GROUP_KEY = RegistryKey.of(
+            Registries.ITEM_GROUP.getKey(),
+            Identifier.of(MOD_ID, "chips_item_group")
+    );
     public static final ItemGroup CHIPS_ITEM_GROUP = FabricItemGroup.builder()
             .icon(() -> ChipsBlockItem.getStack(Blocks.GRASS_BLOCK))
             .displayName(Text.translatable("itemGroup.chips_item_group"))
@@ -165,6 +169,8 @@ public class Chips implements ModInitializer {
                         1.0f,
                         1.0f
                 );
+
+        context.player().getMainHandStack().damage(1, context.player(), EquipmentSlot.MAINHAND);
 
         context.player().resetLastAttackedTicks();
         chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);

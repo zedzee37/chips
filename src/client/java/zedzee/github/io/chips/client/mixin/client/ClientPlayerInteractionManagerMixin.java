@@ -16,6 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -79,6 +80,11 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     public void maceBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         assert client.world != null;
         BlockState state = client.world.getBlockState(pos);
+
+        VoxelShape shape = state.getOutlineShape(client.world, pos);
+        if (!shape.equals(VoxelShapes.fullCube())) {
+            return;
+        }
 
         assert client.player != null;
         if (!client.player.getMainHandStack().isOf(Items.MACE)) {
