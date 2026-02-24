@@ -5,13 +5,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.particle.BlockDustParticle;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
@@ -43,6 +44,15 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     private static final double CHIPPED_PARTICLE_VELOCITY_MAX = 5.0;
 
     @Unique
+    private static final int SPLIT_PARTICLES_MIN = 10;
+    @Unique
+    private static final int SPLIT_PARTICLES_MAX = 20;
+    @Unique
+    private static final float SPLIT_PARTICLES_VELOCITY_MAX = 2;
+    @Unique
+    private static final float SPLIT_PARTICLES_VELOCITY_MIN = 1;
+
+    @Unique
     @Nullable
     private CornerInfo cornerInfo = null;
 
@@ -61,6 +71,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
 
     @Shadow
     public abstract boolean attackBlock(BlockPos pos, Direction direction);
+
+    @Shadow
+    public abstract boolean hasRidingInventory();
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     public void maceBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
@@ -88,12 +101,68 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
             return;
         }
 
+        addSplitParticles(client.world, client.world.getRandom(), state, pos, direction);
+
         chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);
         ClientPlayNetworking.send(new BlockSplitPayload(pos));
 
         client.player.swingHand(Hand.MAIN_HAND);
         client.player.resetLastAttackedTicks();
         cir.setReturnValue(true);
+    }
+
+    @Unique
+    private void addSplitParticles(ClientWorld world, Random random, BlockState state, BlockPos pos, Direction face) {
+        Vec3d startPos = Vec3d.of(pos);
+        Vec3d endPos = Vec3d.of(pos);
+
+        switch (face) {
+            case NORTH:
+                endPos = endPos.add(1.0, 1.0, 0.0);
+                break;
+            case SOUTH:
+                startPos = startPos.add(0.0, 0.0, 1.0);
+                endPos = endPos.add(1.0, 1.0, 1.0);
+                break;
+            case WEST:
+                endPos = endPos.add(0.0, 1.0, 1.0);
+                break;
+            case EAST:
+                startPos = startPos.add(1.0, 0.0, 0.0);
+                endPos = endPos.add(1.0, 1.0, 1.0);
+                break;
+            case DOWN:
+                endPos = endPos.add(1.0, 0.0, 1.0);
+                break;
+            case UP:
+                endPos = endPos.add(0.0, 1.0, 0.0);
+                endPos = endPos.add(1.0, 1.0, 1.0);
+        }
+
+        Chips.LOGGER.info("{} :: {}", startPos, endPos);
+
+        int particleCount = random.nextBetween(SPLIT_PARTICLES_MIN, SPLIT_PARTICLES_MAX);
+        for (int i = 0; i < particleCount; i++) {
+            float randomX = random.nextFloat();
+            float randomY = random.nextFloat();
+            float randomZ = random.nextFloat();
+
+            float randomVelocity = random.nextFloat() * SPLIT_PARTICLES_VELOCITY_MAX + SPLIT_PARTICLES_VELOCITY_MIN;
+            Vec3d dir = Vec3d.of(face.getVector()).multiply(randomVelocity);
+
+            BlockDustParticle particle = new BlockDustParticle(
+                    world,
+                    MathHelper.lerp(randomX, startPos.x, endPos.x),
+                    MathHelper.lerp(randomY, startPos.y, endPos.y),
+                    MathHelper.lerp(randomZ, startPos.z, endPos.z),
+                    dir.getX(),
+                    dir.getY(),
+                    dir.getZ(),
+                    state
+            );
+
+            client.particleManager.addParticle(particle);
+        }
     }
 
     @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
