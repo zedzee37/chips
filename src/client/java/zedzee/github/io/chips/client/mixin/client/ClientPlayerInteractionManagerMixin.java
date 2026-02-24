@@ -139,8 +139,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
                 endPos = endPos.add(1.0, 1.0, 1.0);
         }
 
-        Chips.LOGGER.info("{} :: {}", startPos, endPos);
-
         int particleCount = random.nextBetween(SPLIT_PARTICLES_MIN, SPLIT_PARTICLES_MAX);
         for (int i = 0; i < particleCount; i++) {
             float randomX = random.nextFloat();
