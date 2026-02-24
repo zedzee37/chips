@@ -19,6 +19,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -141,6 +143,7 @@ public class Chips implements ModInitializer {
     }
 
     private static void splitBlock(BlockSplitPayload payload, ServerPlayNetworking.Context context) {
+        final BlockPos pos = payload.pos();
         final World world = context.player().getWorld();
         final BlockState state = world.getBlockState(payload.pos());
 
@@ -149,6 +152,19 @@ public class Chips implements ModInitializer {
         if (!(blockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
             return;
         }
+
+        SoundEvent event = SoundEvents.ITEM_MACE_SMASH_GROUND;
+        world
+                .playSound(
+                        null,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ(),
+                        event,
+                        SoundCategory.BLOCKS,
+                        1.0f,
+                        1.0f
+                );
 
         context.player().resetLastAttackedTicks();
         chipsBlockEntity.setChips(state, CornerInfo.fromShape(255), false);
