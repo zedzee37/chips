@@ -31,6 +31,7 @@ import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
 import zedzee.github.io.chips.client.ChipsClient;
 import zedzee.github.io.chips.client.util.ChipsBlockBreakingProgress;
+import zedzee.github.io.chips.item.ChipsBlockItem;
 import zedzee.github.io.chips.networking.BlockChippedPayload;
 import zedzee.github.io.chips.networking.BlockSplitPayload;
 
@@ -78,33 +79,23 @@ public abstract class ClientPlayerInteractionManagerMixin implements ChipsBlockB
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     public void maceBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         assert client.world != null;
-        BlockState state = client.world.getBlockState(pos);
-
-        VoxelShape shape = state.getOutlineShape(client.world, pos);
-        if (!shape.equals(VoxelShapes.fullCube())) {
-            return;
-        }
+        final BlockState state = client.world.getBlockState(pos);
+        if (!ChipsBlock.canBeChipped(state.getBlock())) return;
 
         assert client.player != null;
-        if (!client.player.getMainHandStack().isOf(Items.MACE)) {
-            return;
-        }
+        if (!client.player.getMainHandStack().isOf(Items.MACE)) return;
 
         if (!ChipsClient.splittingOffCooldown()) {
             cir.setReturnValue(false);
             return;
         }
 
-        if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return;
-        }
+        if (state.isOf(ChipsBlocks.CHIPS_BLOCK)) return;
 
         client.world.setBlockState(pos, ChipsBlocks.CHIPS_BLOCK.getDefaultState());
 
         final BlockEntity blockEntity = client.world.getBlockEntity(pos);
-        if (!(blockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) {
-            return;
-        }
+        if (!(blockEntity instanceof final ChipsBlockEntity chipsBlockEntity)) return;
 
         addSplitParticles(client.world, client.world.getRandom(), state, pos, direction);
 

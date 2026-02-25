@@ -18,6 +18,7 @@ import zedzee.github.io.chips.block.ChipsBlock;
 import zedzee.github.io.chips.block.ChipsBlocks;
 import zedzee.github.io.chips.block.CornerInfo;
 import zedzee.github.io.chips.block.entity.ChipsBlockEntity;
+import zedzee.github.io.chips.item.ChipsBlockItem;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
@@ -36,30 +37,25 @@ public class MinecraftClientMixin {
     )
     public ItemStack modifyPickedStack(ItemStack itemStack) {
         assert crosshairTarget != null;
-        if (crosshairTarget.getType() != HitResult.Type.BLOCK) {
-            return itemStack;
-        }
+        if (crosshairTarget.getType() != HitResult.Type.BLOCK) return itemStack;
 
         final BlockHitResult blockHitResult = (BlockHitResult) crosshairTarget;
         final BlockPos pos = blockHitResult.getBlockPos();
 
         if (world == null) return itemStack;
         final BlockState state = world.getBlockState(pos);
-        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) {
-            return itemStack;
-        }
+        if (!state.isOf(ChipsBlocks.CHIPS_BLOCK)) return itemStack;
 
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) {
-            return itemStack;
-        }
+        if (!(blockEntity instanceof ChipsBlockEntity chipsBlockEntity)) return itemStack;
 
         CornerInfo closestCorner = ChipsBlock.getClosestSlice(world, pos, blockHitResult.getPos());
-        if (closestCorner == null || !closestCorner.exists()) {
-            return itemStack;
-        }
+        if (closestCorner == null || !closestCorner.exists()) return itemStack;
 
         BlockState cornerState = chipsBlockEntity.getStateAtCorner(closestCorner);
-        return state.getBlock().getPickStack(world, pos, cornerState);
+
+        if (cornerState == null) return itemStack;
+
+        return ChipsBlockItem.getStack(cornerState.getBlock());
     }
 }

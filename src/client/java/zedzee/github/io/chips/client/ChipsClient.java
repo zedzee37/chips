@@ -90,13 +90,7 @@ public class ChipsClient implements ClientModInitializer {
                     }
 
                     BlockPos pos = blockOutlineContext.blockPos();
-                    VoxelShape outlineShape = blockOutlineContext.blockState().getOutlineShape(
-                            worldRenderContext.world(),
-                            pos,
-                            ShapeContext.of(blockOutlineContext.entity())
-                    );
-
-                    if (!outlineShape.equals(VoxelShapes.fullCube())) {
+                    if (!ChipsBlock.canBeChipped(blockOutlineContext.blockState().getBlock())) {
                         return true;
                     }
 
