@@ -1,6 +1,5 @@
 package zedzee.github.io.chips.client.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
